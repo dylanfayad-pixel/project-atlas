@@ -1,0 +1,43 @@
+# CMake build directories
+/build/
+/cmake-build-*/
+
+# CMake-generated files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+compile_commands.json
+
+# Compiled C++ artifacts
+*.o
+*.obj
+*.a
+*.so
+*.dylib
+*.exe
+*.out
+
+# Python cache
+__pycache__/
+*.pyc
+.venv/
+
+# Editor settings
+.vscode/
+.idea/
+*.swp
+
+# Operating system files
+.DS_Store
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Local datasets
+/data/*
+!/data/.gitkeep
+
+# Benchmark output
+/benchmark-results/
