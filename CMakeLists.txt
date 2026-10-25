@@ -18,3 +18,16 @@ target_compile_options(atlas PRIVATE
     -Wextra
     -Wpedantic
 )
+
+include(CTest)
+
+if(BUILD_TESTING)
+    add_test(
+        NAME atlas_startup
+        COMMAND atlas
+    )
+
+    set_tests_properties(atlas_startup PROPERTIES
+        PASS_REGULAR_EXPRESSION "System initialized successfully"
+    )
+endif()
