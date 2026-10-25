@@ -31,3 +31,22 @@ if(BUILD_TESTING)
         PASS_REGULAR_EXPRESSION "System initialized successfully"
     )
 endif()
+
+if(BUILD_TESTING)
+    add_executable(test_market_bar
+        tests/test_market_bar.cpp
+    )
+
+    target_include_directories(test_market_bar PRIVATE
+        ${PROJECT_SOURCE_DIR}/include
+    )
+
+    target_compile_options(test_market_bar PRIVATE
+        -Wall -Wextra -Wpedantic
+    )
+
+    add_test(
+        NAME market_bar_validation
+        COMMAND test_market_bar
+    )
+endif()
