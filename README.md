@@ -154,3 +154,49 @@ Current test suites:
 
 Performance benchmarking and additional edge-case testing
 are planned.
+
+## Market Data Integrity
+
+Project Atlas validates daily market data before it is
+accepted by the CSV reader.
+
+### Calendar Validation
+
+Dates must use the YYYY-MM-DD format and represent
+valid calendar dates.
+
+The validator rejects:
+- Invalid months and days
+- Invalid leap dates
+- Incorrect date formats
+- Non-numeric date components
+
+### Chronological Integrity
+
+CSV records must be strictly increasing by date.
+
+The reader rejects:
+- Duplicate timestamps
+- Out-of-order timestamps
+- Invalid calendar dates
+
+Errors include the offending CSV line number.
+
+### Build Configurations
+
+Project Atlas supports Debug and Release builds.
+
+Debug:
+
+    cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+    cmake --build build
+    ctest --test-dir build --output-on-failure
+
+Release:
+
+    cmake -S . -B build-release -DCMAKE_BUILD_TYPE=Release
+    cmake --build build-release
+    ctest --test-dir build-release --output-on-failure
+
+GitHub Actions runs the automated test suite under
+both configurations.

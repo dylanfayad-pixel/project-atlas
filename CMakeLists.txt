@@ -96,3 +96,37 @@ if(BUILD_TESTING)
         COMMAND test_csv_errors
     )
 endif()
+
+if(BUILD_TESTING)
+    add_executable(test_date_validator
+        tests/test_date_validator.cpp
+    )
+
+    target_link_libraries(test_date_validator PRIVATE atlas_core)
+
+    target_compile_options(test_date_validator PRIVATE
+        -Wall -Wextra -Wpedantic
+    )
+
+    add_test(
+        NAME date_validation
+        COMMAND test_date_validator
+    )
+endif()
+
+if(BUILD_TESTING)
+    add_executable(test_csv_chronology
+        tests/test_csv_chronology.cpp
+    )
+
+    target_link_libraries(test_csv_chronology PRIVATE atlas_core)
+
+    target_compile_options(test_csv_chronology PRIVATE
+        -Wall -Wextra -Wpedantic
+    )
+
+    add_test(
+        NAME csv_chronology
+        COMMAND test_csv_chronology
+    )
+endif()

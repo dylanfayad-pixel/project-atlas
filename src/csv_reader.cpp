@@ -1,4 +1,5 @@
 #include "atlas/csv_reader.hpp"
+#include "atlas/date_validator.hpp"
 #include "atlas/market_bar_validator.hpp"
 
 #include <charconv>
@@ -115,6 +116,29 @@ std::vector<MarketBar> CsvReader::read(
                 fields[5], line_number
             )
         };
+
+        if (!is_valid_date(bar.timestamp)) {
+            throw std::runtime_error(
+                "Invalid date at CSV line " +
+                std::to_string(line_number)
+            );
+        }
+
+        if (!bars.empty()) {
+            if (bar.timestamp == bars.back().timestamp) {
+                throw std::runtime_error(
+                    "Duplicate timestamp at CSV line " +
+                    std::to_string(line_number)
+                );
+            }
+
+            if (bar.timestamp < bars.back().timestamp) {
+                throw std::runtime_error(
+                    "Out-of-order timestamp at CSV line " +
+                    std::to_string(line_number)
+                );
+            }
+        }
 
         if (!is_valid_market_bar(bar)) {
             throw std::runtime_error(
