@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.20)
 project(
     ProjectAtlas
     VERSION 0.1.0
-    DESCRIPTION "High-Performance Quantitative Trading and Backtesting Engine"
+    DESCRIPTION "C++20 Quantitative Market Data Infrastructure"
     LANGUAGES CXX
 )
 
@@ -148,5 +148,25 @@ add_executable(benchmark_large_csv
 target_link_libraries(benchmark_large_csv PRIVATE atlas_core)
 
 target_compile_options(benchmark_large_csv PRIVATE
+    -Wall -Wextra -Wpedantic
+)
+
+add_executable(benchmark_capacity
+    benchmarks/benchmark_capacity.cpp
+)
+
+target_link_libraries(benchmark_capacity PRIVATE atlas_core)
+
+target_compile_options(benchmark_capacity PRIVATE
+    -Wall -Wextra -Wpedantic
+)
+
+add_executable(benchmark_capacity_memory
+    benchmarks/benchmark_capacity_memory.cpp
+)
+
+target_link_libraries(benchmark_capacity_memory PRIVATE atlas_core)
+
+target_compile_options(benchmark_capacity_memory PRIVATE
     -Wall -Wextra -Wpedantic
 )

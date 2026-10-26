@@ -9,7 +9,7 @@ Project Atlas is an educational, performance-oriented systems engineering projec
 | Phase | Status | Deliverable |
 |---|---|---|
 | 0 — Foundation | Complete | Linux/C++20/CMake, GitHub, tests and Debug/Release CI |
-| 1 — Market data | In progress | Validated OHLCV CSV ingestion, tests, benchmarks; optimization pending |
+| 1 — Market data | In progress | Validated OHLCV ingestion, tests, benchmarks; capacity experiment completed, further profiling pending |
 | 2 — Backtesting | Not started | Strategy replay and simulation |
 | 3 — Execution | Not started | Order fills, fees and slippage |
 | 4 — Portfolio and risk | Not started | Positions, P&L and risk metrics |
@@ -24,13 +24,13 @@ Project Atlas is an educational, performance-oriented systems engineering projec
 - Validates `YYYY-MM-DD` calendar dates including leap days and strictly increasing daily dates (no duplicates).
 - Supports LF and CRLF line endings; reports file/row errors via exceptions.
 - Reusable static `atlas_core` library, six CTest suites, Debug/Release GitHub Actions matrix.
-- Deterministic sample CSV, generator for a 100,000-row synthetic dataset, two performance benchmarks.
+- Deterministic sample CSV, reproducible 100,000-row dataset generator, four performance benchmark executables.
 
 ## Architecture
 
 ```text
 Synthetic or user-provided OHLCV CSV
-        |  CsvReader::read(filepath)
+        |  CsvReader::read(filepath, capacity_hint = 0)
         v
 CSV schema and numeric conversion
         v
@@ -52,7 +52,7 @@ include/atlas/                  Public C++ headers
 src/main.cpp                    Startup executable
 src/csv_reader.cpp              CSV ingestion implementation
 tests/                          Six automated CTest suites
-benchmarks/                     Small-file and large-file benchmarks
+benchmarks/                     Small-file, large-file, capacity and memory benchmarks
 scripts/generate_benchmark_data.py  Synthetic 100k-row generator
 data/sample_ohlcv.csv           Tracked synthetic five-row fixture
 docs/architecture.md            Architecture and boundaries
@@ -117,6 +117,57 @@ Historical measurements on ARM64 Kali Linux VM (Release; synthetic inputs):
 
 These are **different workloads**, not an optimization speedup. The large-file process peak RSS was approximately 19–21 MiB in three measured runs. See [performance methodology and results](docs/performance.md); values are historical observations, not guarantees.
 
+## CSV Reader Capacity Optimization
+
+Project Atlas supports optional preallocation of market data
+storage through the `capacity_hint` parameter.
+
+### API
+
+```cpp
+auto bars = atlas::CsvReader::read(
+    "data/benchmark_100k.csv",
+    100000
+);
+```
+
+The default capacity hint is zero, preserving normal
+`std::vector` growth and existing caller compatibility.
+
+### Measured Results
+
+A controlled A/B benchmark compared reserved and
+unreserved ingestion of the same 100,000-record dataset.
+
+| Metric | Unreserved | Reserved |
+|---|---:|---:|
+| Median execution time | 24.347 ms | 23.205 ms |
+| Median throughput | 4.107M records/s | 4.309M records/s |
+| Median peak RSS | 12,648 KiB | 10,000 KiB |
+
+Observed median execution-time reduction: **4.69%**.
+
+Observed median peak RSS reduction: **20.9%**.
+
+Results were measured using a C++20 Release build
+inside an ARM64 Kali Linux virtual machine.
+
+The performance improvement is workload-specific.
+Peak RSS includes memory used by the entire process.
+
+For full methodology, see [Performance Report](docs/performance.md).
+
+### Reproduce the Benchmark
+
+```bash
+python3 scripts/generate_benchmark_data.py
+
+cmake -S . -B build-release -DCMAKE_BUILD_TYPE=Release
+cmake --build build-release --parallel 2
+
+./build-release/benchmark_capacity
+```
+
 ## Roadmap checklist
 
 ### Phase 0 — Complete
@@ -128,6 +179,12 @@ These are **different workloads**, not an optimization speedup. The large-file p
 - [ ] Optional VS Code Remote SSH workflow (postponed; not required for completion)
 
 ### Phase 1 — In progress
+
+- [x] Optional CSV reader capacity hint
+- [x] Controlled reserved/unreserved timing benchmark
+- [x] Separate-process peak memory comparison
+- [ ] Profile remaining parsing and allocation bottlenecks
+
 - [x] OHLCV data model and validation
 - [x] Strict CSV ingestion and diagnostic exceptions
 - [x] Calendar validation, duplicate/out-of-order rejection
@@ -135,7 +192,6 @@ These are **different workloads**, not an optimization speedup. The large-file p
 - [x] Six correctness test suites
 - [x] Synthetic fixtures and reproducible dataset generator
 - [x] Initial small/large-file timing and process memory measurements
-- [ ] Profile and experimentally evaluate allocation/parse optimizations
 - [ ] Strengthen edge-case and robustness coverage
 - [ ] Final Phase 1 verification and documentation review
 

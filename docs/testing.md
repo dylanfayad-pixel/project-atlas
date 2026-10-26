@@ -31,3 +31,53 @@ ctest --test-dir build-release --output-on-failure
 ## Gaps
 
 Missing robust tests for extremely long fields, empty datasets, numeric extremes, quoted CSV, adversarial inputs, concurrent temp file collisions, and performance regressions. Current CI does not include sanitizers, fuzzing or cross-platform builds.
+
+## Capacity-Hint Regression Coverage
+
+The CSV reader supports optional preallocation through
+the `capacity_hint` parameter.
+
+The existing CSV reader test verifies that:
+
+- The default reader successfully loads the sample dataset.
+- A reader using a capacity hint loads the same number of records.
+- Both modes return identical timestamps.
+- Both modes return identical OHLCV values.
+
+This is a correctness test, not a performance test.
+
+The capacity optimization must not change the records
+returned by the CSV reader.
+
+### Performance Benchmark Verification
+
+Project Atlas also provides:
+
+- `benchmark_capacity`: 15 paired timing trials comparing
+  reserved and unreserved ingestion.
+- `benchmark_capacity_memory`: separate-process memory
+  measurement for each mode.
+
+These are benchmark executables, not CTest test suites.
+
+### Run All Automated Tests
+
+Debug:
+
+    cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+    cmake --build build --parallel 2
+    ctest --test-dir build --output-on-failure
+
+Release:
+
+    cmake -S . -B build-release -DCMAKE_BUILD_TYPE=Release
+    cmake --build build-release --parallel 2
+    ctest --test-dir build-release --output-on-failure
+
+Both configurations currently contain six registered
+CTest suites.
+
+GitHub Actions builds and tests both configurations.
+
+See [Performance Report](performance.md) for benchmark
+methodology, measured results, and limitations.

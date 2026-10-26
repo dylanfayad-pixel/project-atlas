@@ -65,7 +65,8 @@ T parse_number(
 } // namespace
 
 std::vector<MarketBar> CsvReader::read(
-    const std::string& filepath
+    const std::string& filepath,
+    std::size_t capacity_hint
 ) {
     std::ifstream file(filepath);
 
@@ -93,6 +94,10 @@ std::vector<MarketBar> CsvReader::read(
     }
 
     std::vector<MarketBar> bars;
+
+    if (capacity_hint > 0) {
+        bars.reserve(capacity_hint);
+    }
 
     while (std::getline(file, line)) {
         ++line_number;

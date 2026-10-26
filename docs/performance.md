@@ -46,3 +46,107 @@ Run from the repository root. Record compiler version, CPU, VM resources and bac
 ## Interpretation and limitations
 
 The large-file workload has higher observed throughput than the repeated small-file workload, but **the workloads differ**: this is not a demonstrated code optimization speedup. Timings include file IO, conversion, validation, allocation and caching effects; neither benchmark isolates pure numeric parsing latency. Synthetic calendar days do not represent real market sessions. Seven trials and a single VM do not establish production performance. Further work: profiling, allocation experiments, additional sizes, representative data, memory profiling, sanitizers and robust statistics.
+
+---
+
+## Benchmark 003 — Vector Capacity Reservation
+
+### Objective
+
+Evaluate whether preallocating storage for MarketBar records
+improves CSV ingestion performance and peak memory usage.
+
+### Implementation
+
+CsvReader::read() accepts an optional capacity_hint parameter.
+
+- Default: 0 (normal vector growth)
+- Optimized: 100000 (reserve capacity before parsing)
+
+The capacity hint is optional and does not change CSV
+validation rules or the expected output records.
+
+### Experimental Environment
+
+- Kali Linux ARM64 virtual machine
+- C++20, GCC 15.2.0
+- CMake Release build
+- Synthetic 100,000-record OHLCV dataset
+
+### Timing Methodology
+
+- 3 warm-up pairs
+- 15 measured A/B pairs
+- Alternating measurement order
+- Same input dataset and parser implementation
+- Median execution time used for comparison
+
+### Timing Results
+
+| Metric | Unreserved | Reserved |
+|---|---:|---:|
+| Median execution time | 24.347 ms | 23.205 ms |
+| Median throughput | 4,107,311 records/s | 4,309,329 records/s |
+
+Observed median execution-time reduction: 4.69%.
+
+### Peak Memory Methodology
+
+Each mode was executed in a separate process.
+
+GNU time measured maximum resident set size (RSS).
+
+| Trial | Unreserved (KiB) | Reserved (KiB) |
+|---|---:|---:|
+| 1 | 12424 | 9984 |
+| 2 | 14376 | 10068 |
+| 3 | 12648 | 10000 |
+| 4 | 13012 | 10064 |
+| 5 | 12504 | 10000 |
+
+Median unreserved RSS: 12,648 KiB.
+Median reserved RSS: 10,000 KiB.
+
+Observed median peak RSS reduction: approximately 20.9%.
+
+### Reproduction
+
+Generate the dataset:
+
+    python3 scripts/generate_benchmark_data.py
+
+Configure and build:
+
+    cmake -S . -B build-release -DCMAKE_BUILD_TYPE=Release
+    cmake --build build-release --parallel 2
+
+Run the timing benchmark:
+
+    ./build-release/benchmark_capacity
+
+Measure peak memory:
+
+    /usr/bin/time -f "Peak RSS: %M KiB" \
+        ./build-release/benchmark_capacity_memory unreserved
+
+    /usr/bin/time -f "Peak RSS: %M KiB" \
+        ./build-release/benchmark_capacity_memory reserved
+
+### Interpretation
+
+For this workload, capacity reservation reduced median
+execution time and peak resident memory usage.
+
+These measurements are specific to the tested dataset,
+compiler, build configuration, and virtualized hardware.
+
+The experiment does not isolate allocation overhead
+from other CSV parsing costs.
+
+Peak RSS includes the entire process, not just the vector.
+
+Capacity hints may waste memory when significantly larger
+than the actual number of records.
+
+Additional independent benchmark runs and profiling are
+needed before generalizing these findings.

@@ -18,6 +18,29 @@ int main() {
 
         require(bars.size() == 5, "Expected exactly 5 bars");
 
+        const auto reserved_bars = atlas::CsvReader::read(
+            "data/sample_ohlcv.csv",
+            5
+        );
+
+        require(
+            reserved_bars.size() == bars.size(),
+            "Reserved reader returned incorrect record count"
+        );
+
+        for (std::size_t i = 0; i < bars.size(); ++i) {
+            require(
+                reserved_bars[i].timestamp == bars[i].timestamp &&
+                reserved_bars[i].open == bars[i].open &&
+                reserved_bars[i].high == bars[i].high &&
+                reserved_bars[i].low == bars[i].low &&
+                reserved_bars[i].close == bars[i].close &&
+                reserved_bars[i].volume == bars[i].volume,
+                "Reserved reader produced different market data"
+            );
+        }
+
+
         require(
             bars[0].timestamp == "2026-10-19",
             "Incorrect first timestamp"

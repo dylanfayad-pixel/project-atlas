@@ -28,3 +28,67 @@
 ## Future architecture (not implemented)
 
 Historical market data -> event replay -> strategy signals -> simulated order handling -> portfolio/risk accounting -> analytics. The future simulation must explicitly prevent look-ahead bias, define execution timing, costs and slippage, and track reproducibility.
+
+## CSV Reader Capacity Management
+
+### API
+
+The CSV reader supports an optional capacity hint:
+
+```cpp
+static std::vector<MarketBar> read(
+    const std::string& filepath,
+    std::size_t capacity_hint = 0
+);
+```
+
+A caller can provide an estimated record count:
+
+```cpp
+auto bars = atlas::CsvReader::read(
+    "data/benchmark_100k.csv",
+    100000
+);
+```
+
+### Implementation
+
+The reader stores validated market records in a
+`std::vector<MarketBar>`.
+
+When `capacity_hint` is greater than zero, it calls
+`bars.reserve(capacity_hint)` before appending records.
+
+Without a hint, the vector grows dynamically.
+
+The hint does not change parsing, validation, chronological
+ordering, or duplicate timestamp detection.
+
+### Design Tradeoffs
+
+Advantages:
+
+- Potentially fewer vector reallocations
+- Reduced movement of existing MarketBar objects
+- Potential improvements in execution time and memory usage
+- Backward-compatible default behavior
+
+Limitations:
+
+- The caller must estimate the record count
+- Excessive hints can waste allocated memory
+- Reservation does not guarantee faster execution
+- The reader still loads the complete dataset into memory
+- The API does not currently support streaming ingestion
+
+### Performance Evidence
+
+On the tested 100,000-record synthetic dataset:
+
+- Median execution-time reduction: 4.69%
+- Median peak RSS reduction: approximately 20.9%
+
+These are workload-specific observations, not universal
+performance guarantees.
+
+See [Performance Benchmarks](performance.md) for methodology.
