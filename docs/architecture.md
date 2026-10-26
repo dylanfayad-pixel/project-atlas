@@ -1,94 +1,142 @@
-# Architecture and implementation boundaries
+# Project Atlas — Architecture
 
-## Current data path
+## Current Scope
 
-`CsvReader::read(std::string filepath)` opens a file, checks the exact six-column header, reads lines with LF/CRLF support, splits on commas, converts four price fields and volume using `std::from_chars`, checks `YYYY-MM-DD` with `std::chrono::year_month_day`, enforces strictly increasing dates, validates OHLC values, and appends to `std::vector<MarketBar>`.
+Project Atlas currently implements a C++20 historical
+market-data ingestion and validation library.
 
-`include/atlas/market_bar.hpp`: record structure with string timestamp, `double` OHLC, and `std::uint64_t` volume.
+The backtesting engine, execution simulator, portfolio
+accounting, and risk engine are future development phases.
 
-`include/atlas/market_bar_validator.hpp`: nonempty timestamp, finite and positive prices, high/low/open/close relationships; zero volume permitted. Calendar validation is separate.
+The `atlas` executable currently provides a startup check.
 
-`include/atlas/date_validator.hpp`: validates exact ISO-style daily date format and calendar validity; not an exchange calendar.
+## Data Processing Pipeline
 
-`include/atlas/csv_reader.hpp` and `src/csv_reader.cpp`: file ingestion API and implementation; throws `std::runtime_error` on failures. The public API has **no capacity-hint parameter** in this snapshot.
+Historical OHLCV CSV
+    |
+    v
+CsvReader::read(filepath, capacity_hint)
+    |
+    v
+Strict six-column parsing
+    |
+    v
+Numeric conversion using std::from_chars
+    |
+    v
+Calendar and chronological validation
+    |
+    v
+OHLCV relationship validation
+    |
+    v
+std::vector<MarketBar>
 
-`src/main.cpp`: prints startup banner only; does not invoke `CsvReader`.
+## Core Components
 
-`CMakeLists.txt`: `atlas_core` static library, `atlas` executable, five dedicated test executables plus startup test, and two separate benchmark executables.
+### MarketBar
 
-## Design tradeoffs
+Defined in `include/atlas/market_bar.hpp`.
 
-- Entire CSV is loaded into memory; no streaming API.
-- Prices are floating point; future order accounting should use a deliberate exact-price representation.
-- `YYYY-MM-DD` lexical comparison is chronological only after format and date validation.
-- No quote escaping, optional headers, flexible column order, blank rows, intraday times, exchange calendar, symbol field, or timezone support.
-- No automatic capacity reservation, allocator instrumentation or proven optimization yet.
-- Failure is exception-based; no structured diagnostic result or partial-success mode.
+Stores a date string, four double-precision OHLC prices,
+and unsigned 64-bit volume.
 
-## Future architecture (not implemented)
+### MarketBar Validator
 
-Historical market data -> event replay -> strategy signals -> simulated order handling -> portfolio/risk accounting -> analytics. The future simulation must explicitly prevent look-ahead bias, define execution timing, costs and slippage, and track reproducibility.
+Defined in `include/atlas/market_bar_validator.hpp`.
 
-## CSV Reader Capacity Management
+Rejects non-finite or nonpositive prices and inconsistent
+OHLC relationships. Zero volume is permitted.
 
-### API
+### Date Validator
 
-The CSV reader supports an optional capacity hint:
+Defined in `include/atlas/date_validator.hpp`.
 
-```cpp
-static std::vector<MarketBar> read(
-    const std::string& filepath,
-    std::size_t capacity_hint = 0
-);
-```
+Uses C++20 calendar types to validate YYYY-MM-DD dates.
 
-A caller can provide an estimated record count:
+This is calendar validation, not exchange-session validation.
 
-```cpp
-auto bars = atlas::CsvReader::read(
-    "data/benchmark_100k.csv",
-    100000
-);
-```
+### CSV Reader
 
-### Implementation
+Defined in `include/atlas/csv_reader.hpp` and
+`src/csv_reader.cpp`.
 
-The reader stores validated market records in a
-`std::vector<MarketBar>`.
+Responsibilities:
 
-When `capacity_hint` is greater than zero, it calls
-`bars.reserve(capacity_hint)` before appending records.
+- Strict six-column CSV ingestion
+- LF and CRLF compatibility
+- Numeric conversion
+- Calendar validation
+- Chronological ordering
+- Duplicate timestamp rejection
+- OHLCV validation
+- Line-numbered diagnostic exceptions
 
-Without a hint, the vector grows dynamically.
+## Performance-Oriented Design
 
-The hint does not change parsing, validation, chronological
-ordering, or duplicate timestamp detection.
+### Fixed-Size CSV Splitting
 
-### Design Tradeoffs
+The parser uses:
 
-Advantages:
+    std::array<std::string_view, 6>
 
-- Potentially fewer vector reallocations
-- Reduced movement of existing MarketBar objects
-- Potential improvements in execution time and memory usage
-- Backward-compatible default behavior
+This replaces a dynamically allocated vector of field views.
 
-Limitations:
+The schema is fixed at six fields, allowing the parser
+to avoid a separate dynamic field-buffer allocation
+for each row.
 
-- The caller must estimate the record count
-- Excessive hints can waste allocated memory
-- Reservation does not guarantee faster execution
-- The reader still loads the complete dataset into memory
-- The API does not currently support streaming ingestion
+### Optional Capacity Reservation
+
+CsvReader::read accepts an optional capacity_hint.
+
+When greater than zero, the reader calls vector::reserve
+before appending validated records.
+
+The default remains zero for backward compatibility.
 
 ### Performance Evidence
 
-On the tested 100,000-record synthetic dataset:
+The fixed-size splitter reduced median ingestion time
+by 40.05% in the documented 100,000-record experiment.
 
-- Median execution-time reduction: 4.69%
-- Median peak RSS reduction: approximately 20.9%
+Capacity reservation reduced median ingestion time
+by 4.69% in an earlier experiment.
 
-These are workload-specific observations, not universal
-performance guarantees.
+These are separate experiments and their percentages
+must not be added together.
 
-See [Performance Benchmarks](performance.md) for methodology.
+See performance.md for methodology and limitations.
+
+## Build Architecture
+
+- atlas_core: reusable static C++ library
+- atlas: startup executable
+- CTest: seven automated test suites
+- Benchmarks: separate performance executables
+- profile_csv: optional profiling workload
+
+Enable profiling with:
+
+    -DATLAS_BUILD_PROFILING=ON
+
+## Current Limitations
+
+- No backtesting or strategy execution
+- No order execution simulation
+- No portfolio or risk engine
+- No streaming CSV ingestion
+- No quoted CSV fields
+- No intraday timestamps or timezones
+- No exchange trading-calendar validation
+- No fixed-point monetary representation
+- Entire CSV datasets are materialized in memory
+
+## Future Architecture
+
+Market data -> historical event replay -> strategy
+signals -> simulated execution -> portfolio and
+risk accounting -> analytics.
+
+Future phases must address look-ahead bias, execution
+timing, transaction costs, slippage, and reproducibility.

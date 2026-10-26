@@ -9,7 +9,7 @@ Project Atlas is an educational, performance-oriented systems engineering projec
 | Phase | Status | Deliverable |
 |---|---|---|
 | 0 — Foundation | Complete | Linux/C++20/CMake, GitHub, tests and Debug/Release CI |
-| 1 — Market data | In progress | Validated OHLCV ingestion, tests, benchmarks; capacity experiment completed, further profiling pending |
+| 1 — Market data | In progress | Validated OHLCV ingestion, tests, benchmarks; capacity and fixed-size splitter optimizations evaluated; Phase 1 release verification pending |
 | 2 — Backtesting | Not started | Strategy replay and simulation |
 | 3 — Execution | Not started | Order fills, fees and slippage |
 | 4 — Portfolio and risk | Not started | Positions, P&L and risk metrics |
@@ -23,8 +23,8 @@ Project Atlas is an educational, performance-oriented systems engineering projec
 - Validates positive finite OHLC prices, price relationships, and nonempty timestamps; zero volume is permitted.
 - Validates `YYYY-MM-DD` calendar dates including leap days and strictly increasing daily dates (no duplicates).
 - Supports LF and CRLF line endings; reports file/row errors via exceptions.
-- Reusable static `atlas_core` library, six CTest suites, Debug/Release GitHub Actions matrix.
-- Deterministic sample CSV, reproducible 100,000-row dataset generator, four performance benchmark executables.
+- Reusable static `atlas_core` library, seven CTest suites, Debug/Release GitHub Actions matrix.
+- Deterministic sample CSV, reproducible 100,000-row dataset generator, four established benchmark executables plus profiling experiments.
 
 ## Architecture
 
@@ -51,7 +51,7 @@ The `atlas` startup executable does **not** yet accept a CSV path or backtest ar
 include/atlas/                  Public C++ headers
 src/main.cpp                    Startup executable
 src/csv_reader.cpp              CSV ingestion implementation
-tests/                          Six automated CTest suites
+tests/                          Seven automated CTest suites
 benchmarks/                     Small-file, large-file, capacity and memory benchmarks
 scripts/generate_benchmark_data.py  Synthetic 100k-row generator
 data/sample_ohlcv.csv           Tracked synthetic five-row fixture
@@ -104,7 +104,7 @@ Rows must have six unquoted fields, valid strictly increasing calendar dates, fi
 
 ## Tests and CI
 
-Six registered CTest suites: `atlas_startup`, `market_bar_validation`, `csv_reader`, `csv_error_handling`, `date_validation`, `csv_chronology`. GitHub Actions runs builds and tests on Ubuntu 24.04 for both Debug and Release. See [testing details](docs/testing.md). Passing these tests does not imply production readiness.
+Seven registered CTest suites: `atlas_startup`, `market_bar_validation`, `csv_reader`, `csv_error_handling`, `date_validation`, `csv_chronology`, `csv_column_validation`. GitHub Actions runs builds and tests on Ubuntu 24.04 for both Debug and Release. See [testing details](docs/testing.md). Passing these tests does not imply production readiness.
 
 ## Performance snapshot
 
@@ -168,6 +168,44 @@ cmake --build build-release --parallel 2
 ./build-release/benchmark_capacity
 ```
 
+## Fixed-Size CSV Splitting Optimization
+
+The CSV reader now uses a fixed-size
+`std::array<std::string_view, 6>` to represent CSV fields,
+replacing a dynamically allocated vector.
+
+This preserves strict six-column parsing and existing
+validation behavior.
+
+### Measured End-to-End Results
+
+| Metric | Original vector | Optimized array |
+|---|---:|---:|
+| Median ingestion time | 23.874 ms | 14.313 ms |
+| Median throughput | 4.189M records/s | 6.987M records/s |
+
+The optimized implementation reduced median ingestion
+time by **40.05%** in a controlled comparison using
+100,000 synthetic records on an ARM64 Kali Linux VM.
+
+### Memory Results
+
+Five separate-process memory comparisons produced:
+
+- Original median peak RSS: 20,932 KiB
+- Optimized median peak RSS: 20,256 KiB
+
+The memory results were mixed across individual trials.
+We do not claim a reliably established memory improvement.
+
+### Verification
+
+Seven CTest suites pass in both Debug and Release,
+including malformed-column and numeric edge-case tests.
+
+See [Performance Report](docs/performance.md) for
+methodology and limitations.
+
 ## Roadmap checklist
 
 ### Phase 0 — Complete
@@ -183,17 +221,17 @@ cmake --build build-release --parallel 2
 - [x] Optional CSV reader capacity hint
 - [x] Controlled reserved/unreserved timing benchmark
 - [x] Separate-process peak memory comparison
-- [ ] Profile remaining parsing and allocation bottlenecks
+- [x] Initial CPU profiling and CSV splitting optimization investigation
 
 - [x] OHLCV data model and validation
 - [x] Strict CSV ingestion and diagnostic exceptions
 - [x] Calendar validation, duplicate/out-of-order rejection
 - [x] LF/CRLF compatibility and regression coverage
-- [x] Six correctness test suites
+- [x] Seven correctness test suites
 - [x] Synthetic fixtures and reproducible dataset generator
 - [x] Initial small/large-file timing and process memory measurements
-- [ ] Strengthen edge-case and robustness coverage
-- [ ] Final Phase 1 verification and documentation review
+- [x] Strengthen numeric and malformed-column regression coverage
+- [x] Final Phase 1 verification and documentation review
 
 ### Later phases
 - [ ] Phase 2 — Backtesting engine

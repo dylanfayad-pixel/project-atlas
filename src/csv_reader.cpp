@@ -2,6 +2,7 @@
 #include "atlas/date_validator.hpp"
 #include "atlas/market_bar_validator.hpp"
 
+#include <array>
 #include <charconv>
 #include <fstream>
 #include <stdexcept>
@@ -17,24 +18,35 @@ namespace {
 constexpr std::string_view expected_header =
     "timestamp,open,high,low,close,volume";
 
-std::vector<std::string_view> split_csv(
-    const std::string& line
+std::array<std::string_view, 6> split_csv(
+    const std::string& line,
+    std::size_t line_number
 ) {
-    std::vector<std::string_view> fields;
+    std::array<std::string_view, 6> fields{};
     std::string_view remaining(line);
 
-    while (true) {
+    for (std::size_t i = 0; i < 5; ++i) {
         const auto pos = remaining.find(',');
 
         if (pos == std::string_view::npos) {
-            fields.push_back(remaining);
-            break;
+            throw std::runtime_error(
+                "Expected 6 fields at CSV line " +
+                std::to_string(line_number)
+            );
         }
 
-        fields.push_back(remaining.substr(0, pos));
+        fields[i] = remaining.substr(0, pos);
         remaining.remove_prefix(pos + 1);
     }
 
+    if (remaining.find(',') != std::string_view::npos) {
+        throw std::runtime_error(
+            "Expected 6 fields at CSV line " +
+            std::to_string(line_number)
+        );
+    }
+
+    fields[5] = remaining;
     return fields;
 }
 
@@ -113,7 +125,7 @@ std::vector<MarketBar> CsvReader::read(
             );
         }
 
-        const auto fields = split_csv(line);
+        const auto fields = split_csv(line, line_number);
 
         if (fields.size() != 6) {
             throw std::runtime_error(

@@ -150,3 +150,232 @@ than the actual number of records.
 
 Additional independent benchmark runs and profiling are
 needed before generalizing these findings.
+
+---
+
+## Benchmark 004 — Fixed-Size CSV Field Splitting
+
+### Objective
+
+Evaluate whether replacing dynamically allocated CSV field
+storage with a fixed-size array improves end-to-end ingestion
+performance without changing parsing correctness.
+
+### Implementation
+
+Original implementation:
+
+    std::vector<std::string_view>
+
+Optimized implementation:
+
+    std::array<std::string_view, 6>
+
+The fixed six-column schema makes dynamic field-buffer
+allocation unnecessary.
+
+Both implementations use the same numeric conversion,
+calendar validation, chronology checks, OHLCV validation,
+and output record representation.
+
+### Experimental Environment
+
+- Kali Linux ARM64 virtual machine
+- GCC 15.2.0
+- C++20 Release builds
+- Synthetic 100,000-record OHLCV dataset
+- Same input file for both implementations
+
+The original implementation was built from a separate
+Git worktree at commit cb95011.
+
+The optimized implementation was built from the working
+tree containing the fixed-size splitter change.
+
+### Timing Methodology
+
+Both implementations used the existing large-file
+benchmark executable.
+
+Each benchmark invocation performs two warm-up reads
+followed by seven timed full-file ingestion trials.
+
+An external comparison script performed two additional
+warm-up invocations per implementation and ten measured
+invocations per implementation.
+
+Execution order alternated between baseline and optimized
+implementations.
+
+Each reported comparison is the median from one
+seven-trial benchmark invocation.
+
+The final summary compares the median of those ten
+per-invocation medians for each implementation.
+
+### Timing Results
+
+| Trial | Original (ms) | Optimized (ms) |
+|---|---:|---:|
+| 1 | 24.735 | 14.348 |
+| 2 | 24.328 | 14.149 |
+| 3 | 23.698 | 14.487 |
+| 4 | 23.882 | 14.370 |
+| 5 | 23.914 | 14.319 |
+| 6 | 23.956 | 13.923 |
+| 7 | 23.605 | 14.414 |
+| 8 | 23.853 | 13.924 |
+| 9 | 23.866 | 14.105 |
+| 10 | 23.648 | 14.307 |
+
+### Summary
+
+| Metric | Original | Optimized |
+|---|---:|---:|
+| Median ingestion time | 23.874 ms | 14.313 ms |
+| Median-based throughput | 4,188,657 records/s | 6,986,655 records/s |
+
+Observed median ingestion-time reduction: **40.05%**.
+
+Observed throughput increase: approximately **66.8%**.
+
+These are workload-specific observations, not universal
+performance guarantees.
+
+### Peak Memory Comparison
+
+Five separate-process comparisons used GNU time to
+measure maximum resident set size.
+
+| Trial | Original (KiB) | Optimized (KiB) |
+|---|---:|---:|
+| 1 | 20,932 | 21,536 |
+| 2 | 20,992 | 21,524 |
+| 3 | 19,608 | 19,828 |
+| 4 | 21,244 | 20,048 |
+| 5 | 20,840 | 20,256 |
+
+Median original peak RSS: 20,932 KiB.
+
+Median optimized peak RSS: 20,256 KiB.
+
+The difference between these medians is approximately
+3.23%, but the individual measurements are mixed.
+
+The optimized process used more memory in three of five
+paired trials.
+
+Therefore, these results do not establish a reliable
+memory reduction.
+
+Peak RSS includes the entire process rather than
+isolating field-splitting allocations.
+
+### Correctness Verification
+
+Seven automated CTest suites passed in both Debug
+and Release configurations.
+
+The regression coverage includes:
+
+- Missing CSV columns
+- Extra CSV columns
+- Malformed numeric values
+- Floating-point overflow
+- NaN input rejection
+- Negative unsigned volume
+- Unsigned volume overflow
+- Existing OHLCV and chronological validation
+
+### Interpretation
+
+The fixed-size splitter substantially improved
+end-to-end ingestion time in this controlled experiment.
+
+The change avoids dynamic allocation for the temporary
+field-view collection on each CSV row.
+
+However, the benchmark does not isolate allocation
+overhead from the remaining parsing and validation work.
+
+Additional hardware platforms, larger datasets,
+independent repetitions, and profiling would strengthen
+the evidence.
+
+---
+
+## CPU Profiling Investigation
+
+### Methodology
+
+A separate profiling workload processed 20,000,000
+records through repeated CSV ingestion.
+
+The profiling build used GCC instrumentation flags:
+
+    -pg -g -fno-omit-frame-pointer
+
+GNU gprof was used to inspect the resulting profile.
+
+### Recorded Findings
+
+The profile reported approximately:
+
+- 63.13% of sampled time in CsvReader::read
+- 9.53% in parse_number<double>
+- 25.01% attributed to _init
+- 2.38% attributed to main
+
+The profiling sample total was approximately 0.84 seconds.
+
+### Interpretation
+
+CsvReader::read dominated the recorded profile.
+
+The results motivated investigation of field splitting
+and temporary allocations.
+
+However, gprof instrumentation, compiler behavior,
+sampling granularity, and symbol attribution limit
+the precision of these percentages.
+
+The percentages should not be interpreted as exact
+production CPU utilization or definitive attribution
+of individual parsing operations.
+
+Profiling results must not be directly compared with
+ordinary uninstrumented Release benchmark timings.
+
+---
+
+## Reproducibility and Limitations
+
+All reported experiments used synthetic market data.
+
+The measurements were collected in a virtualized
+ARM64 development environment.
+
+Results may vary with:
+
+- CPU architecture and frequency
+- Virtual machine scheduling
+- Compiler version and optimization flags
+- Filesystem caching
+- Background system activity
+- Allocator behavior
+- Dataset size and content
+- Measurement order
+
+The experiments do not represent live trading latency,
+exchange connectivity, or production execution systems.
+
+The original and optimized implementations were compared
+under equivalent Release configurations, but full
+compiler command lines and host CPU details were not
+archived.
+
+Future work should include sanitizers, additional
+dataset sizes, more independent benchmark sessions,
+and performance measurements on native hardware.
+
+---

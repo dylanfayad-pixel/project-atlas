@@ -170,3 +170,54 @@ target_link_libraries(benchmark_capacity_memory PRIVATE atlas_core)
 target_compile_options(benchmark_capacity_memory PRIVATE
     -Wall -Wextra -Wpedantic
 )
+
+# Optional CPU profiling workload.
+option(ATLAS_BUILD_PROFILING
+    "Build CPU profiling tools"
+    OFF
+)
+
+if(ATLAS_BUILD_PROFILING)
+    add_executable(profile_csv
+        benchmarks/profile_csv.cpp
+    )
+
+    target_link_libraries(profile_csv PRIVATE atlas_core)
+
+    target_compile_options(profile_csv PRIVATE
+        -Wall -Wextra -Wpedantic
+    )
+endif()
+
+if(BUILD_TESTING)
+    add_executable(test_csv_columns
+        tests/test_csv_columns.cpp
+    )
+
+    target_link_libraries(test_csv_columns PRIVATE atlas_core)
+
+    target_compile_options(test_csv_columns PRIVATE
+        -Wall -Wextra -Wpedantic
+    )
+
+    add_test(
+        NAME csv_column_validation
+        COMMAND test_csv_columns
+    )
+endif()
+
+# Optional isolated CSV splitting benchmark.
+option(ATLAS_BUILD_MICROBENCHMARKS
+    "Build isolated microbenchmarks"
+    OFF
+)
+
+if(ATLAS_BUILD_MICROBENCHMARKS)
+    add_executable(benchmark_split
+        benchmarks/benchmark_split.cpp
+    )
+
+    target_compile_options(benchmark_split PRIVATE
+        -Wall -Wextra -Wpedantic
+    )
+endif()

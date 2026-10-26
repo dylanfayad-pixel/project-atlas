@@ -1,138 +1,133 @@
-# Development and reproducibility
+# Project Atlas — Development Guide
 
 ## Environment
 
-The original development environment is Kali Linux ARM64 running in a macOS-hosted VM. VS Code Remote SSH was attempted but postponed; a Mac terminal connecting to Kali over SSH is sufficient. Build instructions are not tied to SSH or macOS.
+Primary development environment:
 
-Dependencies: C++20 compiler, CMake >=3.20, Python 3 for benchmark data generation; GNU `time` is optional for RSS measurements. GitHub CI additionally uses Ninja.
+- Kali Linux ARM64 virtual machine
+- GCC 15.2.0
+- C++20
+- CMake 3.20+
+- Python 3 for synthetic dataset generation
 
-## Clean builds
+Mac Terminal connects to Kali using SSH.
+VS Code Remote SSH is optional and not required.
 
-```bash
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
-cmake --build build --parallel 2
-ctest --test-dir build --output-on-failure
-cmake -S . -B build-release -DCMAKE_BUILD_TYPE=Release
-cmake --build build-release --parallel 2
-ctest --test-dir build-release --output-on-failure
-```
+## Build and Test
 
-## Deterministic data
+Debug:
 
-`data/sample_ohlcv.csv` is a tracked five-record synthetic fixture. Generate the ignored large fixture from the repository root:
+    cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+    cmake --build build --parallel 2
+    ctest --test-dir build --output-on-failure
 
-```bash
-python3 scripts/generate_benchmark_data.py --rows 100000 --output data/benchmark_100k.csv
-wc -l data/benchmark_100k.csv
-```
+Release:
 
-The generator produces 100,000 consecutive **calendar days** from 2000-01-01, not real trading sessions; values are synthetic. Python `csv.writer` may emit CRLF, which the C++ reader accepts. Do not commit generated large datasets or secrets.
+    cmake -S . -B build-release -DCMAKE_BUILD_TYPE=Release
+    cmake --build build-release --parallel 2
+    ctest --test-dir build-release --output-on-failure
 
-## Benchmark commands
-
-```bash
-./build-release/benchmark_csv
-./build-release/benchmark_large_csv
-/usr/bin/time -v ./build-release/benchmark_large_csv
-```
-
-Run from repository root because benchmark file paths are relative. Repeat runs on an idle machine, record CPU/VM, compiler, flags and cache conditions, and never compare different workloads as if they were identical.
-
-## Contribution checklist
-
-1. Make one controlled change; inspect `git diff`.
-2. Run Debug and Release tests.
-3. Benchmark only when performance-related and retain baseline data.
-4. Update README phase status, architecture, testing, performance, setup, roadmap and limitations where affected.
-5. Confirm ignored generated files and secrets are not staged.
-6. Commit, push and verify both GitHub Actions jobs.
-
-## Capacity Optimization Benchmark
-
-Project Atlas includes a controlled experiment comparing
-CSV ingestion with and without vector-capacity reservation.
-
-### Prerequisites
-
-- Linux
-- C++20 compiler
-- CMake 3.20 or newer
-- Python 3
-- GNU time (for peak RSS measurements)
-
-### Generate the dataset
+## Generate Benchmark Data
 
 Run from the repository root:
 
+    python3 scripts/generate_benchmark_data.py \
+        --rows 100000 \
+        --output data/benchmark_100k.csv
+
+The generated dataset contains synthetic consecutive
+calendar-day records, not real exchange trading sessions.
+
+Generated benchmark data is excluded from Git.
+
+## Performance Benchmarks
+
+Run from the repository root:
+
+    ./build-release/benchmark_csv
+    ./build-release/benchmark_large_csv
+    ./build-release/benchmark_capacity
+
+Measure peak RSS:
+
+    /usr/bin/time -v ./build-release/benchmark_large_csv
+
+Capacity comparison:
+
+    /usr/bin/time -f "Peak RSS: %M KiB" \
+        ./build-release/benchmark_capacity_memory reserved
+
+    /usr/bin/time -f "Peak RSS: %M KiB" \
+        ./build-release/benchmark_capacity_memory unreserved
+
+## CPU Profiling
+
+Profiling is optional.
+
+Configure:
+
+    cmake -S . -B build-profile \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DATLAS_BUILD_PROFILING=ON \
+        -DCMAKE_CXX_FLAGS="-pg -g -fno-omit-frame-pointer" \
+        -DCMAKE_EXE_LINKER_FLAGS="-pg"
+
+Build:
+
+    cmake --build build-profile --target profile_csv
+
+Run:
+
+    ./build-profile/profile_csv
+
+Generate a GNU gprof report:
+
+    gprof ./build-profile/profile_csv gmon.out
+
+Instrumented profiling results must not be compared
+directly against ordinary Release benchmark timings.
+
+## Fixed-Size Splitter Experiment
+
+The original vector splitter was compared with the
+fixed-size array implementation using the same
+100,000-record synthetic dataset.
+
+The measured median ingestion-time reduction was 40.05%.
+
+See performance.md for detailed methodology and caveats.
+
+## Contribution Checklist
+
+1. Make a controlled source change.
+2. Run Debug and Release correctness tests.
+3. Measure performance changes against a baseline.
+4. Update all affected repository documentation.
+5. Check generated files and secrets are excluded.
+6. Review staged changes before committing.
+7. Push and verify both GitHub Actions jobs.
+
+## Optional CSV Splitting Microbenchmark
+
+The isolated CSV splitting experiment is disabled
+by default to keep normal builds focused.
+
+Enable it using:
+
 ```bash
-python3 scripts/generate_benchmark_data.py
-```
+cmake -S . -B build-release \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DATLAS_BUILD_MICROBENCHMARKS=ON
 
-This creates a deterministic synthetic dataset containing
-100,000 OHLCV records.
-
-The generated benchmark dataset is excluded from Git.
-The generator script is tracked for reproducibility.
-
-### Build the benchmark
-
-```bash
-cmake -S . -B build-release -DCMAKE_BUILD_TYPE=Release
 cmake --build build-release --parallel 2
+
+./build-release/benchmark_split
 ```
 
-### Compare ingestion performance
+The experiment compares dynamic vector field storage
+against fixed-size array field storage.
 
-```bash
-./build-release/benchmark_capacity
-```
+It is a microbenchmark, not a complete CSV ingestion test.
 
-The benchmark compares:
-
-- Unreserved: capacity_hint = 0
-- Reserved: capacity_hint = 100000
-
-It performs three warm-up pairs followed by 15 measured
-pairs with alternating execution order.
-
-The output includes median execution times, throughput,
-and the percentage difference.
-
-### Compare peak memory usage
-
-Each mode runs in a separate process.
-
-```bash
-/usr/bin/time -f "Peak RSS: %M KiB" \
-    ./build-release/benchmark_capacity_memory unreserved
-
-/usr/bin/time -f "Peak RSS: %M KiB" \
-    ./build-release/benchmark_capacity_memory reserved
-```
-
-Repeat each command multiple times to observe variability.
-
-### Correctness verification
-
-```bash
-ctest --test-dir build-release --output-on-failure
-```
-
-All six registered test suites should pass.
-
-### Reproducibility considerations
-
-Performance results may vary because of:
-
-- CPU architecture and clock frequency
-- Virtual machine scheduling
-- Compiler and optimization settings
-- Operating system and filesystem caching
-- Background system activity
-- Memory allocation behavior
-
-Benchmark results should always identify the workload,
-environment, build configuration, and measurement method.
-
-See [Performance Report](performance.md) for the
-measured results and their limitations.
+Results should not be interpreted as end-to-end
+market-data processing throughput.
