@@ -379,3 +379,42 @@ dataset sizes, more independent benchmark sessions,
 and performance measurements on native hardware.
 
 ---
+
+
+---
+
+## Phase 2 — Strategy Evaluation Performance
+
+### Current Status
+
+The historical replay, strategy interface, backtest
+runner, and signal exporter are implemented.
+
+The current demonstration processes 12 synthetic market
+bars and produces timestamped strategy decisions.
+
+### Performance Measurements
+
+No controlled Phase 2 replay-throughput, strategy-latency,
+or signal-export performance measurements have been
+recorded yet.
+
+The Phase 1 CSV ingestion benchmarks remain separate
+from Phase 2 strategy-evaluation performance.
+
+### Planned Benchmarking
+
+Future experiments will measure:
+
+- Historical replay throughput
+- Strategy evaluation throughput
+- Signal collection overhead
+- CSV signal export throughput
+- Memory usage across dataset sizes
+- Performance differences between strategy implementations
+
+Measurements will identify compiler settings, hardware,
+dataset sizes, trial counts, and methodological limitations.
+
+The current demonstration is a correctness and usability
+example, not a performance benchmark.

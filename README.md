@@ -1,16 +1,16 @@
 # Project Atlas
 
-**C++20 quantitative trading infrastructure project — Phase 0 and Phase 1 complete; Phase 2 next.**
+**C++20 quantitative trading infrastructure project — Phase 0 and Phase 1 complete; Phase 2 in progress.**
 
-Project Atlas is an educational, performance-oriented systems engineering project. Its long-term goal is a reproducible historical trading and backtesting platform. **Today it implements market-data ingestion and validation, not a working trading or backtesting engine.** The `atlas` executable currently prints a startup message; the CSV ingestion API is exercised by tests and benchmarks.
+Project Atlas is an educational, performance-oriented systems engineering project. Its long-term goal is a reproducible historical trading and backtesting platform. **Today it implements validated market-data ingestion, historical replay, strategy-signal evaluation, and CSV signal exporting. It does not yet simulate order fills or calculate portfolio returns.** The `atlas` executable currently prints a startup message; the CSV ingestion API is exercised by tests and benchmarks.
 
 ## Status
 
 | Phase | Status | Deliverable |
 |---|---|---|
 | 0 — Foundation | Complete | Linux/C++20/CMake, GitHub, tests and Debug/Release CI |
-| 1 — Market data | Complete | Validated OHLCV ingestion, tests, benchmarks; capacity and fixed-size splitter optimizations evaluated; Phase 1 release verification pending |
-| 2 — Backtesting | Not started | Strategy replay and simulation |
+| 1 — Market data | Complete | Validated OHLCV ingestion, tests, benchmarks; capacity and fixed-size splitter optimizations evaluated; Phase 1 release verified |
+| 2 — Backtesting | In progress | Historical replay, strategy signals, backtest runner and CSV exporting |
 | 3 — Execution | Not started | Order fills, fees and slippage |
 | 4 — Portfolio and risk | Not started | Positions, P&L and risk metrics |
 | 5 — Advanced performance | Not started | Profiling and systems optimizations |
@@ -18,13 +18,26 @@ Project Atlas is an educational, performance-oriented systems engineering projec
 
 ## Implemented features
 
-- `atlas::MarketBar` OHLCV model (`std::string` date, `double` prices, unsigned 64-bit volume).
-- Strict six-column CSV reader using `std::from_chars` for numeric conversion.
-- Validates positive finite OHLC prices, price relationships, and nonempty timestamps; zero volume is permitted.
-- Validates `YYYY-MM-DD` calendar dates including leap days and strictly increasing daily dates (no duplicates).
-- Supports LF and CRLF line endings; reports file/row errors via exceptions.
-- Reusable static `atlas_core` library, seven CTest suites, Debug/Release GitHub Actions matrix.
-- Deterministic sample CSV, reproducible 100,000-row dataset generator, four established benchmark executables plus profiling experiments.
+### Market Data Infrastructure — Phase 1
+
+- C++20 `MarketBar` OHLCV data model.
+- Strict six-column CSV ingestion using `std::from_chars`.
+- Calendar, chronology, and OHLCV validation.
+- LF/CRLF support and diagnostic exceptions.
+- Optional vector capacity reservation.
+- Fixed-size CSV field splitting optimization.
+- Reproducible synthetic data and performance benchmarks.
+
+### Historical Strategy Evaluation — Phase 2
+
+- Sequential historical market replay.
+- Reusable `Strategy` interface with reset behavior.
+- Buy-and-Hold and SMA crossover strategies.
+- `BacktestRunner` for deterministic signal collection.
+- CSV exporting through `SignalExporter`.
+- Runnable `atlas_backtest_demo` demonstration.
+- Twelve automated CTest suites.
+- Debug/Release GitHub Actions build matrix.
 
 ## Architecture
 
@@ -39,7 +52,7 @@ Date and OHLCV validation + strict chronology
 std::vector<atlas::MarketBar>  (in memory)
         |
         +--> tests and standalone benchmarks
-        +--> future backtesting engine (not implemented)
+        +--> historical replay and strategy evaluation (implemented)
 ```
 
 The `atlas` startup executable does **not** yet accept a CSV path or backtest arguments. See [architecture](docs/architecture.md) for module boundaries and limitations.
@@ -51,7 +64,7 @@ The `atlas` startup executable does **not** yet accept a CSV path or backtest ar
 include/atlas/                  Public C++ headers
 src/main.cpp                    Startup executable
 src/csv_reader.cpp              CSV ingestion implementation
-tests/                          Seven automated CTest suites
+tests/                          Twelve automated CTest suites
 benchmarks/                     Small-file, large-file, capacity and memory benchmarks
 scripts/generate_benchmark_data.py  Synthetic 100k-row generator
 data/sample_ohlcv.csv           Tracked synthetic five-row fixture
@@ -104,7 +117,7 @@ Rows must have six unquoted fields, valid strictly increasing calendar dates, fi
 
 ## Tests and CI
 
-Seven registered CTest suites: `atlas_startup`, `market_bar_validation`, `csv_reader`, `csv_error_handling`, `date_validation`, `csv_chronology`, `csv_column_validation`. GitHub Actions runs builds and tests on Ubuntu 24.04 for both Debug and Release. See [testing details](docs/testing.md). Passing these tests does not imply production readiness.
+Twelve registered CTest suites: seven Phase 1 suites plus `historical_replay`, `strategy_signals`, `backtest_runner`, `sma_crossover`, and `signal_exporter`. GitHub Actions runs builds and tests on Ubuntu 24.04 for both Debug and Release. See [testing details](docs/testing.md). Passing these tests does not imply production readiness.
 
 ## Performance snapshot
 
@@ -206,6 +219,43 @@ including malformed-column and numeric edge-case tests.
 See [Performance Report](docs/performance.md) for
 methodology and limitations.
 
+## Phase 2 — Historical Strategy Evaluation
+
+Project Atlas now includes a C++20 historical strategy
+evaluation pipeline.
+
+### Implemented Components
+
+- `HistoricalReplay`: delivers market bars sequentially.
+- `Strategy`: reusable strategy interface.
+- `BuyAndHoldStrategy`: emits an initial BUY signal.
+- `SmaCrossoverStrategy`: generates moving-average signals.
+- `BacktestRunner`: records timestamped decisions.
+- `SignalExporter`: exports decisions to CSV.
+- `atlas_backtest_demo`: runnable synthetic strategy demo.
+
+### Run the Demonstration
+
+```bash
+cmake -S . -B build-release -DCMAKE_BUILD_TYPE=Release
+cmake --build build-release --parallel 2
+./build-release/atlas_backtest_demo
+cat atlas_signals.csv
+```
+
+The demonstration processes 12 synthetic market bars
+and generates one BUY and one SELL signal.
+
+The CSV output contains `index`, `timestamp`, and `signal`.
+
+**Current limitation:** These are strategy signals, not
+executed orders. No commissions, slippage, portfolio
+accounting, realized P&L or risk metrics are calculated.
+
+See [Architecture](docs/architecture.md),
+[Development](docs/development.md), and
+[Testing](docs/testing.md) for details.
+
 ## Roadmap checklist
 
 ### Phase 0 — Complete
@@ -227,15 +277,26 @@ methodology and limitations.
 - [x] Strict CSV ingestion and diagnostic exceptions
 - [x] Calendar validation, duplicate/out-of-order rejection
 - [x] LF/CRLF compatibility and regression coverage
-- [x] Seven correctness test suites
+- [x] Seven Phase 1 correctness test suites
 - [x] Synthetic fixtures and reproducible dataset generator
 - [x] Initial small/large-file timing and process memory measurements
 - [x] Strengthen numeric and malformed-column regression coverage
 - [x] Final Phase 1 verification and documentation review
 - [x] Final GitHub Actions Debug and Release verification
 
+### Phase 2 — In progress
+
+- [x] Historical market replay
+- [x] Reusable strategy interface
+- [x] Buy-and-Hold signal strategy
+- [x] SMA crossover strategy
+- [x] Backtest runner and deterministic signal tests
+- [x] CSV signal exporter and regression tests
+- [x] Runnable strategy demonstration
+- [ ] Full Phase 2 documentation and CI verification
+- [ ] Final Phase 2 completion review
 ### Later phases
-- [ ] Phase 2 — Backtesting engine
+
 - [ ] Phase 3 — Execution simulation
 - [ ] Phase 4 — Portfolio and risk
 - [ ] Phase 5 — Advanced performance engineering
@@ -243,7 +304,7 @@ methodology and limitations.
 
 ## Known limitations
 
-No strategy execution, order simulation, portfolio accounting, real-time feeds or exchange connectivity. CSV handling is deliberately narrow: no quoted fields, reordered columns, timezone or intraday timestamps. Entire files are materialized in memory; `double` is unsuitable for exact monetary accounting. No corporate-action handling, trading-calendar validation, streaming, resource limits, or full fuzz/overflow test coverage. Benchmarks use synthetic data in a virtual machine and are not representative of production trading latency. See [architecture](docs/architecture.md).
+Strategy-signal evaluation is implemented, but simulated order execution, portfolio accounting, financial returns, real-time feeds and exchange connectivity are not. CSV handling is deliberately narrow: no quoted fields, reordered columns, timezone or intraday timestamps. Entire files are materialized in memory; `double` is unsuitable for exact monetary accounting. No corporate-action handling, trading-calendar validation, streaming, resource limits, or full fuzz/overflow test coverage. Benchmarks use synthetic data in a virtual machine and are not representative of production trading latency. See [architecture](docs/architecture.md).
 
 ## Disclaimer
 

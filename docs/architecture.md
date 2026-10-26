@@ -140,3 +140,128 @@ risk accounting -> analytics.
 
 Future phases must address look-ahead bias, execution
 timing, transaction costs, slippage, and reproducibility.
+
+---
+
+## Phase 2 — Historical Strategy Evaluation
+
+### Current Signal Processing Pipeline
+
+```text
+Validated OHLCV MarketBar records
+              |
+              v
+       HistoricalReplay
+              |
+              v
+        Strategy::on_bar
+              |
+       +------+------+
+       |             |
+       v             v
+ BuyAndHold      SMA Crossover
+       |             |
+       +------+------+
+              |
+              v
+         SignalEvent
+              |
+              v
+        BacktestRunner
+              |
+              v
+        SignalExporter
+              |
+              v
+      atlas_signals.csv
+```
+
+The diagram represents logical responsibilities. The
+BacktestRunner orchestrates replay and strategy evaluation;
+the strategy implementations are alternatives.
+
+### HistoricalReplay
+
+Files:
+
+- `include/atlas/historical_replay.hpp`
+- `src/historical_replay.cpp`
+
+Delivers market bars sequentially using a callback.
+
+The caller is responsible for supplying validated,
+chronologically ordered market data.
+
+### Strategy Interface
+
+File: `include/atlas/strategy.hpp`
+
+Defines a reusable strategy contract:
+
+- `reset()` restores initial strategy state.
+- `on_bar(const MarketBar&)` processes the current bar.
+- `Signal` represents Buy, Sell, or Hold.
+
+The interface provides only the current market bar.
+However, it cannot prevent a strategy from accessing
+future data through unrelated external references.
+
+### Strategy Implementations
+
+`BuyAndHoldStrategy` emits one Buy signal and then Hold.
+
+`SmaCrossoverStrategy` compares rolling fast and slow
+simple moving averages.
+
+The first fully populated window establishes the initial
+relationship without generating a trade.
+
+Subsequent changes in that relationship generate
+Buy or Sell signals.
+
+### BacktestRunner
+
+Files:
+
+- `include/atlas/backtest_runner.hpp`
+- `src/backtest_runner.cpp`
+
+Resets the strategy, coordinates replay, and records
+one SignalEvent per processed market bar.
+
+Each SignalEvent contains:
+
+- Zero-based market bar index
+- Timestamp
+- Buy, Sell, or Hold signal
+
+### SignalExporter
+
+Files:
+
+- `include/atlas/signal_exporter.hpp`
+- `src/signal_exporter.cpp`
+
+Exports signal events using the CSV schema:
+
+    index,timestamp,signal
+
+The exporter checks file opening and writing errors.
+
+### Demonstration Executable
+
+`atlas_backtest_demo` processes 12 synthetic price records
+using a 3/5 SMA crossover strategy.
+
+The demonstration produces one Buy and one Sell signal
+and writes `atlas_signals.csv`.
+
+### Current Architectural Boundary
+
+Phase 2 currently evaluates strategies and records
+signals. It does not simulate order execution, track
+positions, or calculate financial performance.
+
+Those capabilities require explicit execution timing,
+transaction-cost assumptions, portfolio accounting,
+and additional correctness tests.

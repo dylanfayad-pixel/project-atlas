@@ -32,7 +32,7 @@ and cleaned up using RAII. This helper is Linux/POSIX-specific.
     cmake --build build-release --parallel 2
     ctest --test-dir build-release --parallel 2 --output-on-failure
 
-Both configurations have passed all seven suites locally.
+Both configurations have passed all twelve suites locally, including the five Phase 2 suites.
 
 ## Continuous Integration
 
@@ -64,3 +64,62 @@ Additional future testing may include:
 - Additional performance regression coverage
 
 Passing tests does not imply production readiness.
+
+---
+
+## Phase 2 — Automated Test Coverage
+
+The project now registers 12 CTest suites.
+
+Five Phase 2 suites extend the seven Phase 1 suites.
+
+| Test | Coverage |
+|---|---|
+| historical_replay | Sequential delivery, indices, empty input, missing callback |
+| strategy_signals | Buy-and-Hold signals and reset behavior |
+| backtest_runner | Signal collection, repeatability, empty input |
+| sma_crossover | Bullish/bearish crossovers, reset, invalid periods |
+| signal_exporter | CSV schema, empty export, invalid output path |
+
+### Signal Exporter Test Isolation
+
+The exporter regression test creates a unique temporary
+directory using `mkdtemp`.
+
+RAII cleanup removes the directory when the test exits,
+including when assertions throw exceptions.
+
+This implementation is POSIX-specific and currently
+targets the Linux development and CI environments.
+
+### Local Verification
+
+Debug:
+
+```bash
+cmake --build build --parallel 2
+ctest --test-dir build --parallel 2 \
+  --output-on-failure
+```
+
+Release:
+
+```bash
+cmake --build build-release --parallel 2
+ctest --test-dir build-release --parallel 2 \
+  --output-on-failure
+```
+
+All 12 suites passed locally in both configurations.
+
+### Current Testing Limitations
+
+The existing tests do not establish:
+
+- Complete prevention of look-ahead bias
+- Correctness of order fills or portfolio accounting
+- Transaction-cost or slippage behavior
+- Financial return calculations
+- Production trading readiness
+
+These require additional implementation and testing.

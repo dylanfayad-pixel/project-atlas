@@ -45,3 +45,7 @@ __pycache__/
 # Local profiling artifacts
 /profile-report.txt
 /gmon.out
+
+# Generated strategy and backtest outputs
+/atlas_signals.csv
+/results/

@@ -131,3 +131,75 @@ It is a microbenchmark, not a complete CSV ingestion test.
 
 Results should not be interpreted as end-to-end
 market-data processing throughput.
+
+---
+
+## Phase 2 — Strategy Signal Demonstration
+
+### Build
+
+From the repository root:
+
+```bash
+cmake -S . -B build-release \
+  -DCMAKE_BUILD_TYPE=Release
+
+cmake --build build-release --parallel 2
+```
+
+### Run the Demonstration
+
+```bash
+./build-release/atlas_backtest_demo
+```
+
+The demonstration uses 12 synthetic price records.
+
+It evaluates a 3-period and 5-period moving-average
+crossover strategy.
+
+Expected signals:
+
+- BUY at index 7 (Day 8)
+- SELL at index 10 (Day 11)
+- HOLD at all other indices
+
+### Exported Results
+
+The executable writes:
+
+    atlas_signals.csv
+
+Inspect the output:
+
+```bash
+cat atlas_signals.csv
+```
+
+CSV schema:
+
+    index,timestamp,signal
+
+The generated file is excluded from Git.
+
+### Run the Phase 2 Tests
+
+```bash
+ctest --test-dir build-release \
+  --output-on-failure
+```
+
+### Development Guidelines
+
+Strategies should receive market bars sequentially.
+
+Avoid passing the full historical dataset directly
+to strategy implementations when preventing look-ahead
+bias is a design goal.
+
+Reset strategy state before each independent run.
+
+Treat trading signals separately from executed orders.
+
+Do not calculate or report financial returns until
+execution and portfolio accounting are implemented.

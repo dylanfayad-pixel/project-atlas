@@ -13,6 +13,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_library(atlas_core STATIC
     src/csv_reader.cpp
+    src/historical_replay.cpp
+    src/backtest_runner.cpp
+    src/signal_exporter.cpp
 )
 
 target_include_directories(atlas_core PUBLIC
@@ -219,5 +222,112 @@ if(ATLAS_BUILD_MICROBENCHMARKS)
 
     target_compile_options(benchmark_split PRIVATE
         -Wall -Wextra -Wpedantic
+    )
+endif()
+
+# Phase 2: historical replay correctness tests.
+if(BUILD_TESTING)
+    add_executable(test_historical_replay
+        tests/test_historical_replay.cpp
+    )
+
+    target_link_libraries(
+        test_historical_replay PRIVATE atlas_core
+    )
+
+    target_compile_options(test_historical_replay PRIVATE
+        -Wall -Wextra -Wpedantic
+    )
+
+    add_test(
+        NAME historical_replay
+        COMMAND test_historical_replay
+    )
+endif()
+
+# Phase 2: verify strategy signals and reset behavior.
+if(BUILD_TESTING)
+    add_executable(test_strategy
+        tests/test_strategy.cpp
+    )
+
+    target_link_libraries(test_strategy PRIVATE atlas_core)
+
+    target_compile_options(test_strategy PRIVATE
+        -Wall -Wextra -Wpedantic
+    )
+
+    add_test(
+        NAME strategy_signals
+        COMMAND test_strategy
+    )
+endif()
+
+# Phase 2: test strategy evaluation and deterministic replay.
+if(BUILD_TESTING)
+    add_executable(test_backtest_runner
+        tests/test_backtest_runner.cpp
+    )
+
+    target_link_libraries(
+        test_backtest_runner PRIVATE atlas_core
+    )
+
+    target_compile_options(test_backtest_runner PRIVATE
+        -Wall -Wextra -Wpedantic
+    )
+
+    add_test(
+        NAME backtest_runner
+        COMMAND test_backtest_runner
+    )
+endif()
+
+# Phase 2: verify moving-average crossover signals.
+if(BUILD_TESTING)
+    add_executable(test_sma_strategy
+        tests/test_sma_strategy.cpp
+    )
+
+    target_link_libraries(test_sma_strategy PRIVATE atlas_core)
+
+    target_compile_options(test_sma_strategy PRIVATE
+        -Wall -Wextra -Wpedantic
+    )
+
+    add_test(
+        NAME sma_crossover
+        COMMAND test_sma_strategy
+    )
+endif()
+
+# Phase 2: standalone demonstration of strategy signals.
+add_executable(atlas_backtest_demo
+    src/backtest_demo.cpp
+)
+
+target_link_libraries(atlas_backtest_demo PRIVATE atlas_core)
+
+target_compile_options(atlas_backtest_demo PRIVATE
+    -Wall -Wextra -Wpedantic
+)
+
+# Phase 2: verify exported signal CSV content and errors.
+if(BUILD_TESTING)
+    add_executable(test_signal_exporter
+        tests/test_signal_exporter.cpp
+    )
+
+    target_link_libraries(
+        test_signal_exporter PRIVATE atlas_core
+    )
+
+    target_compile_options(test_signal_exporter PRIVATE
+        -Wall -Wextra -Wpedantic
+    )
+
+    add_test(
+        NAME signal_exporter
+        COMMAND test_signal_exporter
     )
 endif()
