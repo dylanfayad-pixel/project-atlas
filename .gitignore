@@ -1,14 +1,13 @@
-# CMake build directories
+# Out-of-source CMake builds
 /build/
+/build-*/
 /cmake-build-*/
-
-# CMake-generated files
 CMakeFiles/
 CMakeCache.txt
 cmake_install.cmake
 compile_commands.json
 
-# Compiled C++ artifacts
+# Compiled binaries and libraries
 *.o
 *.obj
 *.a
@@ -17,31 +16,28 @@ compile_commands.json
 *.exe
 *.out
 
-# Python cache
+# Python caches and virtual environments
 __pycache__/
 *.pyc
 .venv/
 
-# Editor settings
+# Editor and operating system
 .vscode/
 .idea/
 *.swp
-
-# Operating system files
 .DS_Store
 
-# Environment variables and secrets
+# Secrets and local configuration
 .env
 .env.*
 !.env.example
+*.pem
+*.key
 
-# Local datasets
+# Local datasets; keep only the synthetic tracked fixture
 /data/*
 !/data/.gitkeep
-
-# Benchmark output
-/benchmark-results/
 !/data/sample_ohlcv.csv
 
-# Additional out-of-source build directories
-/build-*/
+# Generated benchmark results
+/benchmark-results/
