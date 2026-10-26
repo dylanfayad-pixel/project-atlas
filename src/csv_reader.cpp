@@ -78,8 +78,15 @@ std::vector<MarketBar> CsvReader::read(
     std::string line;
     std::size_t line_number = 1;
 
-    if (!std::getline(file, line) ||
-        line != expected_header) {
+    if (!std::getline(file, line)) {
+        throw std::runtime_error("Invalid CSV header");
+    }
+
+    if (!line.empty() && line.back() == '\r') {
+        line.pop_back();
+    }
+
+    if (line != expected_header) {
         throw std::runtime_error(
             "Invalid CSV header"
         );
@@ -89,6 +96,10 @@ std::vector<MarketBar> CsvReader::read(
 
     while (std::getline(file, line)) {
         ++line_number;
+
+        if (!line.empty() && line.back() == '\r') {
+            line.pop_back();
+        }
 
         if (line.empty()) {
             throw std::runtime_error(

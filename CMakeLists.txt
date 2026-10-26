@@ -130,3 +130,23 @@ if(BUILD_TESTING)
         COMMAND test_csv_chronology
     )
 endif()
+
+add_executable(benchmark_csv
+    benchmarks/benchmark_csv.cpp
+)
+
+target_link_libraries(benchmark_csv PRIVATE atlas_core)
+
+target_compile_options(benchmark_csv PRIVATE
+    -Wall -Wextra -Wpedantic
+)
+
+add_executable(benchmark_large_csv
+    benchmarks/benchmark_large_csv.cpp
+)
+
+target_link_libraries(benchmark_large_csv PRIVATE atlas_core)
+
+target_compile_options(benchmark_large_csv PRIVATE
+    -Wall -Wextra -Wpedantic
+)

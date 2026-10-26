@@ -94,6 +94,26 @@ int main() {
         );
         expect_failure(path, "Invalid OHLCV data");
 
+        // Regression test: Windows-style CRLF line endings.
+        write_file(
+            path,
+            "timestamp,open,high,low,close,volume\r\n"
+            "2026-10-19,100,105,99,103,1000\r\n"
+            "2026-10-20,103,108,102,107,1200\r\n"
+        );
+
+        const auto crlf_bars = atlas::CsvReader::read(path.string());
+
+        require(
+            crlf_bars.size() == 2,
+            "CRLF CSV should contain exactly two records"
+        );
+
+        require(
+            crlf_bars[1].timestamp == "2026-10-20",
+            "CRLF timestamp parsed incorrectly"
+        );
+
         std::filesystem::remove(path);
         std::filesystem::remove(directory);
 
