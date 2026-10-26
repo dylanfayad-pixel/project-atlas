@@ -11,12 +11,24 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+add_library(atlas_core STATIC
+    src/csv_reader.cpp
+)
+
+target_include_directories(atlas_core PUBLIC
+    ${PROJECT_SOURCE_DIR}/include
+)
+
+target_compile_options(atlas_core PRIVATE
+    -Wall -Wextra -Wpedantic
+)
+
 add_executable(atlas src/main.cpp)
 
+target_link_libraries(atlas PRIVATE atlas_core)
+
 target_compile_options(atlas PRIVATE
-    -Wall
-    -Wextra
-    -Wpedantic
+    -Wall -Wextra -Wpedantic
 )
 
 include(CTest)
@@ -30,16 +42,12 @@ if(BUILD_TESTING)
     set_tests_properties(atlas_startup PROPERTIES
         PASS_REGULAR_EXPRESSION "System initialized successfully"
     )
-endif()
 
-if(BUILD_TESTING)
     add_executable(test_market_bar
         tests/test_market_bar.cpp
     )
 
-    target_include_directories(test_market_bar PRIVATE
-        ${PROJECT_SOURCE_DIR}/include
-    )
+    target_link_libraries(test_market_bar PRIVATE atlas_core)
 
     target_compile_options(test_market_bar PRIVATE
         -Wall -Wextra -Wpedantic
@@ -48,5 +56,43 @@ if(BUILD_TESTING)
     add_test(
         NAME market_bar_validation
         COMMAND test_market_bar
+    )
+endif()
+
+if(BUILD_TESTING)
+    add_executable(test_csv_reader
+        tests/test_csv_reader.cpp
+    )
+
+    target_link_libraries(test_csv_reader PRIVATE atlas_core)
+
+    target_compile_options(test_csv_reader PRIVATE
+        -Wall -Wextra -Wpedantic
+    )
+
+    add_test(
+        NAME csv_reader
+        COMMAND test_csv_reader
+    )
+
+    set_tests_properties(csv_reader PROPERTIES
+        WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
+    )
+endif()
+
+if(BUILD_TESTING)
+    add_executable(test_csv_errors
+        tests/test_csv_errors.cpp
+    )
+
+    target_link_libraries(test_csv_errors PRIVATE atlas_core)
+
+    target_compile_options(test_csv_errors PRIVATE
+        -Wall -Wextra -Wpedantic
+    )
+
+    add_test(
+        NAME csv_error_handling
+        COMMAND test_csv_errors
     )
 endif()

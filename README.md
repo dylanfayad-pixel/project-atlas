@@ -100,3 +100,57 @@ Run:
 
 Project Atlas is an educational software engineering project.
 It does not provide financial advice or guarantee trading profits.
+
+## Market Data Engine — Phase 1
+
+Project Atlas includes an initial historical OHLCV CSV reader.
+
+### Supported CSV Format
+
+The reader expects this exact column order:
+
+    timestamp,open,high,low,close,volume
+
+Example:
+
+    2026-10-19,100.00,105.00,99.00,103.00,1250000
+
+The included `data/sample_ohlcv.csv` contains five synthetic
+market records for deterministic testing.
+
+### Implemented Functionality
+
+- Strict six-column CSV parsing
+- Numeric conversion using std::from_chars
+- OHLCV price validation
+- Rejection of malformed numeric values
+- Error reporting with CSV line numbers for invalid records
+- Reusable atlas_core static library
+
+### Current Limitations
+
+- Only the exact six-column CSV schema is supported.
+- Quoted CSV fields are not supported.
+- Timestamps are stored as strings and are not yet calendar-validated.
+- Chronological ordering and duplicate timestamps are not yet checked.
+- Prices currently use double rather than fixed-point integers.
+- The reader loads records into memory rather than streaming them.
+- The parser is not yet production-ready.
+
+### Automated Tests
+
+Run:
+
+    cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+    cmake --build build
+    ctest --test-dir build --output-on-failure
+
+Current test suites:
+
+1. Application startup
+2. Market bar validation
+3. Valid CSV loading
+4. CSV error handling
+
+Performance benchmarking and additional edge-case testing
+are planned.

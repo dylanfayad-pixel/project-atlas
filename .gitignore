@@ -41,3 +41,4 @@ __pycache__/
 
 # Benchmark output
 /benchmark-results/
+!/data/sample_ohlcv.csv
