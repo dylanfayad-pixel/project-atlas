@@ -88,7 +88,7 @@ Run:
 ## Development Roadmap
 
 - [x] Phase 0: Initial C++ application and build system
-- [ ] Phase 0: Repository documentation and CI
+- [x] Phase 0: Repository documentation and CI
 - [ ] Phase 1: Market data processing
 - [ ] Phase 2: Backtesting engine
 - [ ] Phase 3: Order execution simulation
