@@ -1,6 +1,6 @@
 # Project Atlas
 
-**C++20 quantitative trading infrastructure project — Phase 0 complete; Phase 1 in progress.**
+**C++20 quantitative trading infrastructure project — Phase 0 and Phase 1 complete; Phase 2 next.**
 
 Project Atlas is an educational, performance-oriented systems engineering project. Its long-term goal is a reproducible historical trading and backtesting platform. **Today it implements market-data ingestion and validation, not a working trading or backtesting engine.** The `atlas` executable currently prints a startup message; the CSV ingestion API is exercised by tests and benchmarks.
 
@@ -9,7 +9,7 @@ Project Atlas is an educational, performance-oriented systems engineering projec
 | Phase | Status | Deliverable |
 |---|---|---|
 | 0 — Foundation | Complete | Linux/C++20/CMake, GitHub, tests and Debug/Release CI |
-| 1 — Market data | In progress | Validated OHLCV ingestion, tests, benchmarks; capacity and fixed-size splitter optimizations evaluated; Phase 1 release verification pending |
+| 1 — Market data | Complete | Validated OHLCV ingestion, tests, benchmarks; capacity and fixed-size splitter optimizations evaluated; Phase 1 release verification pending |
 | 2 — Backtesting | Not started | Strategy replay and simulation |
 | 3 — Execution | Not started | Order fills, fees and slippage |
 | 4 — Portfolio and risk | Not started | Positions, P&L and risk metrics |
@@ -216,7 +216,7 @@ methodology and limitations.
 - [x] Debug and Release build/test configurations
 - [ ] Optional VS Code Remote SSH workflow (postponed; not required for completion)
 
-### Phase 1 — In progress
+### Phase 1 — Complete
 
 - [x] Optional CSV reader capacity hint
 - [x] Controlled reserved/unreserved timing benchmark
@@ -232,6 +232,7 @@ methodology and limitations.
 - [x] Initial small/large-file timing and process memory measurements
 - [x] Strengthen numeric and malformed-column regression coverage
 - [x] Final Phase 1 verification and documentation review
+- [x] Final GitHub Actions Debug and Release verification
 
 ### Later phases
 - [ ] Phase 2 — Backtesting engine
