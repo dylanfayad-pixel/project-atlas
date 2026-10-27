@@ -32,7 +32,7 @@ and cleaned up using RAII. This helper is Linux/POSIX-specific.
     cmake --build build-release --parallel 2
     ctest --test-dir build-release --parallel 2 --output-on-failure
 
-Both configurations have passed all twelve suites locally, including the five Phase 2 suites.
+The latest reported local verification passed all 17 CTest suites in both Debug and Release. These results must be reverified after changes.
 
 ## Continuous Integration
 
@@ -123,3 +123,57 @@ The existing tests do not establish:
 - Production trading readiness
 
 These require additional implementation and testing.
+
+## Current Portfolio and Frontend Verification
+
+The most recently reported local results are:
+
+| Area | Result |
+|---|---|
+| C++ Debug | 17/17 CTest suites passed |
+| C++ Release | 17/17 CTest suites passed |
+| Frontend | 10/10 Vitest tests passed |
+| Frontend lint | Passed |
+| Frontend production build | Passed |
+| Portfolio JSON integration | Passed |
+
+These results are historical local verification results.
+They must be rerun after subsequent changes.
+
+### Additional C++ Coverage
+
+The expanded suite includes:
+
+- `portfolio_simulator`
+- `portfolio_robustness`
+- `performance_metrics`
+- `portfolio_json_exporter`
+- `portfolio_json_integration`
+
+The integration test executes the portfolio demonstration,
+parses its JSON output, and checks known synthetic results.
+
+### Frontend Coverage
+
+The frontend tests validate the portfolio JSON parser,
+including malformed trades, non-finite numbers, invalid
+schema versions, and inconsistent equity summaries.
+
+### Continuous Integration
+
+The workflow in `.github/workflows/ci.yml` includes:
+
+- C++ Debug build and tests.
+- C++ Release build and tests.
+- Frontend tests, ESLint, and production build.
+
+The updated workflow must pass on GitHub before the
+milestone is considered published and verified.
+
+### Remaining Testing Limitations
+
+The current tests do not establish production readiness.
+
+Further work includes broader accounting invariants,
+larger datasets, randomized testing, security testing,
+and realistic execution-model verification.

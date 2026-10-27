@@ -418,3 +418,38 @@ dataset sizes, trial counts, and methodological limitations.
 
 The current demonstration is a correctness and usability
 example, not a performance benchmark.
+
+## Frontend Bundle Optimization
+
+The Atlas Terminal frontend uses lazy loading for
+chart-heavy components.
+
+### Recorded Production Build Results
+
+| Metric | Before | After |
+|---|---:|---:|
+| Initial JavaScript bundle | 593.43 kB | 236.89 kB |
+
+The uncompressed initial bundle decreased by
+approximately 60.1%.
+
+The optimized build also produced a separate
+351.08 kB chart-library chunk.
+
+### Interpretation
+
+This demonstrates JavaScript code splitting.
+
+It does not establish a 60.1% reduction in page-load
+time, total transferred bytes, or runtime latency.
+
+Actual user-perceived performance requires browser
+measurements under controlled conditions.
+
+### Scope
+
+These frontend measurements are separate from the
+historical C++ CSV ingestion benchmarks above.
+
+The original benchmark results and methodology
+remain preserved in this document.

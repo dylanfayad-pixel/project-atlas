@@ -49,3 +49,6 @@ __pycache__/
 # Generated strategy and backtest outputs
 /atlas_signals.csv
 /results/
+
+# Generated portfolio analytics
+/atlas_portfolio.json

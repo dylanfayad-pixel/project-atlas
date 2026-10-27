@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "strategy": "SMA Crossover (3/5)",
+  "initial_capital": 10000,
+  "final_equity": 4000,
+  "net_profit": -6000,
+  "total_return_pct": -60,
+  "maximum_drawdown_pct": 60,
+  "equity_curve": [
+    {"index": 0, "timestamp": "Day 1", "cash": 10000, "shares": 0, "equity": 10000},
+    {"index": 1, "timestamp": "Day 2", "cash": 10000, "shares": 0, "equity": 10000},
+    {"index": 2, "timestamp": "Day 3", "cash": 10000, "shares": 0, "equity": 10000},
+    {"index": 3, "timestamp": "Day 4", "cash": 10000, "shares": 0, "equity": 10000},
+    {"index": 4, "timestamp": "Day 5", "cash": 10000, "shares": 0, "equity": 10000},
+    {"index": 5, "timestamp": "Day 6", "cash": 10000, "shares": 0, "equity": 10000},
+    {"index": 6, "timestamp": "Day 7", "cash": 10000, "shares": 0, "equity": 10000},
+    {"index": 7, "timestamp": "Day 8", "cash": 10000, "shares": 0, "equity": 10000},
+    {"index": 8, "timestamp": "Day 9", "cash": 0, "shares": 1000, "equity": 10000},
+    {"index": 9, "timestamp": "Day 10", "cash": 0, "shares": 1000, "equity": 8000},
+    {"index": 10, "timestamp": "Day 11", "cash": 0, "shares": 1000, "equity": 6000},
+    {"index": 11, "timestamp": "Day 12", "cash": 4000, "shares": 0, "equity": 4000}
+  ],
+  "trades": [
+    {"index": 8, "timestamp": "Day 9", "side": "BUY", "price": 10, "quantity": 1000},
+    {"index": 11, "timestamp": "Day 12", "side": "SELL", "price": 4, "quantity": 1000}
+  ]
+}

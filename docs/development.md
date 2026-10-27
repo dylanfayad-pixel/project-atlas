@@ -203,3 +203,64 @@ Treat trading signals separately from executed orders.
 
 Do not calculate or report financial returns until
 execution and portfolio accounting are implemented.
+
+## Atlas Terminal Development
+
+The frontend is located in `frontend/`.
+
+### Install Dependencies
+
+```bash
+cd frontend
+npm ci
+```
+
+### Start the Development Server
+
+```bash
+npm run dev
+```
+
+Open the local URL printed by Vite.
+
+### Frontend Verification
+
+```bash
+npm run test
+npm run lint
+npm run build
+```
+
+### Portfolio Demonstration
+
+From the repository root:
+
+```bash
+cmake -S . -B build-release -DCMAKE_BUILD_TYPE=Release
+cmake --build build-release --parallel 2
+
+./build-release/atlas_portfolio_demo
+./build-release/atlas_strategy_comparison
+```
+
+### JSON Integration Verification
+
+```bash
+python3 scripts/verify_portfolio_json.py   --executable build-release/atlas_portfolio_demo
+```
+
+The verification script runs the C++ executable in a
+temporary directory and checks its generated JSON.
+
+The frontend currently uses a checked-in static
+demonstration fixture rather than a live API.
+
+### Development Standards
+
+- Keep C++20 and TypeScript strict checking enabled.
+- Add meaningful comments for important logic.
+- Add regression tests for behavior changes.
+- Run Debug and Release C++ tests.
+- Run frontend tests, lint, and production builds.
+- Keep documentation synchronized with implementation.
+- Avoid committing generated binaries or local datasets.

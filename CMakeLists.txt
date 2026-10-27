@@ -15,6 +15,9 @@ add_library(atlas_core STATIC
     src/csv_reader.cpp
     src/historical_replay.cpp
     src/backtest_runner.cpp
+    src/portfolio_simulator.cpp
+    src/performance_metrics.cpp
+    src/portfolio_json_exporter.cpp
     src/signal_exporter.cpp
 )
 
@@ -329,5 +332,131 @@ if(BUILD_TESTING)
     add_test(
         NAME signal_exporter
         COMMAND test_signal_exporter
+    )
+endif()
+
+
+# Phase 2: deterministic portfolio accounting regression tests.
+if(BUILD_TESTING)
+    add_executable(test_portfolio_simulator
+        tests/test_portfolio_simulator.cpp
+    )
+
+    target_link_libraries(
+        test_portfolio_simulator PRIVATE atlas_core
+    )
+
+    target_compile_options(test_portfolio_simulator PRIVATE
+        -Wall -Wextra -Wpedantic
+    )
+
+    add_test(
+        NAME portfolio_simulator
+        COMMAND test_portfolio_simulator
+    )
+endif()
+
+
+# Phase 2: demonstrate next-bar execution and portfolio returns.
+add_executable(atlas_portfolio_demo
+    src/portfolio_demo.cpp
+)
+
+target_link_libraries(
+    atlas_portfolio_demo PRIVATE atlas_core
+)
+
+target_compile_options(atlas_portfolio_demo PRIVATE
+    -Wall -Wextra -Wpedantic
+)
+
+# Phase 2: validate portfolio error handling and arithmetic safety.
+if(BUILD_TESTING)
+    add_executable(test_portfolio_robustness
+        tests/test_portfolio_robustness.cpp
+    )
+
+    target_link_libraries(
+        test_portfolio_robustness PRIVATE atlas_core
+    )
+
+    target_compile_options(test_portfolio_robustness PRIVATE
+        -Wall -Wextra -Wpedantic
+    )
+
+    add_test(
+        NAME portfolio_robustness
+        COMMAND test_portfolio_robustness
+    )
+endif()
+
+
+# Phase 2: validate equity-based performance calculations.
+if(BUILD_TESTING)
+    add_executable(test_performance_metrics
+        tests/test_performance_metrics.cpp
+    )
+
+    target_link_libraries(
+        test_performance_metrics PRIVATE atlas_core
+    )
+
+    target_compile_options(test_performance_metrics PRIVATE
+        -Wall -Wextra -Wpedantic
+    )
+
+    add_test(
+        NAME performance_metrics
+        COMMAND test_performance_metrics
+    )
+endif()
+
+
+# Phase 2: compare strategies using identical portfolio assumptions.
+add_executable(atlas_strategy_comparison
+    src/strategy_comparison.cpp
+)
+
+target_link_libraries(
+    atlas_strategy_comparison PRIVATE atlas_core
+)
+
+target_compile_options(atlas_strategy_comparison PRIVATE
+    -Wall -Wextra -Wpedantic
+)
+
+# Phase 2: verify portfolio JSON serialization and error handling.
+if(BUILD_TESTING)
+    add_executable(test_portfolio_json_exporter
+        tests/test_portfolio_json_exporter.cpp
+    )
+
+    target_link_libraries(
+        test_portfolio_json_exporter PRIVATE atlas_core
+    )
+
+    target_compile_options(test_portfolio_json_exporter PRIVATE
+        -Wall -Wextra -Wpedantic
+    )
+
+    add_test(
+        NAME portfolio_json_exporter
+        COMMAND test_portfolio_json_exporter
+    )
+endif()
+
+
+# Phase 2: execute the C++ portfolio demo and verify its
+# machine-readable JSON using an independent Python parser.
+if(BUILD_TESTING)
+    find_package(Python3 REQUIRED COMPONENTS Interpreter)
+
+    add_test(
+        NAME portfolio_json_integration
+        COMMAND
+            ${Python3_EXECUTABLE}
+            ${PROJECT_SOURCE_DIR}/scripts/verify_portfolio_json.py
+            --executable
+            $<TARGET_FILE:atlas_portfolio_demo>
     )
 endif()

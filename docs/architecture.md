@@ -265,3 +265,91 @@ positions, or calculate financial performance.
 Those capabilities require explicit execution timing,
 transaction-cost assumptions, portfolio accounting,
 and additional correctness tests.
+
+## Portfolio Simulation and Atlas Terminal
+
+Project Atlas now extends historical strategy evaluation with
+simplified portfolio simulation and a React dashboard.
+
+### Current Processing Pipeline
+
+```text
+Validated OHLCV market bars
+        |
+        v
+HistoricalReplay
+        |
+        v
+Strategy / BacktestRunner
+        |
+        v
+BUY / SELL / HOLD signals
+        |
+        v
+PortfolioSimulator
+        |
+        v
+Cash, shares, fills, equity curve
+        |
+        v
+PerformanceMetrics
+        |
+        v
+PortfolioJsonExporter
+        |
+        v
+Static demonstration JSON
+        |
+        v
+React + TypeScript Atlas Terminal
+```
+
+### Portfolio Simulator
+
+Implementation: `src/portfolio_simulator.cpp`
+
+The simulator processes strategy decisions and models
+simplified long-only execution at the next bar's opening
+price. It tracks cash, shares, simulated fills, and equity.
+
+Current assumptions include fractional shares, zero
+commissions, zero slippage, and no leverage.
+
+These are research simplifications, not production
+execution guarantees.
+
+### Performance Metrics
+
+Implementation: `src/performance_metrics.cpp`
+
+The performance module calculates net profit, total
+return, and maximum drawdown from portfolio results.
+
+### JSON Boundary
+
+Implementation: `src/portfolio_json_exporter.cpp`
+
+The C++ engine exports a versioned JSON document.
+
+The frontend validates this document before displaying
+financial information.
+
+See [JSON contract](api.md).
+
+### Frontend Architecture
+
+The frontend uses React, TypeScript, Vite, and Recharts.
+
+Its components are organized under
+`frontend/src/components/`.
+
+The current application loads static demonstration
+fixtures. There is no live backtesting API yet.
+
+### Architectural Limitations
+
+The simulator does not model realistic commissions,
+slippage, order-book liquidity, or market impact.
+
+The website is a local research interface rather
+than a publicly deployed trading service.

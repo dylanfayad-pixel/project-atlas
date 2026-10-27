@@ -1,0 +1,13 @@
+index,timestamp,price,signal
+0,Day 1,10,HOLD
+1,Day 2,9,HOLD
+2,Day 3,8,HOLD
+3,Day 4,7,HOLD
+4,Day 5,6,HOLD
+5,Day 6,7,HOLD
+6,Day 7,8,HOLD
+7,Day 8,9,BUY
+8,Day 9,10,HOLD
+9,Day 10,8,HOLD
+10,Day 11,6,SELL
+11,Day 12,4,HOLD
