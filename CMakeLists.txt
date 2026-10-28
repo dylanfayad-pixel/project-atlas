@@ -17,6 +17,7 @@ add_library(atlas_core STATIC
     src/backtest_runner.cpp
     src/portfolio_simulator.cpp
     src/performance_metrics.cpp
+    src/risk_analytics.cpp
     src/portfolio_json_exporter.cpp
     src/signal_exporter.cpp
 )
@@ -514,5 +515,26 @@ if(BUILD_TESTING)
             --executable $<TARGET_FILE:atlas_portfolio_demo>
             --fixture
             ${CMAKE_SOURCE_DIR}/frontend/public/data/demo_portfolio_v2.json
+    )
+endif()
+
+
+# Phase 4: validate annualized volatility and Sharpe ratio.
+if(BUILD_TESTING)
+    add_executable(test_risk_analytics
+        tests/test_risk_analytics.cpp
+    )
+
+    target_link_libraries(test_risk_analytics
+        PRIVATE atlas_core
+    )
+
+    target_compile_options(test_risk_analytics PRIVATE
+        -Wall -Wextra -Wpedantic
+    )
+
+    add_test(
+        NAME risk_analytics
+        COMMAND test_risk_analytics
     )
 endif()

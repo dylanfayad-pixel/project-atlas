@@ -158,6 +158,35 @@ Both versions are supported by the frontend parser.
 
 See [JSON contract](api.md).
 
+## Phase 4 — Risk Analytics
+
+The new `RiskAnalyzer` operates on an existing
+`PortfolioResult` without modifying the execution engine.
+
+Implementation:
+
+- `include/atlas/risk_analytics.hpp`
+- `src/risk_analytics.cpp`
+
+It computes periodic returns, annualized volatility,
+Sharpe ratio, downside deviation, and Sortino ratio.
+
+The first closing-equity observation is the baseline.
+Subsequent observations produce periodic returns.
+
+Risk configuration includes annualization frequency,
+periodic risk-free rate, and periodic downside target.
+
+Undefined statistics use `std::optional<double>`.
+
+The module is not yet integrated with portfolio JSON
+serialization or the React frontend.
+
+The implementation does not validate calendar spacing
+and does not establish real-market profitability.
+
+See [risk analytics](risk-analytics.md).
+
 ## Atlas Terminal
 
 Technology:

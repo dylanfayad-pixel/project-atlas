@@ -204,5 +204,35 @@ against the committed frontend fixture.
 These tests are not a substitute for production financial
 validation, adversarial testing, or live-market execution.
 
-GitHub Actions verification for the Phase 3 release
-remains pending until the milestone is pushed.
+Phase 3 GitHub Actions verification completed successfully.
+
+
+## Phase 4 — Risk Analytics Verification
+
+Phase 4 introduces the `risk_analytics` CTest suite.
+
+The project currently registers 21 CTest suites.
+
+All 21 passed locally in Debug and Release during
+the Phase 4.1 implementation review.
+
+The risk analytics tests cover:
+
+- Periodic return sampling.
+- Annualized sample volatility.
+- Sharpe ratio and periodic risk-free rate.
+- Downside deviation and Sortino ratio.
+- Nonzero downside targets.
+- Flat portfolios and insufficient observations.
+- Portfolio depletion.
+- Invalid configuration and non-finite observations.
+- Selected extreme numerical inputs.
+
+The risk analytics module is not yet exposed through
+the frontend JSON contract.
+
+The 21-suite count describes the current local Phase 4
+working tree. The published Phase 3 milestone contains
+20 CTest suites until the Phase 4 changes are committed.
+
+GitHub Actions verification for Phase 4.1 remains pending.

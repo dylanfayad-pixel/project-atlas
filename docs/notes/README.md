@@ -25,6 +25,8 @@ demonstrate the project confidently.
 
 | [13 — Execution Costs](13-execution-costs.md) | Commission, slippage and financial realism |
 
+| [14 — Risk Analytics](14-risk-analytics.md) | Volatility, Sharpe, downside deviation and Sortino |
+
 ## How to Use These Notes
 
 1. Read the simple explanation first.
@@ -39,7 +41,8 @@ demonstrate the project confidently.
 - Phase 1: Complete
 - Phase 2: Complete
 - Phase 3: Complete
-- C++: 20 CTest suites passed locally in Debug and Release
+- Phase 4: In progress
+- C++: 21 CTest suites passed locally in Debug and Release
 - Frontend: 15 Vitest tests passed locally
 - GitHub CI verification for this milestone: Pending
 

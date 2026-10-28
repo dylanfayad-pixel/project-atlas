@@ -14,7 +14,7 @@ Project Atlas is an educational systems-engineering project for validating marke
 | Phase 1 — Market data | Complete | OHLCV parsing, validation, chronology checks, benchmarks |
 | Phase 2 — Historical research | Complete | Replay, strategies, portfolio simulation, metrics, JSON export, dashboard |
 | Phase 3 — Execution realism | Complete | Configurable commissions, adverse slippage, cost-aware accounting, JSON v2, dashboard analytics |
-| Phase 4 — Portfolio and risk | Planned / partial foundations exist | Broader risk controls and portfolio capabilities |
+| Phase 4 — Portfolio and risk | In progress | Risk analytics implemented locally; position sizing and portfolio controls planned |
 | Phase 5 — Research and performance | Planned | More datasets, profiling, robust strategy evaluation |
 | Phase 6 — Public release | Planned | Backend API, deployment, release hardening |
 
@@ -62,6 +62,31 @@ The execution model remains simplified. It does not model order
 books, partial fills, market impact, exchange fees, or real orders.
 
 See [Phase 3 engineering notes](docs/phase3-execution.md).
+
+### Risk analytics — Phase 4
+
+The C++ risk analytics module currently calculates:
+
+- Periodic returns from consecutive closing-equity observations.
+- Annualized sample volatility.
+- Sharpe ratio.
+- Annualized downside deviation.
+- Sortino ratio.
+
+Risk configuration supports explicit periods per year,
+periodic risk-free rates, and periodic downside targets.
+
+Undefined ratios are represented with `std::optional`.
+
+The current module is undergoing Phase 4 milestone verification.
+These risk metrics are not yet exported through the frontend
+portfolio JSON contract or displayed in Atlas Terminal.
+
+Annualization assumes equally spaced observations.
+Synthetic demonstration timestamps do not establish
+real-market annualized performance.
+
+See [risk analytics engineering](docs/risk-analytics.md).
 
 ## Architecture
 

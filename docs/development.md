@@ -365,3 +365,60 @@ The frontend does not yet submit live backtest
 requests to the C++ engine.
 
 No real orders are executed.
+
+---
+
+## Phase 4.1 — Risk Analytics Development
+
+The risk analytics module extends Atlas with
+return-variability and downside-risk calculations.
+
+Source files:
+
+- `include/atlas/risk_analytics.hpp`
+- `src/risk_analytics.cpp`
+- `tests/test_risk_analytics.cpp`
+
+The module operates on existing portfolio results.
+It does not change execution or accounting behavior.
+
+### Run Risk Analytics Tests
+
+```bash
+ctest --test-dir build \
+  -R '^risk_analytics$' --output-on-failure
+
+ctest --test-dir build-release \
+  -R '^risk_analytics$' --output-on-failure
+```
+
+### Run Complete C++ Verification
+
+```bash
+ctest --test-dir build --output-on-failure
+ctest --test-dir build-release --output-on-failure
+```
+
+Phase 4.1 currently registers 21 CTest suites.
+
+### Statistical Assumptions
+
+- Returns use consecutive closing-equity observations.
+- The first observation is the baseline.
+- Volatility uses sample standard deviation.
+- Downside deviation uses all return observations.
+- Annualization assumes equally spaced observations.
+- Risk-free and downside target rates are per observation.
+- Undefined statistics are represented using `std::optional`.
+
+See [risk analytics](risk-analytics.md).
+
+### Current Integration Boundary
+
+Risk analytics is currently available through C++.
+
+It is not yet exported through the versioned
+portfolio JSON contract or displayed by Atlas Terminal.
+
+Do not claim that the website already provides
+Sharpe or Sortino analytics.
