@@ -14,7 +14,8 @@ public:
     static std::string serialize(
         const PortfolioResult& portfolio,
         const PerformanceMetrics& metrics,
-        const std::string& strategy_name
+        const std::string& strategy_name,
+        int schema_version = 1
     );
 };
 

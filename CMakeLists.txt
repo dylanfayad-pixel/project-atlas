@@ -460,3 +460,59 @@ if(BUILD_TESTING)
             $<TARGET_FILE:atlas_portfolio_demo>
     )
 endif()
+
+# Phase 3: validate commission, slippage, and cash accounting.
+if(BUILD_TESTING)
+    add_executable(test_execution_costs
+        tests/test_execution_costs.cpp
+    )
+
+    target_link_libraries(test_execution_costs
+        PRIVATE atlas_core
+    )
+
+    target_compile_options(test_execution_costs PRIVATE
+        -Wall -Wextra -Wpedantic
+    )
+
+    add_test(
+        NAME execution_costs
+        COMMAND test_execution_costs
+    )
+endif()
+
+# Phase 3: verify versioned portfolio cost serialization.
+if(BUILD_TESTING)
+    add_executable(test_portfolio_json_v2
+        tests/test_portfolio_json_v2.cpp
+    )
+
+    target_link_libraries(test_portfolio_json_v2
+        PRIVATE atlas_core
+    )
+
+    target_compile_options(test_portfolio_json_v2 PRIVATE
+        -Wall -Wextra -Wpedantic
+    )
+
+    add_test(
+        NAME portfolio_json_v2
+        COMMAND test_portfolio_json_v2
+    )
+endif()
+
+# Phase 3: verify real C++ JSON v2 output against the
+# committed frontend fixture and financial invariants.
+if(BUILD_TESTING)
+    find_package(Python3 REQUIRED COMPONENTS Interpreter)
+
+    add_test(
+        NAME portfolio_json_v2_integration
+        COMMAND
+            ${Python3_EXECUTABLE}
+            ${CMAKE_SOURCE_DIR}/scripts/verify_portfolio_json_v2.py
+            --executable $<TARGET_FILE:atlas_portfolio_demo>
+            --fixture
+            ${CMAKE_SOURCE_DIR}/frontend/public/data/demo_portfolio_v2.json
+    )
+endif()

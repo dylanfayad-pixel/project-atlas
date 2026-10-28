@@ -52,3 +52,8 @@ __pycache__/
 
 # Generated portfolio analytics
 /atlas_portfolio.json
+
+# Generated portfolio demonstration outputs.
+# Versioned frontend fixtures remain tracked separately.
+/atlas_portfolio.json
+/atlas_portfolio_v2.json

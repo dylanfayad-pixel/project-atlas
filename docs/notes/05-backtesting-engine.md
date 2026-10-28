@@ -86,3 +86,29 @@ Preventing it is essential for credible backtesting.
 - `src/backtest_runner.cpp`
 - `src/portfolio_simulator.cpp`
 - `tests/test_backtest_runner.cpp`
+
+
+## Phase 3 — Execution Cost Update
+
+The original Phase 2 portfolio demonstration assumed
+zero commissions and zero slippage.
+
+Phase 3 introduced configurable execution costs:
+
+- Fixed commission per successfully executed fill.
+- Adverse slippage measured in basis points.
+- Commission-aware position sizing.
+- Per-trade commission and slippage records.
+- Aggregate execution-cost reporting.
+
+The zero-cost configuration remains available for
+backward compatibility and baseline comparisons.
+
+Cost-aware simulations use the same next-bar
+opening-price execution timing.
+
+These features improve the realism of historical
+simulations but do not reproduce real exchange fills.
+
+See [Execution Costs](13-execution-costs.md) and
+[Phase 3 Engineering](../phase3-execution.md).

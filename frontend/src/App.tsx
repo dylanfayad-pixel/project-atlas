@@ -63,7 +63,7 @@ function App() {
   useEffect(() => {
     const controller = new AbortController()
 
-    fetch('/data/demo_portfolio.json', {
+    fetch('/data/demo_portfolio_v2.json', {
       signal: controller.signal,
     })
       .then((response) => {
@@ -138,7 +138,7 @@ function App() {
         )}
 
         <footer>
-          <span>PROJECT ATLAS - PHASE 2 DEVELOPMENT</span>
+          <span>PROJECT ATLAS - PHASE 3 RESEARCH BUILD</span>
           <span>
             <Code2 size={14} />
             C++20 + REACT + TYPESCRIPT

@@ -13,7 +13,7 @@ Project Atlas is an educational systems-engineering project for validating marke
 | Phase 0 — Foundation | Complete | C++20, CMake, Git, initial CI |
 | Phase 1 — Market data | Complete | OHLCV parsing, validation, chronology checks, benchmarks |
 | Phase 2 — Historical research | Complete | Replay, strategies, portfolio simulation, metrics, JSON export, dashboard |
-| Phase 3 — Execution realism | Planned / partial foundations exist | Fees, slippage, more realistic fill behavior |
+| Phase 3 — Execution realism | In progress — release verification | Configurable commissions, adverse slippage, cost-aware accounting, JSON v2, dashboard analytics |
 | Phase 4 — Portfolio and risk | Planned / partial foundations exist | Broader risk controls and portfolio capabilities |
 | Phase 5 — Research and performance | Planned | More datasets, profiling, robust strategy evaluation |
 | Phase 6 — Public release | Planned | Backend API, deployment, release hardening |
@@ -46,6 +46,22 @@ Project Atlas is an educational systems-engineering project for validating marke
 - Lazy-loaded charts to reduce the initial JavaScript bundle.
 
 The website currently reads static demonstration fixtures. A public API that accepts user-selected backtest configurations has not yet been implemented.
+
+### Execution realism — Phase 3
+
+- Configurable fixed commission per executed fill.
+- Configurable adverse slippage in basis points.
+- Commission-aware position sizing and cash accounting.
+- Per-fill and aggregate execution-cost reporting.
+- Versioned portfolio JSON schemas v1 and v2.
+- Validated execution-cost analytics in Atlas Terminal.
+- C++ to JSON v2 integration verification.
+- Synthetic cost-aware demonstration using $5 per fill and 10 bps slippage.
+
+The execution model remains simplified. It does not model order
+books, partial fills, market impact, exchange fees, or real orders.
+
+See [Phase 3 engineering notes](docs/phase3-execution.md).
 
 ## Architecture
 
@@ -164,7 +180,7 @@ See [performance documentation](docs/performance.md).
 
 ## Learning Notes
 
-The [Project Atlas learning guide](docs/notes/README.md) contains 12 topic guides covering project architecture, C++, market data, strategies, backtesting, accounting, frontend development, JSON integration, testing, performance, interviews, and project demonstrations.
+The [Project Atlas learning guide](docs/notes/README.md) contains 13 topic guides covering project architecture, C++, market data, strategies, backtesting, accounting, frontend development, JSON integration, testing, performance, interviews, and project demonstrations.
 
 ## Engineering Documentation
 
@@ -178,7 +194,7 @@ The [Project Atlas learning guide](docs/notes/README.md) contains 12 topic guide
 
 - The frontend uses static demonstration fixtures rather than a live backtesting API.
 - Data and strategy demonstrations are educational and use synthetic input.
-- Execution currently assumes simplified next-bar fills, fractional shares, and no fees or slippage.
+- Execution uses simplified next-bar fills, fractional shares, configurable fixed commissions, and adverse slippage. Order-book liquidity and market impact are not modeled.
 - The simulator is not a production brokerage or order-routing system.
 - Financial calculations use floating-point values; they are not exact decimal monetary accounting.
 - There is no claim of an independently validated profitable strategy.

@@ -1,280 +1,25 @@
-# Project Atlas — Architecture
+# Project Atlas — System Architecture
 
-## Current Scope
+## Overview
 
-Project Atlas currently implements a C++20 historical
-market-data ingestion and validation library.
+Project Atlas is a C++20 quantitative research and
+historical backtesting engine with a React and TypeScript
+frontend called Atlas Terminal.
 
-The backtesting engine, execution simulator, portfolio
-accounting, and risk engine are future development phases.
+The system separates market-data processing, strategy
+evaluation, simulated execution, performance analysis,
+serialization, and visualization.
 
-The `atlas` executable currently provides a startup check.
+The current website uses static demonstration fixtures.
+It does not yet provide a live HTTP backtesting API.
 
-## Data Processing Pipeline
+## System Pipeline
 
+```text
 Historical OHLCV CSV
-    |
-    v
-CsvReader::read(filepath, capacity_hint)
-    |
-    v
-Strict six-column parsing
-    |
-    v
-Numeric conversion using std::from_chars
-    |
-    v
-Calendar and chronological validation
-    |
-    v
-OHLCV relationship validation
-    |
-    v
-std::vector<MarketBar>
-
-## Core Components
-
-### MarketBar
-
-Defined in `include/atlas/market_bar.hpp`.
-
-Stores a date string, four double-precision OHLC prices,
-and unsigned 64-bit volume.
-
-### MarketBar Validator
-
-Defined in `include/atlas/market_bar_validator.hpp`.
-
-Rejects non-finite or nonpositive prices and inconsistent
-OHLC relationships. Zero volume is permitted.
-
-### Date Validator
-
-Defined in `include/atlas/date_validator.hpp`.
-
-Uses C++20 calendar types to validate YYYY-MM-DD dates.
-
-This is calendar validation, not exchange-session validation.
-
-### CSV Reader
-
-Defined in `include/atlas/csv_reader.hpp` and
-`src/csv_reader.cpp`.
-
-Responsibilities:
-
-- Strict six-column CSV ingestion
-- LF and CRLF compatibility
-- Numeric conversion
-- Calendar validation
-- Chronological ordering
-- Duplicate timestamp rejection
-- OHLCV validation
-- Line-numbered diagnostic exceptions
-
-## Performance-Oriented Design
-
-### Fixed-Size CSV Splitting
-
-The parser uses:
-
-    std::array<std::string_view, 6>
-
-This replaces a dynamically allocated vector of field views.
-
-The schema is fixed at six fields, allowing the parser
-to avoid a separate dynamic field-buffer allocation
-for each row.
-
-### Optional Capacity Reservation
-
-CsvReader::read accepts an optional capacity_hint.
-
-When greater than zero, the reader calls vector::reserve
-before appending validated records.
-
-The default remains zero for backward compatibility.
-
-### Performance Evidence
-
-The fixed-size splitter reduced median ingestion time
-by 40.05% in the documented 100,000-record experiment.
-
-Capacity reservation reduced median ingestion time
-by 4.69% in an earlier experiment.
-
-These are separate experiments and their percentages
-must not be added together.
-
-See performance.md for methodology and limitations.
-
-## Build Architecture
-
-- atlas_core: reusable static C++ library
-- atlas: startup executable
-- CTest: seven automated test suites
-- Benchmarks: separate performance executables
-- profile_csv: optional profiling workload
-
-Enable profiling with:
-
-    -DATLAS_BUILD_PROFILING=ON
-
-## Current Limitations
-
-- No backtesting or strategy execution
-- No order execution simulation
-- No portfolio or risk engine
-- No streaming CSV ingestion
-- No quoted CSV fields
-- No intraday timestamps or timezones
-- No exchange trading-calendar validation
-- No fixed-point monetary representation
-- Entire CSV datasets are materialized in memory
-
-## Future Architecture
-
-Market data -> historical event replay -> strategy
-signals -> simulated execution -> portfolio and
-risk accounting -> analytics.
-
-Future phases must address look-ahead bias, execution
-timing, transaction costs, slippage, and reproducibility.
-
----
-
-## Phase 2 — Historical Strategy Evaluation
-
-### Current Signal Processing Pipeline
-
-```text
-Validated OHLCV MarketBar records
-              |
-              v
-       HistoricalReplay
-              |
-              v
-        Strategy::on_bar
-              |
-       +------+------+
-       |             |
-       v             v
- BuyAndHold      SMA Crossover
-       |             |
-       +------+------+
-              |
-              v
-         SignalEvent
-              |
-              v
-        BacktestRunner
-              |
-              v
-        SignalExporter
-              |
-              v
-      atlas_signals.csv
-```
-
-The diagram represents logical responsibilities. The
-BacktestRunner orchestrates replay and strategy evaluation;
-the strategy implementations are alternatives.
-
-### HistoricalReplay
-
-Files:
-
-- `include/atlas/historical_replay.hpp`
-- `src/historical_replay.cpp`
-
-Delivers market bars sequentially using a callback.
-
-The caller is responsible for supplying validated,
-chronologically ordered market data.
-
-### Strategy Interface
-
-File: `include/atlas/strategy.hpp`
-
-Defines a reusable strategy contract:
-
-- `reset()` restores initial strategy state.
-- `on_bar(const MarketBar&)` processes the current bar.
-- `Signal` represents Buy, Sell, or Hold.
-
-The interface provides only the current market bar.
-However, it cannot prevent a strategy from accessing
-future data through unrelated external references.
-
-### Strategy Implementations
-
-`BuyAndHoldStrategy` emits one Buy signal and then Hold.
-
-`SmaCrossoverStrategy` compares rolling fast and slow
-simple moving averages.
-
-The first fully populated window establishes the initial
-relationship without generating a trade.
-
-Subsequent changes in that relationship generate
-Buy or Sell signals.
-
-### BacktestRunner
-
-Files:
-
-- `include/atlas/backtest_runner.hpp`
-- `src/backtest_runner.cpp`
-
-Resets the strategy, coordinates replay, and records
-one SignalEvent per processed market bar.
-
-Each SignalEvent contains:
-
-- Zero-based market bar index
-- Timestamp
-- Buy, Sell, or Hold signal
-
-### SignalExporter
-
-Files:
-
-- `include/atlas/signal_exporter.hpp`
-- `src/signal_exporter.cpp`
-
-Exports signal events using the CSV schema:
-
-    index,timestamp,signal
-
-The exporter checks file opening and writing errors.
-
-### Demonstration Executable
-
-`atlas_backtest_demo` processes 12 synthetic price records
-using a 3/5 SMA crossover strategy.
-
-The demonstration produces one Buy and one Sell signal
-and writes `atlas_signals.csv`.
-
-### Current Architectural Boundary
-
-Phase 2 currently evaluates strategies and records
-signals. It does not simulate order execution, track
-positions, or calculate financial performance.
-
-Those capabilities require explicit execution timing,
-transaction-cost assumptions, portfolio accounting,
-and additional correctness tests.
-
-## Portfolio Simulation and Atlas Terminal
-
-Project Atlas now extends historical strategy evaluation with
-simplified portfolio simulation and a React dashboard.
-
-### Current Processing Pipeline
-
-```text
-Validated OHLCV market bars
+        |
+        v
+CsvReader + MarketBar Validation
         |
         v
 HistoricalReplay
@@ -283,73 +28,203 @@ HistoricalReplay
 Strategy / BacktestRunner
         |
         v
-BUY / SELL / HOLD signals
+BUY / SELL / HOLD Signals
         |
         v
 PortfolioSimulator
         |
-        v
-Cash, shares, fills, equity curve
+        +--> Commission and Slippage
         |
         v
-PerformanceMetrics
+Cash, Shares, Executed Fills, Equity
+        |
+        v
+PerformanceAnalyzer
         |
         v
 PortfolioJsonExporter
         |
         v
-Static demonstration JSON
+Versioned JSON (v1 / v2)
         |
         v
 React + TypeScript Atlas Terminal
 ```
 
-### Portfolio Simulator
+The pipeline describes logical processing responsibilities.
+The current frontend reads exported fixtures rather than
+calling the C++ engine through an HTTP service.
 
-Implementation: `src/portfolio_simulator.cpp`
+## Market Data Layer
 
-The simulator processes strategy decisions and models
-simplified long-only execution at the next bar's opening
-price. It tracks cash, shares, simulated fills, and equity.
+### MarketBar
 
-Current assumptions include fractional shares, zero
-commissions, zero slippage, and no leverage.
+`include/atlas/market_bar.hpp`
 
-These are research simplifications, not production
-execution guarantees.
+Represents OHLCV observations using double-precision
+prices and unsigned volume.
 
-### Performance Metrics
+### CsvReader
 
-Implementation: `src/performance_metrics.cpp`
+`src/csv_reader.cpp`
 
-The performance module calculates net profit, total
-return, and maximum drawdown from portfolio results.
+Responsibilities:
 
-### JSON Boundary
+- Strict six-column CSV ingestion.
+- Numeric conversion using `std::from_chars`.
+- Date and chronological validation.
+- OHLCV relationship validation.
+- LF and CRLF compatibility.
+- Diagnostic exceptions.
 
-Implementation: `src/portfolio_json_exporter.cpp`
+The reader currently materializes complete datasets
+in memory and does not implement streaming ingestion.
 
-The C++ engine exports a versioned JSON document.
+## Historical Strategy Evaluation
 
-The frontend validates this document before displaying
-financial information.
+### HistoricalReplay
+
+Delivers market bars sequentially.
+
+### Strategy Interface
+
+Defines reusable strategy behavior and reset semantics.
+
+Current strategies include:
+
+- Buy-and-Hold.
+- SMA crossover.
+
+### BacktestRunner
+
+Coordinates strategy evaluation and produces
+historical BUY, SELL, and HOLD signals.
+
+Signals are distinct from executed trades.
+
+## Portfolio Execution
+
+Implementation:
+
+`src/portfolio_simulator.cpp`
+
+The simulator supports:
+
+- Long-only positions.
+- Fractional shares.
+- No leverage.
+- Next-bar opening-price fills.
+- Configurable fixed commissions.
+- Configurable adverse slippage.
+- Cash and position accounting.
+- Equity observations.
+- Per-fill execution-cost records.
+
+The simulator does not model order books, partial fills,
+market impact, latency, or actual exchange execution.
+
+## Financial Metrics
+
+Implementation:
+
+`src/performance_metrics.cpp`
+
+Calculates:
+
+- Net profit.
+- Total percentage return.
+- Maximum drawdown.
+
+The simulator additionally records:
+
+- Total commission.
+- Total slippage cost.
+
+Total recorded execution costs are not necessarily
+equal to the difference between cost-aware and
+zero-cost final equity.
+
+## JSON Serialization
+
+Implementation:
+
+`src/portfolio_json_exporter.cpp`
+
+Schema v1 preserves the legacy portfolio contract.
+
+Schema v2 adds aggregate and per-fill execution costs.
+
+Both versions are supported by the frontend parser.
 
 See [JSON contract](api.md).
 
-### Frontend Architecture
+## Atlas Terminal
 
-The frontend uses React, TypeScript, Vite, and Recharts.
+Technology:
 
-Its components are organized under
-`frontend/src/components/`.
+- React
+- TypeScript
+- Vite
+- Recharts
+- Vitest
+- ESLint
 
-The current application loads static demonstration
-fixtures. There is no live backtesting API yet.
+The dashboard displays historical demonstration data,
+portfolio metrics, equity curves, simulated fills,
+and schema v2 execution costs.
 
-### Architectural Limitations
+The current frontend is not connected to a live
+C++ HTTP backend.
 
-The simulator does not model realistic commissions,
-slippage, order-book liquidity, or market impact.
+## Testing and Continuous Integration
 
-The website is a local research interface rather
-than a publicly deployed trading service.
+CMake registers 20 CTest suites.
+
+The tests cover market-data validation, historical
+replay, strategy behavior, portfolio accounting,
+JSON serialization, and integration.
+
+GitHub Actions builds and tests Debug and Release
+configurations on Ubuntu.
+
+Frontend checks include Vitest, TypeScript compilation,
+ESLint, and production builds.
+
+See [testing documentation](testing.md).
+
+## Performance Engineering
+
+The repository includes synthetic CSV benchmarks,
+capacity-reservation experiments, fixed-size CSV
+splitting, and profiling investigations.
+
+Historical measurements and their limitations are
+documented in [performance.md](performance.md).
+
+Performance results are workload- and environment-specific.
+
+## Future Architecture
+
+Planned capabilities include:
+
+- Broader portfolio and risk controls.
+- Real historical market-data integration.
+- Out-of-sample strategy evaluation.
+- Additional execution realism.
+- Secure backend API.
+- Public Atlas Terminal deployment.
+- Larger-scale profiling and performance engineering.
+
+## Current Limitations
+
+- Synthetic demonstration data.
+- No public HTTP backtesting API.
+- No live market feeds or real orders.
+- No market-impact or order-book simulation.
+- No exact fixed-point monetary accounting.
+- No comprehensive corporate-action handling.
+- No full fuzz or adversarial testing.
+- No demonstrated reliably profitable strategy.
+
+Atlas is educational research software, not a
+production brokerage or trading platform.

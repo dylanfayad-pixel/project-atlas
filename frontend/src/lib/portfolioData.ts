@@ -16,8 +16,8 @@ export type EquityPoint = {
   equity: number
 }
 
-export type PortfolioData = {
-  schema_version: 1
+// Schema v1 remains supported for existing portfolio fixtures.
+type PortfolioBase = {
   strategy: string
   initial_capital: number
   final_equity: number
@@ -25,8 +25,27 @@ export type PortfolioData = {
   total_return_pct: number
   maximum_drawdown_pct: number
   equity_curve: EquityPoint[]
+}
+
+export type PortfolioV1 = PortfolioBase & {
+  schema_version: 1
   trades: PortfolioTrade[]
 }
+
+export type PortfolioV2Trade = PortfolioTrade & {
+  commission_paid: number
+  slippage_cost: number
+}
+
+export type PortfolioV2 = PortfolioBase & {
+  schema_version: 2
+  total_commission: number
+  total_slippage_cost: number
+  total_execution_cost: number
+  trades: PortfolioV2Trade[]
+}
+
+export type PortfolioData = PortfolioV1 | PortfolioV2
 
 // Narrow unknown JSON objects before reading their fields.
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -80,9 +99,12 @@ export function parsePortfolioData(value: unknown): PortfolioData {
     throw new Error('Invalid portfolio response')
   }
 
-  if (value.schema_version !== 1) {
+  if (value.schema_version !== 1 &&
+      value.schema_version !== 2) {
     throw new Error('Unsupported portfolio schema version')
   }
+
+  const schemaVersion = value.schema_version
 
   if (typeof value.strategy !== 'string' ||
       value.strategy.trim().length === 0) {
@@ -133,6 +155,58 @@ export function parsePortfolioData(value: unknown): PortfolioData {
 
   if (!value.trades.every(isPortfolioTrade)) {
     throw new Error('Invalid portfolio trade')
+  }
+
+  if (schemaVersion === 2) {
+    const commission = value.total_commission
+    const slippage = value.total_slippage_cost
+    const total = value.total_execution_cost
+
+    if (!isFiniteNumber(commission) ||
+        !isFiniteNumber(slippage) ||
+        !isFiniteNumber(total) ||
+        commission < 0 ||
+        slippage < 0 ||
+        total < 0) {
+      throw new Error('Invalid portfolio execution costs')
+    }
+
+    let tradeCommission = 0
+    let tradeSlippage = 0
+
+    for (const trade of value.trades) {
+      // A v2 trade must explicitly contain both cost fields.
+      // The 'in' checks safely narrow the legacy trade type.
+      if (!('commission_paid' in trade) ||
+          !('slippage_cost' in trade)) {
+        throw new Error('Missing trade execution costs')
+      }
+
+      const commissionPaid = trade.commission_paid
+      const slippageCost = trade.slippage_cost
+
+      if (!isFiniteNumber(commissionPaid) ||
+          !isFiniteNumber(slippageCost) ||
+          commissionPaid < 0 ||
+          slippageCost < 0) {
+        throw new Error('Invalid trade execution costs')
+      }
+
+      tradeCommission += commissionPaid
+      tradeSlippage += slippageCost
+    }
+
+    const matches = (actual: number, expected: number) =>
+      Number.isFinite(actual) &&
+      Number.isFinite(expected) &&
+      Math.abs(actual - expected) <=
+        1e-7 * Math.max(1, Math.abs(actual), Math.abs(expected))
+
+    if (!matches(commission, tradeCommission) ||
+        !matches(slippage, tradeSlippage) ||
+        !matches(total, commission + slippage)) {
+      throw new Error('Execution cost totals disagree')
+    }
   }
 
   // Ensure observations are sequential and trades refer

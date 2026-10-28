@@ -9,9 +9,29 @@ JSON file. A live HTTP backend API is not implemented yet.
 
 ## Schema Version
 
-The current portfolio JSON contract uses:
+The portfolio exporter supports two schema versions:
 
-`schema_version: 1`
+- `schema_version: 1` — legacy portfolio results.
+- `schema_version: 2` — portfolio results with execution costs.
+
+The frontend accepts both versions. The active cost-aware
+dashboard fixture uses schema v2.
+
+Schema v2 adds these top-level fields:
+
+| Field | Meaning |
+|---|---|
+| `total_commission` | Sum of commissions on executed fills |
+| `total_slippage_cost` | Sum of adverse execution-price costs |
+| `total_execution_cost` | Commission plus slippage |
+
+Each v2 trade also includes `commission_paid` and
+`slippage_cost`.
+
+The exporter checks that aggregate costs agree with
+the recorded trade costs.
+
+See [Phase 3 execution engineering](phase3-execution.md).
 
 ## Top-Level Fields
 
@@ -85,6 +105,22 @@ python3 scripts/verify_portfolio_json.py \
 
 The integration script executes the C++ demonstration
 and validates its JSON output.
+
+## Schema v2 Integration Verification
+
+From the repository root:
+
+```bash
+python3 scripts/verify_portfolio_json_v2.py \
+  --executable build-release/atlas_portfolio_demo
+```
+
+The verifier executes the real C++ demonstration, parses
+its JSON, reconciles financial values, and checks the
+committed frontend fixture.
+
+The website currently reads static JSON. There is no
+public HTTP backtesting endpoint.
 
 ## Future HTTP API
 

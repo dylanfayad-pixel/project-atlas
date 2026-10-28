@@ -264,3 +264,104 @@ demonstration fixture rather than a live API.
 - Run frontend tests, lint, and production builds.
 - Keep documentation synchronized with implementation.
 - Avoid committing generated binaries or local datasets.
+
+---
+
+## Phase 3 — Cost-Aware Portfolio Development
+
+Phase 3 extends the original portfolio demonstration
+with configurable execution costs.
+
+### Generate Cost-Aware Results
+
+From the repository root:
+
+```bash
+./build-release/atlas_portfolio_demo --cost-demo
+```
+
+The command generates:
+
+`atlas_portfolio_v2.json`
+
+The frontend uses the versioned fixture:
+
+`frontend/public/data/demo_portfolio_v2.json`
+
+### Verify JSON Integration
+
+```bash
+python3 scripts/verify_portfolio_json_v2.py \
+  --executable build-release/atlas_portfolio_demo
+```
+
+The verifier runs the real C++ demonstration,
+parses its JSON output, checks financial invariants,
+and compares it with the frontend fixture.
+
+### Run C++ Regression Tests
+
+```bash
+ctest --test-dir build --output-on-failure
+ctest --test-dir build-release --output-on-failure
+```
+
+Phase 3 currently registers 20 CTest suites.
+
+### Run Frontend Checks
+
+```bash
+cd frontend
+npm run test
+npx tsc --noEmit -p tsconfig.app.json
+npm run lint
+npm run build
+```
+
+### Mac Terminal and Kali Development
+
+The project is developed inside Kali Linux running
+through VirtualBox on macOS.
+
+The Mac connects to Kali using SSH:
+
+```bash
+ssh -p 2222 arisxe@localhost
+```
+
+Vite can be started inside Kali using:
+
+```bash
+cd ~/projects/project-atlas/frontend
+npm run dev -- --host 0.0.0.0
+```
+
+If necessary, create an SSH tunnel from a separate
+Mac Terminal window:
+
+```bash
+ssh -N -L 5173:127.0.0.1:5173 -p 2222 arisxe@localhost
+```
+
+Then open `http://127.0.0.1:5173/` on the Mac.
+
+### Engineering Standards
+
+- Keep C++20 and strict TypeScript checking.
+- Validate financial arithmetic and JSON contracts.
+- Preserve schema v1 compatibility.
+- Keep generated root-level JSON files out of Git.
+- Commit intentional frontend fixtures.
+- Run Debug and Release regression tests.
+- Keep learning notes and documentation synchronized.
+- Verify GitHub Actions after publishing.
+
+### Important Limitations
+
+The simulator uses synthetic data and simplified
+execution assumptions.
+
+The frontend does not yet submit live backtest
+requests to the C++ engine.
+
+No real orders are executed.

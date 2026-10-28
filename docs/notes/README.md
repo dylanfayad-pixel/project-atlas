@@ -23,6 +23,8 @@ demonstrate the project confidently.
 | [11 — Interviews](11-interview-preparation.md) | Technical interview preparation |
 | [12 — Demo](12-project-demonstration.md) | How to demonstrate Atlas |
 
+| [13 — Execution Costs](13-execution-costs.md) | Commission, slippage and financial realism |
+
 ## How to Use These Notes
 
 1. Read the simple explanation first.
@@ -36,15 +38,16 @@ demonstrate the project confidently.
 - Phase 0: Complete
 - Phase 1: Complete
 - Phase 2: Complete
-- C++: 17 CTest suites passed locally in Debug and Release
-- Frontend: 10 Vitest tests passed locally
+- Phase 3: In progress
+- C++: 20 CTest suites passed locally in Debug and Release
+- Frontend: 15 Vitest tests passed locally
 - GitHub CI verification for this milestone: Pending
 
 ## Important Limitations
 
 Atlas is an educational research project. Its current
 portfolio simulation uses synthetic data, fractional shares,
-next-bar opening-price fills, and zero fees or slippage.
+next-bar opening-price fills, and configurable commission and adverse slippage.
 
 The current website loads exported demonstration data.
 It does not yet submit backtests to a live backend API.

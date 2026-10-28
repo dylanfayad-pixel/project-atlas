@@ -16,6 +16,11 @@ struct SimulatedTrade {
     Signal side;
     double price;
     double quantity;
+
+    // Costs charged for this simulated fill.
+    // Default values preserve existing aggregate initializers.
+    double commission_paid = 0.0;
+    double slippage_cost = 0.0;
 };
 
 // Portfolio value recorded after each historical bar.
@@ -33,8 +38,19 @@ struct PortfolioResult {
     double final_equity;
     double total_return_pct;
 
+    // Aggregated costs across successfully executed fills.
+    double total_commission = 0.0;
+    double total_slippage_cost = 0.0;
+
     std::vector<SimulatedTrade> trades;
     std::vector<EquityPoint> equity_curve;
+};
+
+// Configurable simulated execution costs.
+// Defaults preserve the original zero-cost model.
+struct ExecutionConfig {
+    double commission_per_trade = 0.0;
+    double slippage_bps = 0.0;
 };
 
 class PortfolioSimulator {
@@ -46,13 +62,14 @@ public:
     // - Long-only trading
     // - Fractional shares
     // - No leverage
-    // - Zero fees and slippage
+    // - Configurable fees and adverse slippage
     // - All available cash invested on BUY
     // - Entire position liquidated on SELL
     static PortfolioResult run(
         const std::vector<MarketBar>& bars,
         const std::vector<SignalEvent>& signals,
-        double initial_capital = 10000.0
+        double initial_capital = 10000.0,
+        const ExecutionConfig& config = {}
     );
 };
 

@@ -2,7 +2,7 @@
 
 ## Automated Test Suites
 
-Project Atlas currently registers seven CTest suites.
+Phase 1 originally registered seven CTest suites.
 
 | Test | Coverage |
 |---|---|
@@ -32,7 +32,7 @@ and cleaned up using RAII. This helper is Linux/POSIX-specific.
     cmake --build build-release --parallel 2
     ctest --test-dir build-release --parallel 2 --output-on-failure
 
-The latest reported local verification passed all 17 CTest suites in both Debug and Release. These results must be reverified after changes.
+The Phase 2 milestone previously passed 17 CTest suites. Phase 3 now registers 20 suites, verified locally in Debug and Release.
 
 ## Continuous Integration
 
@@ -69,7 +69,7 @@ Passing tests does not imply production readiness.
 
 ## Phase 2 — Automated Test Coverage
 
-The project now registers 12 CTest suites.
+Phase 2 expanded the project to 12 CTest suites.
 
 Five Phase 2 suites extend the seven Phase 1 suites.
 
@@ -114,7 +114,7 @@ All 12 suites passed locally in both configurations.
 
 ### Current Testing Limitations
 
-The existing tests do not establish:
+The historical Phase 2 tests alone did not establish:
 
 - Complete prevention of look-ahead bias
 - Correctness of order fills or portfolio accounting
@@ -177,3 +177,32 @@ The current tests do not establish production readiness.
 Further work includes broader accounting invariants,
 larger datasets, randomized testing, security testing,
 and realistic execution-model verification.
+
+
+## Phase 3 — Execution Cost Verification
+
+Phase 3 adds three CTest suites:
+
+| Test | Coverage |
+|---|---|
+| `execution_costs` | Commissions, slippage, accounting and invalid configurations |
+| `portfolio_json_v2` | Versioned cost serialization and validation |
+| `portfolio_json_v2_integration` | Real C++ JSON generation and frontend fixture reconciliation |
+
+The project now registers **20 CTest suites**.
+
+All 20 passed locally in both Debug and Release during
+Phase 3 release preparation.
+
+The frontend also passed 15 Vitest tests, TypeScript
+checking, ESLint, and a Vite production build.
+
+The JSON v2 integration test runs the demonstration in
+a temporary directory and verifies the generated output
+against the committed frontend fixture.
+
+These tests are not a substitute for production financial
+validation, adversarial testing, or live-market execution.
+
+GitHub Actions verification for the Phase 3 release
+remains pending until the milestone is pushed.

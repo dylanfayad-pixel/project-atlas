@@ -7,11 +7,28 @@
 #include "atlas/sma_crossover_strategy.hpp"
 
 #include <array>
+#include <string>
 #include <iomanip>
 #include <iostream>
 #include <vector>
 
-int main() {
+int main(int argc, char* argv[]) {
+    // Preserve the original demonstration unless cost mode
+    // is explicitly requested.
+    if (argc > 2 ||
+        (argc == 2 && std::string(argv[1]) != "--cost-demo")) {
+        std::cerr << "Usage: atlas_portfolio_demo [--cost-demo]\n";
+        return 1;
+    }
+
+    const bool cost_demo = argc == 2;
+    atlas::ExecutionConfig config{};
+
+    if (cost_demo) {
+        config.commission_per_trade = 5.0;
+        config.slippage_bps = 10.0;
+    }
+
     // Synthetic closing prices from the existing SMA demo.
     constexpr std::array<double, 12> prices{
         10, 9, 8, 7, 6, 7, 8, 9, 10, 8, 6, 4
@@ -45,7 +62,8 @@ int main() {
     const auto result = atlas::PortfolioSimulator::run(
         bars,
         signals,
-        10000.0
+        10000.0,
+        config
     );
 
     // Calculate portfolio performance from the equity curve.
@@ -91,14 +109,26 @@ int main() {
     std::cout << "Maximum drawdown: "
               << metrics.maximum_drawdown_pct << "%\n";
 
+    if (cost_demo) {
+        std::cout << "Total commission: $"
+                  << result.total_commission << '\n';
+        std::cout << "Total slippage: $"
+                  << result.total_slippage_cost << '\n';
+    }
+
     // Export calculated results for the Atlas Terminal frontend.
     const auto json = atlas::PortfolioJsonExporter::serialize(
         result,
         metrics,
-        "SMA Crossover (3/5)"
+        "SMA Crossover (3/5)",
+        cost_demo ? 2 : 1
     );
 
-    std::ofstream output("atlas_portfolio.json");
+    const std::string output_path = cost_demo
+        ? "atlas_portfolio_v2.json"
+        : "atlas_portfolio.json";
+
+    std::ofstream output(output_path);
 
     if (!output.is_open()) {
         throw std::runtime_error("Cannot create portfolio JSON");
@@ -111,7 +141,8 @@ int main() {
         throw std::runtime_error("Failed to write portfolio JSON");
     }
 
-    std::cout << "\nPortfolio JSON exported to atlas_portfolio.json\n";
+    std::cout << "\nPortfolio JSON exported to "
+              << output_path << '\n';
 
     std::cout << "\nSynthetic data only.\n";
     std::cout << "No real orders were executed.\n";

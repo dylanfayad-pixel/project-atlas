@@ -110,3 +110,62 @@ describe('Portfolio JSON validation', () => {
     expect(() => parsePortfolioData(data)).toThrow()
   })
 })
+
+// Schema v2 must preserve the legacy contract while validating
+// the new per-fill and aggregate execution costs.
+describe('Portfolio JSON schema v2', () => {
+  function validV2() {
+    const legacy = validPortfolio()
+
+    return {
+      ...legacy,
+      schema_version: 2,
+      total_commission: 4,
+      total_slippage_cost: 1,
+      total_execution_cost: 5,
+      trades: legacy.trades.map((trade) => ({
+        ...trade,
+        commission_paid: 4,
+        slippage_cost: 1,
+      })),
+    }
+  }
+
+  it('accepts a valid cost-aware portfolio', () => {
+    const result = parsePortfolioData(validV2())
+
+    expect(result.schema_version).toBe(2)
+
+    if (result.schema_version === 2) {
+      expect(result.total_execution_cost).toBe(5)
+    }
+  })
+
+  it('rejects mismatched aggregate costs', () => {
+    const data = validV2()
+    data.total_execution_cost = 100
+
+    expect(() => parsePortfolioData(data)).toThrow()
+  })
+
+  it('rejects negative trade commissions', () => {
+    const data = validV2()
+    data.trades[0].commission_paid = -1
+
+    expect(() => parsePortfolioData(data)).toThrow()
+  })
+
+  it('rejects non-finite slippage costs', () => {
+    const data = validV2()
+    data.trades[0].slippage_cost = Number.NaN
+
+    expect(() => parsePortfolioData(data)).toThrow()
+  })
+
+  it('rejects inconsistent trade cost totals', () => {
+    const data = validV2()
+    data.trades[0].commission_paid = 50
+
+    expect(() => parsePortfolioData(data)).toThrow()
+  })
+})
