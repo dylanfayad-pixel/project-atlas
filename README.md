@@ -13,7 +13,7 @@ Project Atlas is an educational systems-engineering project for validating marke
 | Phase 0 — Foundation | Complete | C++20, CMake, Git, initial CI |
 | Phase 1 — Market data | Complete | OHLCV parsing, validation, chronology checks, benchmarks |
 | Phase 2 — Historical research | Complete | Replay, strategies, portfolio simulation, metrics, JSON export, dashboard |
-| Phase 3 — Execution realism | In progress — release verification | Configurable commissions, adverse slippage, cost-aware accounting, JSON v2, dashboard analytics |
+| Phase 3 — Execution realism | Complete | Configurable commissions, adverse slippage, cost-aware accounting, JSON v2, dashboard analytics |
 | Phase 4 — Portfolio and risk | Planned / partial foundations exist | Broader risk controls and portfolio capabilities |
 | Phase 5 — Research and performance | Planned | More datasets, profiling, robust strategy evaluation |
 | Phase 6 — Public release | Planned | Backend API, deployment, release hardening |

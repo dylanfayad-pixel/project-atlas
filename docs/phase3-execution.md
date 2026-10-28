@@ -128,5 +128,6 @@ These are rounded presentation values, not exact test fixtures.
 - No public user-configurable backtesting API.
 - Further adversarial and overflow testing is needed.
 
-Phase 3 is not considered released until documentation,
-local verification, and GitHub CI have been reviewed.
+Phase 3 implementation was published and verified through
+GitHub Actions. Debug, Release, and frontend jobs passed.
+This milestone does not establish production trading readiness.
