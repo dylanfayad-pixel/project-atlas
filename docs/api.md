@@ -141,6 +141,24 @@ risk-control configuration or exposure history.
 
 See [Phase 4.2 risk controls](phase4-risk-controls.md).
 
+## Phase 4.3 Drawdown Configuration
+
+The C++ `ExecutionConfig` supports:
+
+- `max_drawdown_fraction`
+- `liquidate_on_drawdown`
+
+The drawdown threshold is a fraction greater than zero
+and at most 1.0; 1.0 disables the circuit breaker.
+
+These settings are not HTTP API parameters.
+
+The current JSON v1/v2 contracts remain unchanged.
+They do not expose circuit-breaker activation events,
+breach timestamps, or liquidation reasons.
+
+See [drawdown controls](phase4-drawdown-controls.md).
+
 ## Future HTTP API
 
 A future backend will accept user-selected strategy

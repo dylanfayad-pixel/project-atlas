@@ -580,3 +580,24 @@ if(BUILD_TESTING)
         COMMAND test_exposure_limits
     )
 endif()
+
+
+# Phase 4.3: verify close-observed drawdown safeguards.
+if(BUILD_TESTING)
+    add_executable(test_drawdown_controls
+        tests/test_drawdown_controls.cpp
+    )
+
+    target_link_libraries(test_drawdown_controls
+        PRIVATE atlas_core
+    )
+
+    target_compile_options(test_drawdown_controls PRIVATE
+        -Wall -Wextra -Wpedantic
+    )
+
+    add_test(
+        NAME drawdown_controls
+        COMMAND test_drawdown_controls
+    )
+endif()

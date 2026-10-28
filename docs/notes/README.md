@@ -29,6 +29,8 @@ demonstrate the project confidently.
 
 | [15 — Position Sizing and Exposure](15-position-sizing-and-exposure.md) | Entry allocation, exposure limits and cash accounting |
 
+| [16 — Drawdown Circuit Breakers](16-drawdown-circuit-breakers.md) | High-water marks, trading halts, liquidation and gap risk |
+
 ## How to Use These Notes
 
 1. Read the simple explanation first.
@@ -44,7 +46,7 @@ demonstrate the project confidently.
 - Phase 2: Complete
 - Phase 3: Complete
 - Phase 4: In progress
-- C++: 23 CTest suites passed locally in Debug and Release
+- C++: 24 CTest suites passed locally in Debug and Release
 - Frontend: 15 Vitest tests passed locally
 - GitHub CI verification for this milestone: Pending
 

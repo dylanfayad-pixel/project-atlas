@@ -468,7 +468,43 @@ These controls are currently C++ configuration options.
 
 They are not yet exposed through Atlas Terminal.
 
-Continuous exposure enforcement, drawdown safeguards,
-and live brokerage integration are not implemented.
+Continuous exposure enforcement and live brokerage
+integration are not implemented. Phase 4.3 adds a
+close-observed drawdown circuit breaker.
 
 See [risk controls](phase4-risk-controls.md).
+
+---
+
+## Phase 4.3 — Drawdown Safeguards
+
+The simulator supports close-observed drawdown thresholds,
+permanently latched BUY restrictions, and optional
+next-bar liquidation.
+
+### Dedicated Regression Test
+
+```bash
+ctest --test-dir build -R '^drawdown_controls$' --output-on-failure
+ctest --test-dir build-release -R '^drawdown_controls$' --output-on-failure
+```
+
+### Full C++ Verification
+
+```bash
+ctest --test-dir build --output-on-failure
+ctest --test-dir build-release --output-on-failure
+```
+
+The Phase 4.3 working tree registers 24 CTest suites.
+
+### Limitations
+
+- Drawdown detection occurs at bar close.
+- Liquidation occurs no earlier than the next open.
+- The circuit breaker does not automatically reset.
+- Gaps can produce losses beyond the threshold.
+- A rejected liquidation leaves the position open.
+- Risk events are not currently exported in JSON.
+
+See [drawdown controls](phase4-drawdown-controls.md).

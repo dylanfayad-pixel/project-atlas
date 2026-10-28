@@ -262,3 +262,29 @@ during Phase 4.2 verification.
 Phase 4.2 GitHub Actions verification is pending.
 
 Historical Phase 4.1 results remain 21 suites.
+
+---
+
+## Phase 4.3 — Drawdown Safeguard Verification
+
+The Phase 4.3 working tree registers 24 CTest suites.
+
+The new `drawdown_controls` suite verifies:
+
+- Threshold detection and boundary behavior.
+- Next-bar liquidation without look-ahead.
+- Permanent BUY restrictions.
+- Optional liquidation and ordinary strategy exits.
+- Commission and adverse slippage accounting.
+- Final-bar breaches.
+- Market-gap losses.
+- Rejected liquidation when proceeds cannot cover fees.
+- Invalid configuration rejection.
+- Default behavior compatibility.
+
+All 24 CTest suites passed locally in Debug and Release.
+
+The frontend's 15 Vitest tests, TypeScript checks,
+ESLint, and production build also passed locally.
+
+GitHub Actions verification for Phase 4.3 is pending.

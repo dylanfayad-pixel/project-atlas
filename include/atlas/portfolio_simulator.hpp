@@ -61,6 +61,16 @@ struct ExecutionConfig {
     // valued at the bar's opening market price.
     // 1.0 preserves the original unrestricted entry model.
     double max_entry_exposure = 1.0;
+
+    // Maximum allowed close-observed drawdown as a fraction
+    // of the historical closing-equity high-water mark.
+    // 1.0 disables the circuit breaker by default.
+    double max_drawdown_fraction = 1.0;
+
+    // If enabled, a drawdown breach requests liquidation
+    // at the next available bar's opening price.
+    // This setting has no effect while the breaker is disabled.
+    bool liquidate_on_drawdown = false;
 };
 
 class PortfolioSimulator {

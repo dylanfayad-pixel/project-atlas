@@ -31,7 +31,10 @@ PortfolioResult PortfolioSimulator::run(
         config.max_entry_allocation > 1.0 ||
         !std::isfinite(config.max_entry_exposure) ||
         config.max_entry_exposure < 0.0 ||
-        config.max_entry_exposure > 1.0) {
+        config.max_entry_exposure > 1.0 ||
+        !std::isfinite(config.max_drawdown_fraction) ||
+        config.max_drawdown_fraction <= 0.0 ||
+        config.max_drawdown_fraction > 1.0) {
         throw std::invalid_argument(
             "Invalid execution cost configuration"
         );
@@ -90,6 +93,11 @@ PortfolioResult PortfolioSimulator::run(
     const double slip = config.slippage_bps / 10000.0;
     const double commission = config.commission_per_trade;
 
+    // Drawdown safeguards observe closing equity only.
+    // A breach cannot affect execution until the next bar.
+    double peak_equity = initial_capital;
+    bool drawdown_halted = false;
+
     for (std::size_t i = 0; i < bars.size(); ++i) {
         const auto& bar = bars[i];
 
@@ -99,6 +107,7 @@ PortfolioResult PortfolioSimulator::run(
             const Signal pending = signals[i - 1].signal;
 
             if (pending == Signal::Buy && shares == 0.0 &&
+                !drawdown_halted &&
                 config.max_entry_allocation > 0.0 &&
                 config.max_entry_exposure > 0.0 &&
                 cash > commission) {
@@ -226,8 +235,12 @@ PortfolioResult PortfolioSimulator::run(
                         commission, slippage_cost
                     });
                 }
-            } else if (pending == Signal::Sell &&
-                       shares > 0.0) {
+            } else if (
+                shares > 0.0 &&
+                (pending == Signal::Sell ||
+                 (drawdown_halted &&
+                  config.liquidate_on_drawdown))
+            ) {
 
                 const double price = bar.open * (1.0 - slip);
                 const double quantity = shares;
@@ -294,6 +307,27 @@ PortfolioResult PortfolioSimulator::run(
         result.equity_curve.push_back({
             i, bar.timestamp, cash, shares, equity
         });
+
+        // Observe the completed bar before changing risk state.
+        // Future execution may react, but this bar cannot.
+        peak_equity = std::max(peak_equity, equity);
+
+        if (config.max_drawdown_fraction < 1.0 &&
+            !drawdown_halted) {
+
+            const double drawdown =
+                (peak_equity - equity) / peak_equity;
+
+            if (!std::isfinite(drawdown)) {
+                throw std::overflow_error(
+                    "Non-finite portfolio drawdown"
+                );
+            }
+
+            if (drawdown >= config.max_drawdown_fraction) {
+                drawdown_halted = true;
+            }
+        }
     }
 
     // Aggregate recorded costs after successful replay.

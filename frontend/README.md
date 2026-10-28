@@ -119,3 +119,18 @@ are not yet exposed through the portfolio JSON
 v1/v2 frontend contract.
 
 See [risk controls](../docs/phase4-risk-controls.md).
+
+## Phase 4.3 Drawdown Integration Status
+
+The C++ simulator supports a close-observed drawdown
+circuit breaker with optional next-bar liquidation.
+
+Atlas Terminal does not currently provide interactive
+drawdown configuration or circuit-breaker event history.
+
+The website still reads static demonstration fixtures.
+
+The existing JSON v1/v2 contracts do not expose
+drawdown-trigger metadata.
+
+See [drawdown controls](../docs/phase4-drawdown-controls.md).

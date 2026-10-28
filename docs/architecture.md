@@ -220,6 +220,32 @@ positions after market-driven exposure changes.
 
 See [Phase 4.2 risk controls](phase4-risk-controls.md).
 
+## Phase 4.3 — Drawdown Circuit Breaker
+
+The portfolio simulator maintains a closing-equity
+high-water mark initialized to starting capital.
+
+Each historical bar follows this sequence:
+
+1. Process eligible previous-close signals at the open.
+2. Apply execution costs and entry risk constraints.
+3. Mark the portfolio to the current closing price.
+4. Update the historical closing-equity peak.
+5. Detect and latch any configured drawdown breach.
+
+A breach cannot affect an earlier execution.
+
+After activation, new BUY signals are blocked.
+Optional liquidation is attempted at the next open
+using the existing cost-aware SELL execution path.
+
+The breaker never automatically resets.
+
+The risk state is currently internal to the simulator.
+No drawdown-event history is exported in JSON v1/v2.
+
+See [drawdown controls](phase4-drawdown-controls.md).
+
 ## Atlas Terminal
 
 Technology:

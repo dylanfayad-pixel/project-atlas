@@ -14,7 +14,7 @@ Project Atlas is an educational systems-engineering project for validating marke
 | Phase 1 — Market data | Complete | OHLCV parsing, validation, chronology checks, benchmarks |
 | Phase 2 — Historical research | Complete | Replay, strategies, portfolio simulation, metrics, JSON export, dashboard |
 | Phase 3 — Execution realism | Complete | Configurable commissions, adverse slippage, cost-aware accounting, JSON v2, dashboard analytics |
-| Phase 4 — Portfolio and risk | In progress | Risk analytics, configurable entry allocation, and entry exposure limits; drawdown controls planned |
+| Phase 4 — Portfolio and risk | In progress | Risk analytics, configurable entry allocation, entry exposure limits, and close-observed drawdown safeguards |
 | Phase 5 — Research and performance | Planned | More datasets, profiling, robust strategy evaluation |
 | Phase 6 — Public release | Planned | Backend API, deployment, release hardening |
 
@@ -78,7 +78,7 @@ periodic risk-free rates, and periodic downside targets.
 
 Undefined ratios are represented with `std::optional`.
 
-The current module is undergoing Phase 4 milestone verification.
+The Phase 4.1 risk analytics module is implemented and verified.
 These risk metrics are not yet exported through the frontend
 portfolio JSON contract or displayed in Atlas Terminal.
 
@@ -112,6 +112,28 @@ These controls are implemented in C++ but are not
 yet configurable through Atlas Terminal.
 
 See [Phase 4.2 risk controls](docs/phase4-risk-controls.md).
+
+### Drawdown safeguards — Phase 4.3
+
+The C++ simulator supports a configurable, close-observed
+drawdown circuit breaker.
+
+- Tracks the historical closing-equity high-water mark.
+- Blocks subsequent BUY signals after a threshold breach.
+- Optionally attempts liquidation at the next bar's open.
+- Preserves ordinary strategy SELL execution.
+- Applies existing commissions and adverse slippage.
+- Remains latched for the rest of the simulation.
+
+The default threshold of 1.0 disables the safeguard.
+
+Market gaps and rejected liquidation attempts can cause
+losses beyond the configured threshold.
+
+The circuit-breaker state is not currently exported
+through portfolio JSON v1/v2 or shown in Atlas Terminal.
+
+See [Phase 4.3 drawdown controls](docs/phase4-drawdown-controls.md).
 
 ## Architecture
 
