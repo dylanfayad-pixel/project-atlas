@@ -187,6 +187,39 @@ and does not establish real-market profitability.
 
 See [risk analytics](risk-analytics.md).
 
+## Phase 4.2 — Entry Risk Controls
+
+The portfolio simulator now supports configurable
+entry allocation and entry exposure limits.
+
+`ExecutionConfig` contains:
+
+- `commission_per_trade`
+- `slippage_bps`
+- `max_entry_allocation`
+- `max_entry_exposure`
+
+The entry allocation limit constrains the amount
+of cash committed to a new BUY, including commission.
+
+The entry exposure limit constrains the position's
+opening-price market value relative to post-trade
+portfolio equity.
+
+The simulator calculates the maximum permitted
+quantity under both constraints and selects
+the smaller quantity.
+
+SELL execution adds net proceeds to existing cash,
+preserving uninvested capital.
+
+These policies apply only when entering a position.
+
+The simulator does not automatically rebalance
+positions after market-driven exposure changes.
+
+See [Phase 4.2 risk controls](phase4-risk-controls.md).
+
 ## Atlas Terminal
 
 Technology:

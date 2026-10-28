@@ -14,7 +14,7 @@ Project Atlas is an educational systems-engineering project for validating marke
 | Phase 1 — Market data | Complete | OHLCV parsing, validation, chronology checks, benchmarks |
 | Phase 2 — Historical research | Complete | Replay, strategies, portfolio simulation, metrics, JSON export, dashboard |
 | Phase 3 — Execution realism | Complete | Configurable commissions, adverse slippage, cost-aware accounting, JSON v2, dashboard analytics |
-| Phase 4 — Portfolio and risk | In progress | Risk analytics implemented locally; position sizing and portfolio controls planned |
+| Phase 4 — Portfolio and risk | In progress | Risk analytics, configurable entry allocation, and entry exposure limits; drawdown controls planned |
 | Phase 5 — Research and performance | Planned | More datasets, profiling, robust strategy evaluation |
 | Phase 6 — Public release | Planned | Backend API, deployment, release hardening |
 
@@ -87,6 +87,31 @@ Synthetic demonstration timestamps do not establish
 real-market annualized performance.
 
 See [risk analytics engineering](docs/risk-analytics.md).
+
+### Entry risk controls — Phase 4.2
+
+The C++ portfolio simulator now supports:
+
+- Configurable maximum entry allocation.
+- Configurable maximum entry exposure.
+- Commission-aware entry budgets.
+- Slippage-aware exposure calculations.
+- Preservation of uninvested cash after SELL.
+- Explicit validation of invalid risk configurations.
+
+Both entry limits default to 100%, preserving the
+original all-in execution behavior.
+
+Entry exposure is measured using post-trade equity
+at the next bar's opening reference price.
+
+The simulator does not automatically rebalance
+positions when market movement increases exposure.
+
+These controls are implemented in C++ but are not
+yet configurable through Atlas Terminal.
+
+See [Phase 4.2 risk controls](docs/phase4-risk-controls.md).
 
 ## Architecture
 

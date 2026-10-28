@@ -538,3 +538,45 @@ if(BUILD_TESTING)
         COMMAND test_risk_analytics
     )
 endif()
+
+
+# Phase 4.2: validate configurable portfolio entry allocation.
+if(BUILD_TESTING)
+    add_executable(test_position_sizing
+        tests/test_position_sizing.cpp
+    )
+
+    target_link_libraries(test_position_sizing
+        PRIVATE atlas_core
+    )
+
+    target_compile_options(test_position_sizing PRIVATE
+        -Wall -Wextra -Wpedantic
+    )
+
+    add_test(
+        NAME position_sizing
+        COMMAND test_position_sizing
+    )
+endif()
+
+
+# Phase 4.2: validate entry-time portfolio exposure limits.
+if(BUILD_TESTING)
+    add_executable(test_exposure_limits
+        tests/test_exposure_limits.cpp
+    )
+
+    target_link_libraries(test_exposure_limits
+        PRIVATE atlas_core
+    )
+
+    target_compile_options(test_exposure_limits PRIVATE
+        -Wall -Wextra -Wpedantic
+    )
+
+    add_test(
+        NAME exposure_limits
+        COMMAND test_exposure_limits
+    )
+endif()

@@ -27,6 +27,8 @@ demonstrate the project confidently.
 
 | [14 — Risk Analytics](14-risk-analytics.md) | Volatility, Sharpe, downside deviation and Sortino |
 
+| [15 — Position Sizing and Exposure](15-position-sizing-and-exposure.md) | Entry allocation, exposure limits and cash accounting |
+
 ## How to Use These Notes
 
 1. Read the simple explanation first.
@@ -42,7 +44,7 @@ demonstrate the project confidently.
 - Phase 2: Complete
 - Phase 3: Complete
 - Phase 4: In progress
-- C++: 21 CTest suites passed locally in Debug and Release
+- C++: 23 CTest suites passed locally in Debug and Release
 - Frontend: 15 Vitest tests passed locally
 - GitHub CI verification for this milestone: Pending
 

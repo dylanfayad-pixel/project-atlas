@@ -211,7 +211,7 @@ Phase 3 GitHub Actions verification completed successfully.
 
 Phase 4 introduces the `risk_analytics` CTest suite.
 
-The project currently registers 21 CTest suites.
+The Phase 4.1 milestone registered 21 CTest suites.
 
 All 21 passed locally in Debug and Release during
 the Phase 4.1 implementation review.
@@ -236,3 +236,29 @@ working tree. The published Phase 3 milestone contains
 20 CTest suites until the Phase 4 changes are committed.
 
 GitHub Actions verification for Phase 4.1 remains pending.
+
+
+## Phase 4.2 — Entry Risk Control Verification
+
+The current Phase 4.2 working tree registers
+23 CTest suites.
+
+The new dedicated suites are:
+
+- `position_sizing`
+- `exposure_limits`
+
+They verify configurable entry allocation,
+commission-aware budgets, entry exposure,
+slippage, residual cash, invalid configuration,
+and market-driven exposure changes.
+
+The tests also cover selected financial
+boundary cases and equity reconciliation.
+
+All 23 suites passed locally in Debug and Release
+during Phase 4.2 verification.
+
+Phase 4.2 GitHub Actions verification is pending.
+
+Historical Phase 4.1 results remain 21 suites.

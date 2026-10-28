@@ -1,6 +1,7 @@
 #include "atlas/portfolio_simulator.hpp"
 #include "atlas/market_bar_validator.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <stdexcept>
 
@@ -24,7 +25,13 @@ PortfolioResult PortfolioSimulator::run(
         config.commission_per_trade < 0.0 ||
         !std::isfinite(config.slippage_bps) ||
         config.slippage_bps < 0.0 ||
-        config.slippage_bps >= 10000.0) {
+        config.slippage_bps >= 10000.0 ||
+        !std::isfinite(config.max_entry_allocation) ||
+        config.max_entry_allocation < 0.0 ||
+        config.max_entry_allocation > 1.0 ||
+        !std::isfinite(config.max_entry_exposure) ||
+        config.max_entry_exposure < 0.0 ||
+        config.max_entry_exposure > 1.0) {
         throw std::invalid_argument(
             "Invalid execution cost configuration"
         );
@@ -92,73 +99,133 @@ PortfolioResult PortfolioSimulator::run(
             const Signal pending = signals[i - 1].signal;
 
             if (pending == Signal::Buy && shares == 0.0 &&
+                config.max_entry_allocation > 0.0 &&
+                config.max_entry_exposure > 0.0 &&
                 cash > commission) {
 
-                const double price = bar.open * (1.0 + slip);
-                const double budget = cash - commission;
-                const double quantity = budget / price;
+                // Both constraints are evaluated at the
+                // next bar's opening reference price.
+                const double allocation_budget =
+                    cash * config.max_entry_allocation;
 
-                if (!std::isfinite(price) ||
-                    !std::isfinite(quantity) ||
-                    price <= 0.0 ||
-                    quantity <= 0.0) {
+                const double fill_price =
+                    bar.open * (1.0 + slip);
+
+                if (!std::isfinite(allocation_budget) ||
+                    !std::isfinite(fill_price) ||
+                    fill_price <= 0.0) {
                     throw std::overflow_error(
-                        "Invalid BUY execution arithmetic"
+                        "Invalid entry sizing arithmetic"
                     );
                 }
 
-                const double cost = quantity * price;
+                if (allocation_budget > commission) {
+                    // Commission is part of the allocated budget.
+                    const double allocation_quantity =
+                        (allocation_budget - commission) /
+                        fill_price;
 
-                if (!std::isfinite(cost)) {
-                    throw std::overflow_error(
-                        "Non-finite BUY cost"
+                    // Entry exposure uses post-trade equity
+                    // marked at the unadjusted opening price.
+                    const double exposure_denominator =
+                        bar.open +
+                        config.max_entry_exposure *
+                        (fill_price - bar.open);
+
+                    const double exposure_quantity =
+                        config.max_entry_exposure *
+                        (cash - commission) /
+                        exposure_denominator;
+
+                    const double quantity = std::min(
+                        allocation_quantity,
+                        exposure_quantity
                     );
+
+                    if (!std::isfinite(quantity) ||
+                        !std::isfinite(exposure_denominator) ||
+                        exposure_denominator <= 0.0 ||
+                        quantity <= 0.0) {
+                        throw std::overflow_error(
+                            "Invalid entry exposure quantity"
+                        );
+                    }
+
+                    const double cost = quantity * fill_price;
+
+                    if (!std::isfinite(cost)) {
+                        throw std::overflow_error(
+                            "Non-finite BUY cost"
+                        );
+                    }
+
+                    double remaining =
+                        cash - cost - commission;
+
+                    if (!std::isfinite(remaining)) {
+                        throw std::overflow_error(
+                            "Non-finite remaining cash"
+                        );
+                    }
+
+                    const double tolerance = 1e-12 * cash;
+
+                    if (remaining < -tolerance) {
+                        throw std::overflow_error(
+                            "BUY exceeded available cash"
+                        );
+                    }
+
+                    if (remaining < 0.0) {
+                        remaining = 0.0;
+                    }
+
+                    const double slippage_cost =
+                        quantity * (fill_price - bar.open);
+
+                    if (!std::isfinite(slippage_cost) ||
+                        slippage_cost < 0.0) {
+                        throw std::overflow_error(
+                            "Invalid BUY slippage cost"
+                        );
+                    }
+
+                    // Verify exposure using the actual
+                    // post-trade cash and opening market value.
+                    const double market_value =
+                        quantity * bar.open;
+
+                    const double entry_equity =
+                        remaining + market_value;
+
+                    if (!std::isfinite(market_value) ||
+                        !std::isfinite(entry_equity) ||
+                        entry_equity <= 0.0) {
+                        throw std::overflow_error(
+                            "Invalid post-trade equity"
+                        );
+                    }
+
+                    const double exposure =
+                        market_value / entry_equity;
+
+                    if (!std::isfinite(exposure) ||
+                        exposure >
+                            config.max_entry_exposure + 1e-12) {
+                        throw std::overflow_error(
+                            "Entry exposure limit exceeded"
+                        );
+                    }
+
+                    shares = quantity;
+                    cash = remaining;
+
+                    result.trades.push_back({
+                        i, bar.timestamp, Signal::Buy,
+                        fill_price, quantity,
+                        commission, slippage_cost
+                    });
                 }
-
-                // Deduct the actual fill cost and commission.
-                // Preserve residual cash instead of assuming it is zero.
-                double remaining = cash - cost - commission;
-
-                if (!std::isfinite(remaining)) {
-                    throw std::overflow_error(
-                        "Non-finite remaining cash"
-                    );
-                }
-
-                // Floating-point rounding can leave a tiny negative
-                // remainder when investing almost all available cash.
-                const double tolerance = 1e-12 * cash;
-
-                if (remaining < -tolerance) {
-                    throw std::overflow_error(
-                        "BUY exceeded available cash"
-                    );
-                }
-
-                if (remaining < 0.0) {
-                    remaining = 0.0;
-                }
-
-                // Measure adverse price movement against the open.
-                const double slippage_cost =
-                    quantity * (price - bar.open);
-
-                if (!std::isfinite(slippage_cost) ||
-                    slippage_cost < 0.0) {
-                    throw std::overflow_error(
-                        "Invalid BUY slippage cost"
-                    );
-                }
-
-                shares = quantity;
-                cash = remaining;
-
-                result.trades.push_back({
-                    i, bar.timestamp, Signal::Buy,
-                    price, quantity,
-                    commission, slippage_cost
-                });
-
             } else if (pending == Signal::Sell &&
                        shares > 0.0) {
 
@@ -188,7 +255,18 @@ PortfolioResult PortfolioSimulator::run(
                         );
                     }
 
-                    cash = proceeds - commission;
+                    // Preserve uninvested cash when closing
+                    // a partially allocated position.
+                    const double updated_cash =
+                        cash + (proceeds - commission);
+
+                    if (!std::isfinite(updated_cash)) {
+                        throw std::overflow_error(
+                            "Non-finite SELL cash balance"
+                        );
+                    }
+
+                    cash = updated_cash;
                     shares = 0.0;
 
                     result.trades.push_back({

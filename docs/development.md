@@ -399,7 +399,7 @@ ctest --test-dir build --output-on-failure
 ctest --test-dir build-release --output-on-failure
 ```
 
-Phase 4.1 currently registers 21 CTest suites.
+The completed Phase 4.1 milestone registered 21 CTest suites.
 
 ### Statistical Assumptions
 
@@ -422,3 +422,53 @@ portfolio JSON contract or displayed by Atlas Terminal.
 
 Do not claim that the website already provides
 Sharpe or Sortino analytics.
+
+---
+
+## Phase 4.2 — Entry Risk Controls
+
+The C++ portfolio simulator supports configurable
+maximum entry allocation and entry exposure.
+
+Both limits default to 1.0.
+
+### Run Dedicated Tests
+
+```bash
+ctest --test-dir build \
+  -R 'position_sizing|exposure_limits' \
+  --output-on-failure
+
+ctest --test-dir build-release \
+  -R 'position_sizing|exposure_limits' \
+  --output-on-failure
+```
+
+### Run Complete Verification
+
+```bash
+ctest --test-dir build --output-on-failure
+ctest --test-dir build-release --output-on-failure
+```
+
+Phase 4.2 registers 23 CTest suites.
+
+### Execution Policy
+
+- BUY signals execute at the next bar's open.
+- Allocation budgets include commission.
+- Exposure calculations account for adverse slippage.
+- The smaller permitted BUY quantity is selected.
+- SELL adds net proceeds to existing cash.
+- Market movement does not trigger automatic rebalancing.
+
+### Limitations
+
+These controls are currently C++ configuration options.
+
+They are not yet exposed through Atlas Terminal.
+
+Continuous exposure enforcement, drawdown safeguards,
+and live brokerage integration are not implemented.
+
+See [risk controls](phase4-risk-controls.md).

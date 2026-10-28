@@ -101,3 +101,21 @@ The demonstration uses synthetic market data and
 simplified simulated execution.
 
 No real trades are placed.
+
+
+## Phase 4 Risk-Control Integration Status
+
+The C++ simulator supports configurable entry
+allocation and entry exposure limits.
+
+These controls are not currently selectable
+through the React frontend.
+
+The website continues to display static
+demonstration portfolio results.
+
+Risk analytics and risk-control configuration
+are not yet exposed through the portfolio JSON
+v1/v2 frontend contract.
+
+See [risk controls](../docs/phase4-risk-controls.md).

@@ -51,6 +51,16 @@ struct PortfolioResult {
 struct ExecutionConfig {
     double commission_per_trade = 0.0;
     double slippage_bps = 0.0;
+
+    // Fraction of available cash allocated to a new BUY.
+    // 1.0 preserves the original all-in execution model.
+    // This limits entry allocation, not future exposure.
+    double max_entry_allocation = 1.0;
+
+    // Maximum position exposure immediately after BUY,
+    // valued at the bar's opening market price.
+    // 1.0 preserves the original unrestricted entry model.
+    double max_entry_exposure = 1.0;
 };
 
 class PortfolioSimulator {
@@ -63,7 +73,7 @@ public:
     // - Fractional shares
     // - No leverage
     // - Configurable fees and adverse slippage
-    // - All available cash invested on BUY
+    // - Configurable BUY allocation (100% by default)
     // - Entire position liquidated on SELL
     static PortfolioResult run(
         const std::vector<MarketBar>& bars,

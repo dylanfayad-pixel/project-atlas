@@ -122,6 +122,25 @@ committed frontend fixture.
 The website currently reads static JSON. There is no
 public HTTP backtesting endpoint.
 
+## Phase 4.2 Execution Configuration
+
+The C++ portfolio simulator accepts an `ExecutionConfig`
+with commission, slippage, maximum entry allocation,
+and maximum entry exposure settings.
+
+These settings affect simulated execution behavior.
+
+They are not currently exposed as user-configurable
+HTTP API parameters.
+
+The existing portfolio JSON v1/v2 contracts remain
+unchanged by this milestone.
+
+The JSON output does not yet include a dedicated
+risk-control configuration or exposure history.
+
+See [Phase 4.2 risk controls](phase4-risk-controls.md).
+
 ## Future HTTP API
 
 A future backend will accept user-selected strategy
