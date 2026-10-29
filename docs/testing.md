@@ -322,3 +322,41 @@ GitHub Actions verification for Phase 4.4
 remains pending.
 
 See [Phase 4.4 risk reporting](phase4-risk-reporting.md).
+
+## Phase 5.2 — Frontend Integration Verification
+
+The latest local frontend verification passed:
+
+| Check | Result |
+|---|---|
+| Vitest | 67 tests passed |
+| TypeScript | Passed |
+| ESLint | Passed |
+| Vite production build | Passed |
+| Git whitespace validation | Passed |
+
+### New regression coverage
+
+- Strict daily OHLCV CSV parsing.
+- Research-session initialization and dataset metadata.
+- Instrument symbol and exchange validation.
+- Instrument editor interactions.
+- Dataset persistence across workspace navigation.
+- Instrument metadata persistence and replacement.
+- Preservation of valid data after invalid uploads.
+- Prevention of unrelated synthetic backtest results.
+
+Application integration tests use React Testing Library
+and jsdom. Financial chart components are mocked in
+application tests; those tests do not establish visual
+chart correctness.
+
+The latest established C++ baseline is 27 CTest
+suites from Phase 4.4. Run both Debug and Release
+suites again during release verification.
+
+GitHub Actions verification for Phase 5.2 remains
+pending until the release is pushed.
+
+See [Phase 5.2 engineering documentation](
+phase5-integrated-workspace.md).

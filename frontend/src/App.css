@@ -558,3 +558,132 @@ button.nav-item:focus-visible {
   background: #10372e;
   color: #8de6be;
 }
+
+/* Phase 5.2: interactive historical market chart. */
+
+.candlestick-chart {
+  width: 100%;
+  min-height: 440px;
+  overflow: hidden;
+  border: 1px solid #263a53;
+  border-radius: 8px;
+  background: #101b2c;
+}
+
+/* Phase 5.2: user-provided instrument metadata. */
+
+.instrument-form {
+  display: grid;
+  gap: 18px;
+  max-width: 720px;
+}
+
+.instrument-field {
+  display: grid;
+  gap: 8px;
+}
+
+.instrument-field label {
+  color: #dce8f7;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.instrument-field input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #334963;
+  border-radius: 8px;
+  background: #101b2c;
+  color: #f0f6ff;
+  font: inherit;
+}
+
+.instrument-field input:focus-visible {
+  outline: 2px solid #5ca8ff;
+  outline-offset: 2px;
+}
+
+/* Phase 5.2: shared research-session identification. */
+
+.session-identity {
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 1px solid #29415e;
+  border-radius: 12px;
+  background: #101e31;
+  color: #eaf2ff;
+}
+
+.session-identity-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.session-identity-label,
+.session-identity-details span {
+  display: block;
+  margin-bottom: 6px;
+  color: #9db3cd;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.session-identity-main strong {
+  display: block;
+  font-size: 1.5rem;
+  letter-spacing: -0.02em;
+}
+
+.session-identity-main p {
+  margin: 4px 0 0;
+  color: #b3c4d9;
+}
+
+.session-identity-source {
+  padding: 7px 11px;
+  border: 1px solid #315c83;
+  border-radius: 7px;
+  background: #17334e;
+  color: #a9d9ff;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.session-identity-details {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.session-identity-details > div {
+  padding: 12px;
+  border: 1px solid #293d56;
+  border-radius: 8px;
+  background: #0c192a;
+}
+
+.session-identity-details strong {
+  color: #f0f6ff;
+  font-size: 0.85rem;
+  overflow-wrap: anywhere;
+}
+
+.session-identity-disclaimer {
+  margin: 0;
+  color: #a5b7cd;
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
+@media (max-width: 720px) {
+  .session-identity-details {
+    grid-template-columns: 1fr;
+  }
+}

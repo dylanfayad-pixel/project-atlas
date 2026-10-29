@@ -3,10 +3,19 @@ import { Code2 } from 'lucide-react'
 import { Sidebar } from './components/Sidebar'
 import type { WorkspaceView } from './components/Sidebar'
 import { WorkspaceContent } from './components/WorkspaceContent'
+import { SessionIdentity } from './components/SessionIdentity'
 import { parseMarketData } from './lib/marketData'
 import type { MarketPoint } from './lib/marketData'
 import { parsePortfolioData } from './lib/portfolioData'
 import type { PortfolioData } from './lib/portfolioData'
+import {
+  createResearchSession,
+  createUploadedDataset,
+} from './lib/researchSession'
+import type { OhlcvBar } from './lib/ohlcvData'
+import type {
+  InstrumentMetadata,
+} from './lib/instrumentMetadata'
 import './App.css'
 
 const titles: Record<WorkspaceView, string> = {
@@ -21,6 +30,42 @@ const titles: Record<WorkspaceView, string> = {
 function App() {
   const [activeView, setActiveView] =
     useState<WorkspaceView>('research-setup')
+
+  const [session, setSession] = useState(createResearchSession)
+
+  function handleDatasetImported(
+    filename: string,
+    bars: OhlcvBar[]
+  ) {
+    const dataset = createUploadedDataset(filename, bars)
+
+    setSession((previous) => ({
+      ...previous,
+      dataset,
+      status: 'data-ready',
+    }))
+  }
+
+  function handleInstrumentSaved(
+    datasetId: string,
+    metadata: InstrumentMetadata
+  ) {
+    setSession((previous) => {
+      if (previous.dataset?.id !== datasetId) {
+        return previous
+      }
+
+      return {
+        ...previous,
+        dataset: {
+          ...previous.dataset,
+          symbol: metadata.symbol,
+          exchange: metadata.exchange,
+          instrumentVerified: false,
+        },
+      }
+    })
+  }
 
   const [data, setData] = useState<MarketPoint[]>([])
   const [error, setError] = useState<string | null>(null)
@@ -112,9 +157,15 @@ function App() {
 
           <div className="environment-pill">
             <span className="status-dot" />
-            SYNTHETIC DATA
+            {session.dataset
+              ? 'UPLOADED MARKET DATA'
+              : 'SYNTHETIC DEMO'}
           </div>
         </header>
+
+        {session.dataset && (
+          <SessionIdentity dataset={session.dataset} />
+        )}
 
         {loading && (
           <div className="panel" role="status">
@@ -131,6 +182,9 @@ function App() {
         {!loading && !error && (
           <WorkspaceContent
             view={activeView}
+            session={session}
+            onDatasetImported={handleDatasetImported}
+            onInstrumentSaved={handleInstrumentSaved}
             data={data}
             portfolio={portfolio}
             portfolioLoading={portfolioLoading}

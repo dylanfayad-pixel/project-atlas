@@ -549,3 +549,49 @@ The frontend loads a static C++-generated JSON v3
 fixture. It does not invoke the simulator directly.
 
 See [Phase 4.4 risk reporting](phase4-risk-reporting.md).
+
+## Phase 5.2 — Frontend Research Workspace Development
+
+### Local development
+
+```bash
+cd frontend
+npm ci
+npm run dev
+```
+
+### Verification
+
+```bash
+npx tsc --noEmit -p tsconfig.app.json
+npm run test
+npm run lint
+npm run build
+```
+
+The latest local frontend verification passed
+67 Vitest tests, TypeScript, ESLint, and the
+Vite production build.
+
+### Development boundaries
+
+The daily OHLCV importer is separate from the
+legacy synthetic signal demonstration parser.
+
+App.tsx owns the active ResearchSession.
+
+ResearchSetup publishes validated imported data.
+
+InstrumentEditor validates user-provided metadata.
+
+WorkspaceContent selects views based on whether
+an uploaded dataset is active.
+
+Do not associate synthetic portfolio results
+with uploaded datasets.
+
+The C++ engine remains separate from browser
+execution until a backend API is implemented.
+
+See [Phase 5.2 engineering documentation](
+phase5-integrated-workspace.md).

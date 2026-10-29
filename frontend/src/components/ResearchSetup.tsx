@@ -1,16 +1,35 @@
 import { useRef, useState } from 'react'
 import type { ChangeEvent } from 'react'
 import { FileUp, Database, ShieldCheck } from 'lucide-react'
+import { CandlestickChart } from './CandlestickChart'
+import { InstrumentEditor } from './InstrumentEditor'
+import type {
+  InstrumentMetadata,
+} from '../lib/instrumentMetadata'
 import { parseOhlcvCsv } from '../lib/ohlcvData'
 import type { OhlcvBar } from '../lib/ohlcvData'
+import type { ResearchDataset } from '../lib/researchSession'
 
 // Limit browser-side imports to avoid excessive memory use.
 const MAX_FILE_BYTES = 10 * 1024 * 1024
 
-export function ResearchSetup() {
+type Props = {
+  dataset: ResearchDataset | null
+  onDatasetImported: (filename: string, bars: OhlcvBar[]) => void
+  onInstrumentSaved: (
+    datasetId: string,
+    metadata: InstrumentMetadata
+  ) => void
+}
+
+export function ResearchSetup({
+  dataset,
+  onDatasetImported,
+  onInstrumentSaved,
+}: Props) {
   const fileInput = useRef<HTMLInputElement>(null)
-  const [filename, setFilename] = useState<string | null>(null)
-  const [bars, setBars] = useState<OhlcvBar[]>([])
+  const filename = dataset?.filename ?? null
+  const bars = dataset?.bars ?? []
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
@@ -21,8 +40,6 @@ export function ResearchSetup() {
 
     setLoading(true)
     setError(null)
-    setBars([])
-    setFilename(null)
 
     try {
       if (!file.name.toLowerCase().endsWith('.csv')) {
@@ -36,8 +53,7 @@ export function ResearchSetup() {
       const text = await file.text()
       const parsed = parseOhlcvCsv(text)
 
-      setBars(parsed)
-      setFilename(file.name)
+      onDatasetImported(file.name, parsed)
     } catch (cause: unknown) {
       setError(
         cause instanceof Error
@@ -117,6 +133,20 @@ export function ResearchSetup() {
           </div>
         )}
       </section>
+
+      {dataset && (
+        <InstrumentEditor
+          key={`${dataset.id}:${dataset.symbol ?? ''}:${dataset.exchange ?? ''}`}
+          dataset={dataset}
+          onSave={(metadata) =>
+            onInstrumentSaved(dataset.id, metadata)
+          }
+        />
+      )}
+
+      {bars.length > 0 && (
+        <CandlestickChart bars={bars} />
+      )}
 
       {bars.length > 0 && (
         <section className="panel">

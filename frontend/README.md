@@ -163,3 +163,61 @@ The dashboard does not execute live trades or
 submit backtests to a backend API.
 
 See [Phase 4.4 risk reporting](../docs/phase4-risk-reporting.md).
+
+## Phase 5.2 — Integrated Research Workspace
+
+Atlas Terminal supports browser-local daily OHLCV CSV imports.
+
+The active research session is shared across Research Setup,
+Overview, Strategies, Market Data, and Backtests.
+
+### Market visualization
+
+- TradingView Lightweight Charts v5.
+- Interactive OHLCV candlesticks.
+- Historical trading-volume histogram.
+- Responsive chart resizing.
+
+### Instrument information
+
+Users can enter a ticker and exchange label.
+
+These labels are user-provided and unverified.
+They do not authenticate the uploaded market data.
+
+### Research-session behavior
+
+- Uploaded datasets remain active across tab navigation.
+- New valid uploads replace the selected dataset.
+- Dataset replacement resets instrument metadata.
+- Invalid uploads preserve the previous valid dataset.
+- Synthetic portfolio results are not shown as results
+  for uploaded market data.
+
+### Testing
+
+The current local frontend suite contains 67 Vitest tests.
+
+The stack includes React Testing Library, User Event,
+jest-dom, and jsdom for interaction and integration tests.
+
+Run:
+
+```bash
+npm run test
+npm run lint
+npm run build
+```
+
+### Current limitations
+
+The active dataset is stored in browser memory and
+is lost on refresh.
+
+Only daily-date OHLCV CSV imports are supported.
+
+There is no browser-to-C++ backtesting API,
+market-data provider, or brokerage integration.
+
+See [Phase 5.2 engineering documentation](
+../docs/phase5-integrated-workspace.md).

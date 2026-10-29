@@ -15,8 +15,42 @@ Project Atlas is an educational systems-engineering project for validating marke
 | Phase 2 — Historical research | Complete | Replay, strategies, portfolio simulation, metrics, JSON export, dashboard |
 | Phase 3 — Execution realism | Complete | Configurable commissions, adverse slippage, cost-aware accounting, JSON v2, dashboard analytics |
 | Phase 4 — Portfolio and risk | In progress | Risk analytics, entry controls, drawdown safeguards, JSON v3 risk reporting, and dashboard visualization |
-| Phase 5 — Research and performance | Planned | More datasets, profiling, robust strategy evaluation |
+| Phase 5 — Research and performance | In progress | Data-first research setup, daily OHLCV imports, interactive candlesticks, shared sessions, and instrument metadata |
 | Phase 6 — Public release | Planned | Backend API, deployment, release hardening |
+
+
+## Current Atlas Terminal Status — Phase 5.2
+
+Phase 5.2 introduces an integrated browser research workspace.
+
+Implemented locally:
+
+- Strict daily OHLCV CSV imports.
+- Interactive candlestick and volume visualization.
+- Shared research-session state across workspaces.
+- User-provided ticker and exchange metadata.
+- Consistent dataset identification and provenance.
+- Separation of imported data from synthetic results.
+- React interaction and application integration tests.
+
+The latest local frontend verification passed 67 Vitest
+tests, TypeScript, ESLint, and the production build.
+
+The C++ engine passed all 27 CTest suites in both
+Debug and Release during Phase 5.2 local verification.
+
+A public frontend preview is hosted at:
+
+https://project-atlas-two-rho.vercel.app
+
+The Phase 5.2 changes are not yet deployed there.
+
+Uploaded data is not currently submitted to the C++
+backtester. The public preview is not a live trading
+service and does not place brokerage orders.
+
+See [Phase 5.2 engineering documentation](
+docs/phase5-integrated-workspace.md).
 
 ## Features
 
@@ -45,7 +79,7 @@ Project Atlas is an educational systems-engineering project for validating marke
 - Runtime validation of portfolio JSON.
 - Lazy-loaded charts to reduce the initial JavaScript bundle.
 
-The website currently reads static demonstration fixtures. A public API that accepts user-selected backtest configurations has not yet been implemented.
+Atlas Terminal supports browser-local daily OHLCV CSV imports alongside static synthetic demonstration fixtures. Uploaded data is not yet submitted to the C++ engine. A public API for user-selected backtests has not yet been implemented.
 
 ### Execution realism — Phase 3
 
@@ -236,7 +270,7 @@ See [frontend setup](frontend/README.md).
 
 ## Testing and CI
 
-The most recently reported local verification passed 17 CTest suites in both Debug and Release and 10 Vitest tests. Re-run these commands after changes; local results do not establish that a new GitHub Actions run has passed.
+The latest Phase 5.2 local frontend verification passed 67 Vitest tests, TypeScript, ESLint, and the Vite production build. The established C++ baseline is 27 CTest suites from Phase 4.4; rerun Debug and Release CTest before this release. Local results do not establish that a new GitHub Actions run has passed.
 
 The GitHub Actions workflow is configured for C++ Debug, C++ Release, and frontend tests/lint/build. Verify the workflow on GitHub after pushing changes.
 

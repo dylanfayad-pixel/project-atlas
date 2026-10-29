@@ -353,3 +353,44 @@ The frontend still does not invoke the C++ engine
 through an HTTP API.
 
 See [Phase 4.4 risk reporting](phase4-risk-reporting.md).
+
+## Phase 5.2 — Shared Research Session Architecture
+
+Atlas Terminal uses application-level React state to
+maintain the active research dataset.
+
+```text
+ResearchSetup
+    |
+    | validated daily OHLCV bars
+    v
+App.tsx / ResearchSession
+    |
+    +--> SessionIdentity
+    |
+    +--> Overview
+    |
+    +--> Strategies
+    |
+    +--> Market Data / CandlestickChart
+    |
+    +--> Backtests
+```
+
+InstrumentEditor validates user-provided ticker and
+exchange metadata.
+
+SessionIdentity displays the active dataset identity,
+historical coverage, timeframe, and provenance.
+
+WorkspaceContent prevents unrelated synthetic
+demonstration results from appearing as results
+for an uploaded dataset.
+
+The browser does not currently execute the C++
+backtesting engine.
+
+Session state is not persisted across page reloads.
+
+See [Phase 5.2 engineering documentation](
+phase5-integrated-workspace.md).
