@@ -9,6 +9,7 @@ import {
 
 // Supported workspace views.
 export type WorkspaceView =
+  | 'research-setup'
   | 'overview'
   | 'strategies'
   | 'market-data'
@@ -20,6 +21,7 @@ type Props = {
 }
 
 const navigation = [
+  { id: 'research-setup', label: 'Research Setup', icon: Database },
   { id: 'overview', label: 'Overview', icon: BarChart3 },
   { id: 'strategies', label: 'Strategies', icon: ChartNoAxesCombined },
   { id: 'market-data', label: 'Market Data', icon: Database },

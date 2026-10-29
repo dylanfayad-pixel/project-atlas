@@ -10,6 +10,7 @@ import type { PortfolioData } from './lib/portfolioData'
 import './App.css'
 
 const titles: Record<WorkspaceView, string> = {
+  'research-setup': 'New Research Session',
   overview: 'Strategy Overview',
   strategies: 'Strategy Research',
   'market-data': 'Market Data',
@@ -19,7 +20,7 @@ const titles: Record<WorkspaceView, string> = {
 // Application shell owns navigation and asynchronous data loading.
 function App() {
   const [activeView, setActiveView] =
-    useState<WorkspaceView>('overview')
+    useState<WorkspaceView>('research-setup')
 
   const [data, setData] = useState<MarketPoint[]>([])
   const [error, setError] = useState<string | null>(null)

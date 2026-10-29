@@ -1,3 +1,4 @@
+import { ResearchSetup } from './ResearchSetup'
 import type { MarketPoint } from '../lib/marketData'
 import type { PortfolioData } from '../lib/portfolioData'
 // Load portfolio charts separately from the main dashboard.
@@ -34,6 +35,10 @@ export function WorkspaceContent({
   portfolioLoading,
   portfolioError,
 }: Props) {
+  if (view === 'research-setup') {
+    return <ResearchSetup />
+  }
+
   if (view === 'overview') {
     return (
       <>
