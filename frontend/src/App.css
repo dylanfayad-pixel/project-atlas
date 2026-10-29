@@ -737,3 +737,15 @@ button.nav-item:focus-visible {
   outline: 2px solid #5ca8ff;
   outline-offset: 2px;
 }
+
+/* Keep creator attribution visible in the Atlas header. */
+.atlas-creator {
+  color: #94a3b8;
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
+}
+
+.atlas-creator strong {
+  color: #e2e8f0;
+  font-weight: 600;
+}

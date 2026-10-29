@@ -183,6 +183,9 @@ function App() {
             </div>
             <h1>{titles[activeView]}</h1>
             <p>Historical quantitative research platform</p>
+            <p className="atlas-creator">
+              Created by <strong>Dylan Fayad</strong>
+            </p>
           </div>
 
           <div className="environment-pill">
