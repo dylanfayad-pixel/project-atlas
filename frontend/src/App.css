@@ -687,3 +687,53 @@ button.nav-item:focus-visible {
     grid-template-columns: 1fr;
   }
 }
+
+/* Phase 5.3: editable daily OHLCV observations. */
+
+.manual-data-table {
+  min-width: 900px;
+}
+
+.manual-data-table input {
+  width: 125px;
+  padding: 9px 10px;
+  border: 1px solid #334963;
+  border-radius: 6px;
+  background: #101b2c;
+  color: #f0f6ff;
+  font: inherit;
+  font-size: 0.82rem;
+}
+
+.manual-data-table input:focus-visible {
+  outline: 2px solid #5ca8ff;
+  outline-offset: 2px;
+}
+
+.manual-data-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.manual-remove-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px;
+  border: 1px solid #67414a;
+  border-radius: 7px;
+  background: #2c1c28;
+  color: #ffb4b4;
+  cursor: pointer;
+}
+
+.manual-remove-button:hover {
+  background: #462631;
+}
+
+.manual-remove-button:focus-visible {
+  outline: 2px solid #5ca8ff;
+  outline-offset: 2px;
+}

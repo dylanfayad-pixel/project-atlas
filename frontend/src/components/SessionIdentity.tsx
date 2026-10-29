@@ -25,7 +25,13 @@ export function SessionIdentity({ dataset }: Props) {
         </div>
 
         <span className="session-identity-source">
-          USER-UPLOADED DATA
+          {dataset.source === 'manual-entry'
+            ? 'MANUALLY ENTERED DATA'
+            : dataset.source === 'uploaded-csv'
+              ? 'USER-UPLOADED CSV'
+              : dataset.source === 'provider'
+                ? 'PROVIDER DATA'
+                : 'DEMONSTRATION DATA'}
         </span>
       </div>
 

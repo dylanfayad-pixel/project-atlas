@@ -69,6 +69,164 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
+
+describe('Manual research workflow', () => {
+  async function loadManualData(
+    user: ReturnType<typeof userEvent.setup>
+  ) {
+    await user.click(screen.getByRole('button', {
+      name: 'Manual Entry',
+    }))
+
+    const fields = [
+      ['Date (YYYY-MM-DD)', '2026-01-05'],
+      ['Open', '100'],
+      ['High', '105'],
+      ['Low', '98'],
+      ['Close', '103'],
+      ['Volume', '1500000'],
+    ]
+
+    for (const [label, value] of fields) {
+      await user.type(
+        screen.getByRole('textbox', {
+          name: `${label} row 1`,
+        }),
+        value
+      )
+    }
+
+    await user.click(screen.getByRole('button', {
+      name: 'Validate & Load Data',
+    }))
+  }
+
+  it('loads manual data into the shared session', async () => {
+    mockFetch()
+    const user = userEvent.setup()
+    render(<App />)
+
+    await screen.findByText('Market Data Import')
+    await loadManualData(user)
+
+    expect(
+      screen.getByText('MANUALLY ENTERED DATA')
+    ).toBeTruthy()
+
+    await user.click(screen.getByRole('button', {
+      name: 'Overview',
+    }))
+
+    expect(screen.getByText('Active Research Dataset')).toBeTruthy()
+
+    // Both the session header and Overview show the count.
+    // Verify that each displays the expected observation total.
+    expect(screen.getAllByText('1')).toHaveLength(2)
+  })
+
+  it('shows manual candles in Market Data', async () => {
+    mockFetch()
+    const user = userEvent.setup()
+    render(<App />)
+
+    await screen.findByText('Market Data Import')
+    await loadManualData(user)
+
+    await user.click(screen.getByRole('button', {
+      name: 'Market Data',
+    }))
+
+    expect(
+      screen.getByTestId('candlestick-chart')
+    ).toBeTruthy()
+  })
+
+  it('does not assign demo backtest results to manual data',
+    async () => {
+      mockFetch()
+      const user = userEvent.setup()
+      render(<App />)
+
+      await screen.findByText('Market Data Import')
+      await loadManualData(user)
+
+      await user.click(screen.getByRole('button', {
+        name: 'Backtests',
+      }))
+
+      expect(
+        screen.getByText('No Backtest Executed')
+      ).toBeTruthy()
+
+      expect(
+        screen.queryByTestId('portfolio-analytics')
+      ).toBeNull()
+    })
+})
+
+
+describe('Market data source selection', () => {
+  it('shows only the selected input form', async () => {
+    mockFetch()
+    const user = userEvent.setup()
+    render(<App />)
+
+    await screen.findByText('Market Data Import')
+
+    expect(
+      screen.getByRole('button', { name: 'Choose CSV File' })
+    ).toBeTruthy()
+
+    await user.click(screen.getByRole('button', {
+      name: 'Manual Entry',
+    }))
+
+    expect(
+      screen.getByText('Manual Market Data Entry')
+    ).toBeTruthy()
+
+    expect(
+      screen.queryByRole('button', { name: 'Choose CSV File' })
+    ).toBeNull()
+
+    await user.click(screen.getByRole('button', {
+      name: 'Upload CSV',
+    }))
+
+    expect(
+      screen.getByRole('button', { name: 'Choose CSV File' })
+    ).toBeTruthy()
+
+    expect(
+      screen.queryByText('Manual Market Data Entry')
+    ).toBeNull()
+  })
+
+  it('preserves active data when changing input methods',
+    async () => {
+      mockFetch()
+      const user = userEvent.setup()
+      render(<App />)
+
+      await screen.findByText('Market Data Import')
+      await uploadCsv(user, sampleCsv)
+
+      await screen.findByText('Dataset Preview')
+
+      await user.click(screen.getByRole('button', {
+        name: 'Manual Entry',
+      }))
+
+      expect(screen.getByText('Dataset Preview')).toBeTruthy()
+
+      await user.click(screen.getByRole('button', {
+        name: 'Upload CSV',
+      }))
+
+      expect(screen.getByText('Dataset Preview')).toBeTruthy()
+    })
+})
+
 describe('Atlas research workflow', () => {
   it('preserves imported data across navigation', async () => {
     mockFetch()

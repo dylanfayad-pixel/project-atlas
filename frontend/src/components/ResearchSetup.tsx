@@ -3,6 +3,7 @@ import type { ChangeEvent } from 'react'
 import { FileUp, Database, ShieldCheck } from 'lucide-react'
 import { CandlestickChart } from './CandlestickChart'
 import { InstrumentEditor } from './InstrumentEditor'
+import { ManualDataEditor } from './ManualDataEditor'
 import type {
   InstrumentMetadata,
 } from '../lib/instrumentMetadata'
@@ -16,6 +17,7 @@ const MAX_FILE_BYTES = 10 * 1024 * 1024
 type Props = {
   dataset: ResearchDataset | null
   onDatasetImported: (filename: string, bars: OhlcvBar[]) => void
+  onManualDataLoaded: (bars: OhlcvBar[]) => void
   onInstrumentSaved: (
     datasetId: string,
     metadata: InstrumentMetadata
@@ -25,6 +27,7 @@ type Props = {
 export function ResearchSetup({
   dataset,
   onDatasetImported,
+  onManualDataLoaded,
   onInstrumentSaved,
 }: Props) {
   const fileInput = useRef<HTMLInputElement>(null)
@@ -32,6 +35,8 @@ export function ResearchSetup({
   const bars = dataset?.bars ?? []
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [sourceMode, setSourceMode] =
+    useState<'csv' | 'manual'>('csv')
 
   // Validate the complete file before exposing imported data.
   async function handleFile(event: ChangeEvent<HTMLInputElement>) {
@@ -72,6 +77,26 @@ export function ResearchSetup({
 
   return (
     <div className="research-setup">
+      <div className="manual-data-actions">
+        <button
+          type="button"
+          className="research-upload-button"
+          onClick={() => setSourceMode('csv')}
+          aria-pressed={sourceMode === 'csv'}
+        >
+          Upload CSV
+        </button>
+        <button
+          type="button"
+          className="research-upload-button"
+          onClick={() => setSourceMode('manual')}
+          aria-pressed={sourceMode === 'manual'}
+        >
+          Manual Entry
+        </button>
+      </div>
+
+      {sourceMode === 'csv' && (
       <section className="panel">
         <div className="panel-heading">
           <div>
@@ -133,6 +158,11 @@ export function ResearchSetup({
           </div>
         )}
       </section>
+      )}
+
+      {sourceMode === 'manual' && (
+        <ManualDataEditor onLoad={onManualDataLoaded} />
+      )}
 
       {dataset && (
         <InstrumentEditor
@@ -153,7 +183,11 @@ export function ResearchSetup({
           <div className="panel-heading">
             <div>
               <h2>Dataset Preview</h2>
-              <p>{filename}</p>
+              <p>
+                  {dataset?.source === 'manual-entry'
+                    ? 'Manually entered daily observations'
+                    : filename}
+                </p>
             </div>
             <span className="panel-tag">VALIDATED</span>
           </div>

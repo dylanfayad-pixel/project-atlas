@@ -34,6 +34,7 @@ type Props = {
     filename: string,
     bars: OhlcvBar[]
   ) => void
+  onManualDataLoaded: (bars: OhlcvBar[]) => void
   onInstrumentSaved: (
     datasetId: string,
     metadata: InstrumentMetadata
@@ -49,6 +50,7 @@ export function WorkspaceContent({
   view,
   session,
   onDatasetImported,
+  onManualDataLoaded,
   onInstrumentSaved,
   data,
   portfolio,
@@ -60,6 +62,7 @@ export function WorkspaceContent({
       <ResearchSetup
         dataset={session.dataset}
         onDatasetImported={onDatasetImported}
+        onManualDataLoaded={onManualDataLoaded}
         onInstrumentSaved={onInstrumentSaved}
       />
     )
@@ -75,7 +78,13 @@ export function WorkspaceContent({
             <h2>Active Research Dataset</h2>
             <p>{dataset.filename ?? 'Imported market data'}</p>
           </div>
-          <span className="panel-tag">UPLOADED DATA</span>
+          <span className="panel-tag">
+            {dataset.source === 'manual-entry'
+              ? 'MANUAL DATA'
+              : dataset.source === 'uploaded-csv'
+                ? 'UPLOADED CSV'
+                : 'RESEARCH DATA'}
+          </span>
         </div>
         <div className="detail-grid">
           <div className="detail-card">

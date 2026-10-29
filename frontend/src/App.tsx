@@ -11,6 +11,7 @@ import type { PortfolioData } from './lib/portfolioData'
 import {
   createResearchSession,
   createUploadedDataset,
+  createManualDataset,
 } from './lib/researchSession'
 import type { OhlcvBar } from './lib/ohlcvData'
 import type {
@@ -38,6 +39,16 @@ function App() {
     bars: OhlcvBar[]
   ) {
     const dataset = createUploadedDataset(filename, bars)
+
+    setSession((previous) => ({
+      ...previous,
+      dataset,
+      status: 'data-ready',
+    }))
+  }
+
+  function handleManualDataLoaded(bars: OhlcvBar[]) {
+    const dataset = createManualDataset(bars)
 
     setSession((previous) => ({
       ...previous,
@@ -157,9 +168,13 @@ function App() {
 
           <div className="environment-pill">
             <span className="status-dot" />
-            {session.dataset
-              ? 'UPLOADED MARKET DATA'
-              : 'SYNTHETIC DEMO'}
+            {session.dataset?.source === 'manual-entry'
+              ? 'MANUAL MARKET DATA'
+              : session.dataset?.source === 'uploaded-csv'
+                ? 'UPLOADED MARKET DATA'
+                : session.dataset
+                  ? 'RESEARCH MARKET DATA'
+                  : 'SYNTHETIC DEMO'}
           </div>
         </header>
 
@@ -184,6 +199,7 @@ function App() {
             view={activeView}
             session={session}
             onDatasetImported={handleDatasetImported}
+            onManualDataLoaded={handleManualDataLoaded}
             onInstrumentSaved={handleInstrumentSaved}
             data={data}
             portfolio={portfolio}
@@ -193,7 +209,7 @@ function App() {
         )}
 
         <footer>
-          <span>PROJECT ATLAS - QUANTITATIVE RESEARCH PLATFORM</span>
+          <span>© 2026 Dylan Fayad · Project Atlas</span>
           <span>
             <Code2 size={14} />
             C++20 + REACT + TYPESCRIPT
