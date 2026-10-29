@@ -595,3 +595,23 @@ execution until a backend API is implemented.
 
 See [Phase 5.2 engineering documentation](
 phase5-integrated-workspace.md).
+
+## Phase 5.3 — Development Notes
+
+The milestone adds manual market-data entry,
+explicit Demo Mode, session isolation, and
+historical provider adapter foundations.
+
+Run frontend and API checks:
+
+```bash
+cd frontend
+npx tsc --noEmit -p tsconfig.app.json
+npx tsc --noEmit -p tsconfig.api.json
+npm run test
+npm run lint
+npm run build
+```
+
+See [Phase 5.3 documentation](
+phase5-data-first-workspace.md).

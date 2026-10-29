@@ -394,3 +394,25 @@ Session state is not persisted across page reloads.
 
 See [Phase 5.2 engineering documentation](
 phase5-integrated-workspace.md).
+
+## Phase 5.3 — Research Session Isolation
+
+Atlas separates three research conditions:
+
+1. No active dataset.
+2. Validated market data without backtest results.
+3. Explicit synthetic demonstration mode.
+
+App.tsx owns research-session and demo state.
+
+WorkspaceContent renders the selected workspace
+according to the active session.
+
+Historical provider interfaces are implemented
+separately from browser research state.
+
+The production market-data endpoint remains
+unconfigured.
+
+See [Phase 5.3 documentation](
+phase5-data-first-workspace.md).

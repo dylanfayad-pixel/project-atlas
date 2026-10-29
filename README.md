@@ -19,38 +19,51 @@ Project Atlas is an educational systems-engineering project for validating marke
 | Phase 6 — Public release | Planned | Backend API, deployment, release hardening |
 
 
-## Current Atlas Terminal Status — Phase 5.2
+## Current Atlas Terminal Status — Phase 5.3
 
-Phase 5.2 introduces an integrated browser research workspace.
+Project Atlas now includes a data-first browser research
+workspace.
 
-Implemented locally:
+### Implemented locally
 
-- Strict daily OHLCV CSV imports.
+- Empty workspace on initial application load.
+- Explicit synthetic Demo Mode.
+- Daily OHLCV CSV and manual data entry.
 - Interactive candlestick and volume visualization.
-- Shared research-session state across workspaces.
-- User-provided ticker and exchange metadata.
-- Consistent dataset identification and provenance.
-- Separation of imported data from synthetic results.
-- React interaction and application integration tests.
+- Shared research sessions and instrument metadata.
+- Separation of user data from demonstration results.
+- Historical market-data API foundation.
+- Massive provider adapter with mocked HTTP tests.
 
-The latest local frontend verification passed 67 Vitest
-tests, TypeScript, ESLint, and the production build.
+### Latest local verification
 
-The C++ engine passed all 27 CTest suites in both
-Debug and Release during Phase 5.2 local verification.
+- 157 Vitest tests passed.
+- Frontend and backend TypeScript passed.
+- ESLint passed.
+- Production build passed.
 
-A public frontend preview is hosted at:
+The C++ engine previously passed 27 CTest suites in
+Debug and Release. Rerun both configurations before
+this release.
+
+### Public deployment
+
+Public preview:
 
 https://project-atlas-two-rho.vercel.app
 
-The Phase 5.2 changes are not yet deployed there.
+The Phase 5.3 changes have not yet been verified
+on the public deployment.
 
-Uploaded data is not currently submitted to the C++
-backtester. The public preview is not a live trading
-service and does not place brokerage orders.
+Live historical-data retrieval remains disabled.
+Uploaded and manually entered data cannot yet run
+through the C++ backtester from the website.
 
-See [Phase 5.2 engineering documentation](
-docs/phase5-integrated-workspace.md).
+Atlas is an educational research platform, not a
+live trading service.
+
+See [Phase 5.3 engineering documentation](
+docs/phase5-data-first-workspace.md).
 
 ## Features
 

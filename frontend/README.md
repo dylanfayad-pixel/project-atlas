@@ -221,3 +221,21 @@ market-data provider, or brokerage integration.
 
 See [Phase 5.2 engineering documentation](
 ../docs/phase5-integrated-workspace.md).
+
+## Phase 5.3 — Data-First Workspace
+
+Atlas starts with an empty research session.
+
+Synthetic results are available only through explicit
+Demo Mode activation.
+
+Users can upload validated daily OHLCV CSV files
+or manually enter daily OHLCV observations.
+
+The browser does not yet execute C++ backtests
+for user-provided data.
+
+The latest reported local suite passed 157 Vitest tests.
+
+See [Phase 5.3 documentation](
+../docs/phase5-data-first-workspace.md).

@@ -57,3 +57,6 @@ __pycache__/
 # Versioned frontend fixtures remain tracked separately.
 /atlas_portfolio.json
 /atlas_portfolio_v2.json
+
+# Local source transfer archives
+/project-atlas-source.zip

@@ -360,3 +360,27 @@ pending until the release is pushed.
 
 See [Phase 5.2 engineering documentation](
 phase5-integrated-workspace.md).
+
+## Phase 5.3 — Verification
+
+Latest reported local results:
+
+| Check | Result |
+|---|---|
+| Vitest | 157/157 passed |
+| Frontend TypeScript | Passed |
+| Backend TypeScript | Passed |
+| ESLint | Passed |
+| Production build | Passed |
+| Whitespace | Passed |
+
+The suite covers empty initial sessions,
+explicit Demo Mode, source switching,
+session isolation, delayed responses,
+manual data validation, and provider adapters.
+
+C++ release verification and new GitHub Actions
+results remain pending.
+
+See [Phase 5.3 documentation](
+phase5-data-first-workspace.md).

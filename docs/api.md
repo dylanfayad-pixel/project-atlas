@@ -221,3 +221,31 @@ The browser validates schema v3 before rendering.
 The active JSON v3 demonstration fixture is synthetic.
 
 See [Phase 4.4 risk reporting](phase4-risk-reporting.md).
+
+## Phase 5.3 — Historical Market-Data API Foundation
+
+The repository includes a serverless GET endpoint:
+
+`/api/market-data`
+
+Supported query parameters:
+
+- `symbol`
+- `start`
+- `end`
+- `timeframe` (daily only)
+
+Requests are validated before provider execution.
+
+The implementation includes provider timeouts,
+structured error responses, response validation,
+and an experimental Massive HTTP adapter.
+
+The production handler currently uses a null
+provider and returns a provider-not-configured
+response for valid requests.
+
+No public live market-data service is enabled.
+
+See [Phase 5.3 documentation](
+phase5-data-first-workspace.md).

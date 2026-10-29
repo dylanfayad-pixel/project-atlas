@@ -33,12 +33,25 @@ function App() {
     useState<WorkspaceView>('research-setup')
 
   const [session, setSession] = useState(createResearchSession)
+  const [demoMode, setDemoMode] = useState(false)
+
+  // Remove synthetic results when changing research sources.
+  function clearDemoResults() {
+    setData([])
+    setPortfolio(null)
+    setError(null)
+    setPortfolioError(null)
+    setLoading(false)
+    setPortfolioLoading(false)
+  }
 
   function handleDatasetImported(
     filename: string,
     bars: OhlcvBar[]
   ) {
     const dataset = createUploadedDataset(filename, bars)
+    setDemoMode(false)
+    clearDemoResults()
 
     setSession((previous) => ({
       ...previous,
@@ -49,6 +62,8 @@ function App() {
 
   function handleManualDataLoaded(bars: OhlcvBar[]) {
     const dataset = createManualDataset(bars)
+    setDemoMode(false)
+    clearDemoResults()
 
     setSession((previous) => ({
       ...previous,
@@ -80,17 +95,19 @@ function App() {
 
   const [data, setData] = useState<MarketPoint[]>([])
   const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
 
   const [portfolio, setPortfolio] =
     useState<PortfolioData | null>(null)
 
-  const [portfolioLoading, setPortfolioLoading] = useState(true)
+  const [portfolioLoading, setPortfolioLoading] = useState(false)
   const [portfolioError, setPortfolioError] =
     useState<string | null>(null)
 
 
   useEffect(() => {
+    if (!demoMode) return
+
     const controller = new AbortController()
 
     fetch('/data/demo_signals.csv', {
@@ -114,10 +131,12 @@ function App() {
       })
 
     return () => controller.abort()
-  }, [])
+  }, [demoMode])
 
   // Load portfolio results independently of market signals.
   useEffect(() => {
+    if (!demoMode) return
+
     const controller = new AbortController()
 
     fetch('/data/demo_portfolio_v3.json', {
@@ -147,7 +166,7 @@ function App() {
       })
 
     return () => controller.abort()
-  }, [])
+  }, [demoMode])
 
   return (
     <div className="app-shell">
@@ -174,9 +193,40 @@ function App() {
                 ? 'UPLOADED MARKET DATA'
                 : session.dataset
                   ? 'RESEARCH MARKET DATA'
-                  : 'SYNTHETIC DEMO'}
+                  : demoMode ? 'SYNTHETIC DEMO' : 'NO ACTIVE DATA'}
           </div>
-        </header>
+        <div className="demo-controls">
+            {demoMode ? (
+              <button
+                type="button"
+                className="research-upload-button"
+                onClick={() => {
+                  setDemoMode(false)
+                  clearDemoResults()
+                  setSession(createResearchSession())
+                  setActiveView('research-setup')
+                }}
+              >
+                Exit Demo
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="research-upload-button"
+                onClick={() => {
+                  setSession(createResearchSession())
+                  clearDemoResults()
+                  setDemoMode(true)
+                  setLoading(true)
+                  setPortfolioLoading(true)
+                  setActiveView('overview')
+                }}
+              >
+                Launch Demo
+              </button>
+            )}
+          </div>
+          </header>
 
         {session.dataset && (
           <SessionIdentity dataset={session.dataset} />
@@ -198,6 +248,7 @@ function App() {
           <WorkspaceContent
             view={activeView}
             session={session}
+              demoMode={demoMode}
             onDatasetImported={handleDatasetImported}
             onManualDataLoaded={handleManualDataLoaded}
             onInstrumentSaved={handleInstrumentSaved}

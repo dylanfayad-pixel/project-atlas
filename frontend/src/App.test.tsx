@@ -70,6 +70,181 @@ afterEach(() => {
 })
 
 
+describe('Explicit demonstration mode', () => {
+  it('starts without synthetic performance results', async () => {
+    mockFetch()
+    const user = userEvent.setup()
+    render(<App />)
+
+    await screen.findByText('Market Data Import')
+
+    expect(screen.getByText('NO ACTIVE DATA')).toBeTruthy()
+
+    await user.click(screen.getByRole('button', {
+      name: 'Overview',
+    }))
+
+    expect(
+      screen.getByText('No Active Research Session')
+    ).toBeTruthy()
+
+    expect(screen.queryByTestId('demo-price-chart')).toBeNull()
+    expect(screen.queryByTestId('portfolio-analytics')).toBeNull()
+  })
+
+  it('activates demo only when explicitly requested', async () => {
+    mockFetch()
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.click(screen.getByRole('button', {
+      name: 'Launch Demo',
+    }))
+
+    expect(await screen.findByText('SYNTHETIC DEMO')).toBeTruthy()
+
+    expect(
+      await screen.findByTestId('demo-price-chart')
+    ).toBeTruthy()
+  })
+
+  it('returns to an empty session after exiting demo', async () => {
+    mockFetch()
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.click(screen.getByRole('button', {
+      name: 'Launch Demo',
+    }))
+
+    await screen.findByTestId('demo-price-chart')
+
+    await user.click(screen.getByRole('button', {
+      name: 'Exit Demo',
+    }))
+
+    expect(screen.getByText('NO ACTIVE DATA')).toBeTruthy()
+
+    await user.click(screen.getByRole('button', {
+      name: 'Overview',
+    }))
+
+    expect(
+      screen.getByText('No Active Research Session')
+    ).toBeTruthy()
+  })
+})
+
+describe('Research session isolation', () => {
+  it('clears imported data when launching demo', async () => {
+    mockFetch()
+    const user = userEvent.setup()
+    render(<App />)
+
+    await uploadCsv(user, sampleCsv)
+    await screen.findByText('Dataset Preview')
+
+    await user.click(screen.getByRole('button', {
+      name: 'Launch Demo',
+    }))
+
+    expect(
+      await screen.findByText('SYNTHETIC DEMO')
+    ).toBeTruthy()
+
+    expect(
+      await screen.findByTestId('demo-price-chart')
+    ).toBeTruthy()
+
+    expect(
+      screen.queryByText('Active Research Dataset')
+    ).toBeNull()
+  })
+
+  it('returns to an empty workspace after demo exit', async () => {
+    mockFetch()
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.click(screen.getByRole('button', {
+      name: 'Launch Demo',
+    }))
+
+    await screen.findByTestId('demo-price-chart')
+
+    await user.click(screen.getByRole('button', {
+      name: 'Exit Demo',
+    }))
+
+    await user.click(screen.getByRole('button', {
+      name: 'Backtests',
+    }))
+
+    expect(
+      screen.getByText('No Active Research Session')
+    ).toBeTruthy()
+
+    expect(
+      screen.queryByTestId('portfolio-analytics')
+    ).toBeNull()
+  })
+})
+
+describe('Demo loading race conditions', () => {
+  it('ignores late demo responses after exiting', async () => {
+    let resolveSignals:
+      ((value: { ok: boolean; text: () => Promise<string> }) => void)
+      | undefined
+
+    const pendingSignals = new Promise<{
+      ok: boolean
+      text: () => Promise<string>
+    }>((resolve) => {
+      resolveSignals = resolve
+    })
+
+    vi.stubGlobal('fetch', vi.fn((input: RequestInfo | URL) => {
+      if (String(input).includes('demo_signals.csv')) {
+        return pendingSignals
+      }
+
+      return Promise.resolve({
+        ok: true,
+        json: async () => ({}),
+      })
+    }))
+
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.click(screen.getByRole('button', {
+      name: 'Launch Demo',
+    }))
+
+    await user.click(screen.getByRole('button', {
+      name: 'Exit Demo',
+    }))
+
+    resolveSignals?.({
+      ok: true,
+      text: async () =>
+        'index,timestamp,price,signal\\n0,2026-01-05,100,HOLD',
+    })
+
+    await user.click(screen.getByRole('button', {
+      name: 'Overview',
+    }))
+
+    expect(
+      screen.getByText('No Active Research Session')
+    ).toBeTruthy()
+
+    expect(
+      screen.queryByTestId('demo-price-chart')
+    ).toBeNull()
+  })
+})
+
 describe('Manual research workflow', () => {
   async function loadManualData(
     user: ReturnType<typeof userEvent.setup>

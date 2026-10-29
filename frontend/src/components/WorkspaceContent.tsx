@@ -30,6 +30,7 @@ import { SignalTable } from './SignalTable'
 type Props = {
   view: WorkspaceView
   session: ResearchSession
+  demoMode: boolean
   onDatasetImported: (
     filename: string,
     bars: OhlcvBar[]
@@ -49,6 +50,7 @@ type Props = {
 export function WorkspaceContent({
   view,
   session,
+  demoMode,
   onDatasetImported,
   onManualDataLoaded,
   onInstrumentSaved,
@@ -159,6 +161,29 @@ export function WorkspaceContent({
           engine is not connected to this browser session.
           No trades, returns, or risk metrics have been
           calculated for the uploaded data.
+        </p>
+      </section>
+    )
+  }
+
+  // Without an active dataset or explicit Demo Mode,
+  // no synthetic results may appear in the workspace.
+  if (!session.dataset && !demoMode) {
+    return (
+      <section className="panel">
+        <div className="panel-heading">
+          <div>
+            <h2>No Active Research Session</h2>
+            <p>Start by loading market data.</p>
+          </div>
+          <span className="panel-tag">NO DATA</span>
+        </div>
+        <p className="workspace-description">
+          Upload a daily OHLCV CSV or enter observations
+          manually in Research Setup. Market charts,
+          strategy signals, and backtest performance
+          will appear only when supported by an
+          active research session.
         </p>
       </section>
     )
