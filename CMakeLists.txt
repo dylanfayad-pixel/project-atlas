@@ -601,3 +601,72 @@ if(BUILD_TESTING)
         COMMAND test_drawdown_controls
     )
 endif()
+
+
+# Phase 4.4: verify chronological risk-control event reporting.
+if(BUILD_TESTING)
+    add_executable(test_risk_events
+        tests/test_risk_events.cpp
+    )
+
+    target_link_libraries(test_risk_events
+        PRIVATE atlas_core
+    )
+
+    target_compile_options(test_risk_events PRIVATE
+        -Wall -Wextra -Wpedantic
+    )
+
+    add_test(
+        NAME risk_events
+        COMMAND test_risk_events
+    )
+endif()
+
+
+# Phase 4.4: validate versioned portfolio risk reporting.
+if(BUILD_TESTING)
+    add_executable(test_portfolio_json_v3
+        tests/test_portfolio_json_v3.cpp
+    )
+
+    target_link_libraries(test_portfolio_json_v3
+        PRIVATE atlas_core
+    )
+
+    target_compile_options(test_portfolio_json_v3 PRIVATE
+        -Wall -Wextra -Wpedantic
+    )
+
+    add_test(
+        NAME portfolio_json_v3
+        COMMAND test_portfolio_json_v3
+    )
+endif()
+
+
+# Phase 4.4: validate C++ JSON v3 with Python's JSON parser.
+if(BUILD_TESTING)
+    find_package(Python3 COMPONENTS Interpreter REQUIRED)
+
+    add_executable(atlas_portfolio_json_v3_generator
+        tests/portfolio_json_v3_generator.cpp
+    )
+
+    target_link_libraries(atlas_portfolio_json_v3_generator
+        PRIVATE atlas_core
+    )
+
+    target_compile_options(
+        atlas_portfolio_json_v3_generator PRIVATE
+        -Wall -Wextra -Wpedantic
+    )
+
+    add_test(
+        NAME portfolio_json_v3_integration
+        COMMAND
+            ${Python3_EXECUTABLE}
+            ${CMAKE_SOURCE_DIR}/scripts/verify_portfolio_json_v3.py
+            $<TARGET_FILE:atlas_portfolio_json_v3_generator>
+    )
+endif()

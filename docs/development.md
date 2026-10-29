@@ -306,7 +306,7 @@ ctest --test-dir build --output-on-failure
 ctest --test-dir build-release --output-on-failure
 ```
 
-Phase 3 currently registers 20 CTest suites.
+The Phase 3 milestone registered 20 CTest suites.
 
 ### Run Frontend Checks
 
@@ -417,8 +417,8 @@ See [risk analytics](risk-analytics.md).
 
 Risk analytics is currently available through C++.
 
-It is not yet exported through the versioned
-portfolio JSON contract or displayed by Atlas Terminal.
+Phase 4.4 subsequently integrated these metrics into
+JSON v3 and the Atlas Terminal dashboard.
 
 Do not claim that the website already provides
 Sharpe or Sortino analytics.
@@ -508,3 +508,44 @@ The Phase 4.3 working tree registers 24 CTest suites.
 - Risk events are not currently exported in JSON.
 
 See [drawdown controls](phase4-drawdown-controls.md).
+
+## Phase 4.4 — Risk Reporting Development
+
+Phase 4.4 adds risk-event reporting, JSON v3
+serialization, and frontend visualization.
+
+### Backend verification
+
+```bash
+cmake --build build --parallel 2
+ctest --test-dir build --output-on-failure
+
+cmake --build build-release --parallel 2
+ctest --test-dir build-release --output-on-failure
+```
+
+### JSON v3 integration
+
+```bash
+ctest --test-dir build   -R '^portfolio_json_v3_integration$'   --output-on-failure
+```
+
+### Frontend verification
+
+```bash
+cd frontend
+npx tsc --noEmit -p tsconfig.app.json
+npm run test
+npm run lint
+npm run build
+```
+
+The Phase 4.4 working tree registers 27 CTest
+suites and 28 frontend Vitest tests.
+
+### Implementation boundary
+
+The frontend loads a static C++-generated JSON v3
+fixture. It does not invoke the simulator directly.
+
+See [Phase 4.4 risk reporting](phase4-risk-reporting.md).

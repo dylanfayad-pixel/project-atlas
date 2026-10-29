@@ -9,13 +9,14 @@ JSON file. A live HTTP backend API is not implemented yet.
 
 ## Schema Version
 
-The portfolio exporter supports two schema versions:
+The portfolio exporter supports three schema versions:
 
 - `schema_version: 1` — legacy portfolio results.
 - `schema_version: 2` — portfolio results with execution costs.
+- `schema_version: 3` — execution costs and risk reporting.
 
-The frontend accepts both versions. The active cost-aware
-dashboard fixture uses schema v2.
+The frontend accepts all three versions. The active
+portfolio dashboard fixture uses schema v3.
 
 Schema v2 adds these top-level fields:
 
@@ -183,3 +184,40 @@ assumptions and floating-point financial values.
 
 JSON validity does not establish profitability,
 production readiness, or real-market execution accuracy.
+
+## JSON Schema v3 — Risk Reporting
+
+Schema v3 preserves the cost-aware fields introduced
+in schema v2.
+
+It adds three top-level reporting objects:
+
+| Field | Description |
+|---|---|
+| `risk_metrics` | Quantitative statistics and sampling assumptions |
+| `exposure` | Historical position exposure and observed maximum |
+| `risk_controls` | Execution policy configuration and risk events |
+
+Risk metrics include volatility, Sharpe, downside
+deviation, and Sortino.
+
+Undefined statistics are represented as JSON `null`.
+
+Risk-control events use the following types:
+
+- `DRAWDOWN_BREACH`
+- `LIQUIDATION_EXECUTED`
+- `LIQUIDATION_REJECTED`
+
+A breach is observed at bar close.
+
+Liquidation may execute at the following bar's open.
+
+Executed liquidation events must correspond to
+recorded SELL fills.
+
+The browser validates schema v3 before rendering.
+
+The active JSON v3 demonstration fixture is synthetic.
+
+See [Phase 4.4 risk reporting](phase4-risk-reporting.md).

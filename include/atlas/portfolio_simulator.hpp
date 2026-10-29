@@ -32,6 +32,26 @@ struct EquityPoint {
     double equity;
 };
 
+// Events produced by the portfolio risk-control state machine.
+// These describe simulation decisions, not brokerage orders.
+enum class RiskEventType {
+    DrawdownBreach,
+    LiquidationExecuted,
+    LiquidationRejected
+};
+
+// A timestamped observation or outcome from risk enforcement.
+struct RiskEvent {
+    std::size_t index;
+    std::string timestamp;
+    RiskEventType type;
+
+    // Drawdown observed at the event's bar close.
+    // Execution events may leave this unset because they
+    // occur at the next bar's opening price.
+    double drawdown_fraction = 0.0;
+};
+
 // Results from a deterministic historical execution simulation.
 struct PortfolioResult {
     double initial_capital;
@@ -44,6 +64,10 @@ struct PortfolioResult {
 
     std::vector<SimulatedTrade> trades;
     std::vector<EquityPoint> equity_curve;
+
+    // Chronological risk-control events produced during replay.
+    // Existing JSON v1/v2 serialization remains unchanged.
+    std::vector<RiskEvent> risk_events;
 };
 
 // Configurable simulated execution costs.

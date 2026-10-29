@@ -1,3 +1,4 @@
+import { RiskEventHistory } from './RiskEventHistory'
 import {
   CartesianGrid,
   Line,
@@ -53,7 +54,7 @@ export function PortfolioAnalytics({ portfolio }: Props) {
         </div>
       </section>
 
-      {portfolio.schema_version === 2 && (
+      {(portfolio.schema_version === 2 || portfolio.schema_version === 3) && (
         <section className="metric-grid">
           <div className="metric-card">
             <span>TOTAL COMMISSIONS</span>
@@ -86,6 +87,147 @@ export function PortfolioAnalytics({ portfolio }: Props) {
             </strong>
           </div>
         </section>
+      )}
+
+      {portfolio.schema_version === 3 && (
+        <section className="panel">
+          <div className="panel-heading">
+            <div>
+              <h2>Historical Portfolio Exposure</h2>
+              <p>
+                Closing position value as a percentage
+                of portfolio equity
+              </p>
+            </div>
+            <span className="panel-tag">RISK EXPOSURE</span>
+          </div>
+
+          <div className="metric-grid">
+            <div className="metric-card">
+              <span>MAXIMUM OBSERVED EXPOSURE</span>
+              <strong>
+                {(
+                  portfolio.exposure.maximum_observed_fraction * 100
+                ).toFixed(2)}%
+              </strong>
+            </div>
+
+            <div className="metric-card">
+              <span>ENTRY EXPOSURE LIMIT</span>
+              <strong>
+                {(
+                  portfolio.risk_controls.max_entry_exposure * 100
+                ).toFixed(2)}%
+              </strong>
+            </div>
+          </div>
+
+          <div className="chart-container">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart
+                data={portfolio.exposure.observations}
+                margin={{ top: 12, right: 18, left: 8, bottom: 4 }}
+              >
+                <CartesianGrid
+                  stroke="#243247"
+                  strokeDasharray="3 5"
+                />
+                <XAxis
+                  dataKey="timestamp"
+                  stroke="#8190a6"
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <YAxis
+                  stroke="#8190a6"
+                  tickLine={false}
+                  axisLine={false}
+                  domain={[0, 1]}
+                  tickFormatter={(value: number) =>
+                    `${(value * 100).toFixed(0)}%`
+                  }
+                />
+                <Tooltip
+                  formatter={(value) => [
+                    `${(Number(value) * 100).toFixed(2)}%`,
+                    'Portfolio Exposure',
+                  ]}
+                  contentStyle={{
+                    background: '#111e30',
+                    border: '1px solid #2a3b52',
+                    borderRadius: 10,
+                  }}
+                />
+                <Line
+                  type="linear"
+                  dataKey="fraction"
+                  stroke="#a78bfa"
+                  strokeWidth={3}
+                  dot={false}
+                  isAnimationActive={false}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+
+          <p>
+            Entry exposure limits apply at execution.
+            Market movements can change exposure afterward.
+          </p>
+        </section>
+      )}
+
+      {portfolio.schema_version === 3 && (
+        <section className="panel">
+          <div className="panel-heading">
+            <div>
+              <h2>Quantitative Risk Analytics</h2>
+              <p>
+                C++-calculated risk metrics using
+                {` ${portfolio.risk_metrics.periods_per_year}`}
+                {' '}periods per year
+              </p>
+              <p>
+                Synthetic research data. Annualized statistics
+                from short samples are illustrative and should
+                not be interpreted as reliable performance estimates.
+              </p>
+            </div>
+            <span className="panel-tag">RISK ENGINE</span>
+          </div>
+
+          <div className="metric-grid">
+            {([
+              ['ANNUALIZED VOLATILITY',
+                portfolio.risk_metrics.annualized_volatility_pct,
+                '%'],
+              ['SHARPE RATIO',
+                portfolio.risk_metrics.sharpe_ratio,
+                ''],
+              ['DOWNSIDE DEVIATION',
+                portfolio.risk_metrics.downside_deviation_pct,
+                '%'],
+              ['SORTINO RATIO',
+                portfolio.risk_metrics.sortino_ratio,
+                ''],
+            ] as const).map(([label, value, suffix]) => (
+              <div className="metric-card" key={label}>
+                <span>{label}</span>
+                <strong>
+                  {value === null
+                    ? 'N/A'
+                    : `${value.toFixed(2)}${suffix}`}
+                </strong>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {portfolio.schema_version === 3 && (
+        <RiskEventHistory
+          events={portfolio.risk_controls.events}
+        />
       )}
 
       <section className="panel">
@@ -167,7 +309,7 @@ export function PortfolioAnalytics({ portfolio }: Props) {
                 <th>SIDE</th>
                 <th>PRICE</th>
                 <th>QUANTITY</th>
-                {portfolio.schema_version === 2 && (
+                {(portfolio.schema_version === 2 || portfolio.schema_version === 3) && (
                   <>
                     <th>COMMISSION</th>
                     <th>SLIPPAGE</th>
@@ -188,7 +330,7 @@ export function PortfolioAnalytics({ portfolio }: Props) {
                   </td>
                   <td>{money(trade.price)}</td>
                   <td>{trade.quantity.toFixed(4)}</td>
-                  {portfolio.schema_version === 2 &&
+                  {(portfolio.schema_version === 2 || portfolio.schema_version === 3) &&
                     'commission_paid' in trade &&
                     'slippage_cost' in trade && (
                       <>

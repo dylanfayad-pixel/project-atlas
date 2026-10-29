@@ -14,7 +14,7 @@ Project Atlas is an educational systems-engineering project for validating marke
 | Phase 1 — Market data | Complete | OHLCV parsing, validation, chronology checks, benchmarks |
 | Phase 2 — Historical research | Complete | Replay, strategies, portfolio simulation, metrics, JSON export, dashboard |
 | Phase 3 — Execution realism | Complete | Configurable commissions, adverse slippage, cost-aware accounting, JSON v2, dashboard analytics |
-| Phase 4 — Portfolio and risk | In progress | Risk analytics, configurable entry allocation, entry exposure limits, and close-observed drawdown safeguards |
+| Phase 4 — Portfolio and risk | In progress | Risk analytics, entry controls, drawdown safeguards, JSON v3 risk reporting, and dashboard visualization |
 | Phase 5 — Research and performance | Planned | More datasets, profiling, robust strategy evaluation |
 | Phase 6 — Public release | Planned | Backend API, deployment, release hardening |
 
@@ -79,8 +79,8 @@ periodic risk-free rates, and periodic downside targets.
 Undefined ratios are represented with `std::optional`.
 
 The Phase 4.1 risk analytics module is implemented and verified.
-These risk metrics are not yet exported through the frontend
-portfolio JSON contract or displayed in Atlas Terminal.
+These metrics are exported through JSON v3 and displayed
+in Atlas Terminal using synthetic demonstration data.
 
 Annualization assumes equally spaced observations.
 Synthetic demonstration timestamps do not establish
@@ -130,8 +130,8 @@ The default threshold of 1.0 disables the safeguard.
 Market gaps and rejected liquidation attempts can cause
 losses beyond the configured threshold.
 
-The circuit-breaker state is not currently exported
-through portfolio JSON v1/v2 or shown in Atlas Terminal.
+JSON v3 exports risk-control events for Atlas Terminal.
+Legacy JSON v1/v2 contracts remain unchanged.
 
 See [Phase 4.3 drawdown controls](docs/phase4-drawdown-controls.md).
 
@@ -284,3 +284,32 @@ The [Project Atlas learning guide](docs/notes/README.md) contains 13 topic guide
 ## Disclaimer
 
 Educational engineering and quantitative research software only. Not investment advice, a trading signal service, or a production trading system.
+
+## Phase 4.4 — Risk Reporting and Dashboard
+
+Phase 4.4 integrates quantitative risk reporting with
+the Atlas Terminal frontend.
+
+Implemented capabilities:
+
+- Versioned JSON schema v3.
+- Quantitative risk metrics and sampling configuration.
+- Historical portfolio exposure observations.
+- Drawdown breach and liquidation event reporting.
+- C++ exporter event-to-trade reconciliation.
+- Python integration verification.
+- TypeScript runtime schema validation.
+- Risk analytics cards and exposure visualization.
+- Risk-control event history.
+
+The active dashboard portfolio fixture is generated
+by the C++ engine and contains synthetic data.
+
+The browser does not execute C++ directly.
+
+Local Phase 4.4 verification passed 27 CTest suites
+in Debug and Release and 28 frontend Vitest tests.
+
+GitHub Actions verification for this milestone is pending.
+
+See [Phase 4.4 risk reporting](docs/phase4-risk-reporting.md).

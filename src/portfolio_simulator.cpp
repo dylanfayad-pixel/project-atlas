@@ -241,6 +241,11 @@ PortfolioResult PortfolioSimulator::run(
                  (drawdown_halted &&
                   config.liquidate_on_drawdown))
             ) {
+                // A latched risk policy takes precedence over
+                // a simultaneous ordinary strategy SELL.
+                const bool risk_liquidation =
+                    drawdown_halted &&
+                    config.liquidate_on_drawdown;
 
                 const double price = bar.open * (1.0 - slip);
                 const double quantity = shares;
@@ -287,6 +292,24 @@ PortfolioResult PortfolioSimulator::run(
                         price, quantity,
                         commission, slippage_cost
                     });
+
+                    if (risk_liquidation) {
+                        result.risk_events.push_back({
+                            i,
+                            bar.timestamp,
+                            RiskEventType::LiquidationExecuted,
+                            0.0
+                        });
+                    }
+                } else if (risk_liquidation) {
+                    // The position remains open when gross
+                    // proceeds cannot cover commission.
+                    result.risk_events.push_back({
+                        i,
+                        bar.timestamp,
+                        RiskEventType::LiquidationRejected,
+                        0.0
+                    });
                 }
             }
         }
@@ -326,6 +349,15 @@ PortfolioResult PortfolioSimulator::run(
 
             if (drawdown >= config.max_drawdown_fraction) {
                 drawdown_halted = true;
+
+                // Record the close-observed breach once.
+                // The latch prevents duplicate breach events.
+                result.risk_events.push_back({
+                    i,
+                    bar.timestamp,
+                    RiskEventType::DrawdownBreach,
+                    drawdown
+                });
             }
         }
     }

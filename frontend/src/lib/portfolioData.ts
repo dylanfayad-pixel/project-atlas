@@ -45,7 +45,52 @@ export type PortfolioV2 = PortfolioBase & {
   trades: PortfolioV2Trade[]
 }
 
-export type PortfolioData = PortfolioV1 | PortfolioV2
+// Schema v3 extends cost-aware portfolio results with
+// quantitative risk analytics and execution-policy events.
+export type PortfolioRiskMetrics = {
+  return_observations: number
+  periods_per_year: number
+  risk_free_rate_per_period: number
+  target_return_per_period: number
+  annualized_volatility_pct: number | null
+  sharpe_ratio: number | null
+  downside_deviation_pct: number | null
+  sortino_ratio: number | null
+}
+
+export type PortfolioExposurePoint = {
+  index: number
+  timestamp: string
+  fraction: number
+}
+
+export type PortfolioRiskEvent = {
+  index: number
+  timestamp: string
+  type:
+    | 'DRAWDOWN_BREACH'
+    | 'LIQUIDATION_EXECUTED'
+    | 'LIQUIDATION_REJECTED'
+  drawdown_fraction: number
+}
+
+export type PortfolioV3 = Omit<PortfolioV2, 'schema_version'> & {
+  schema_version: 3
+  risk_metrics: PortfolioRiskMetrics
+  exposure: {
+    observations: PortfolioExposurePoint[]
+    maximum_observed_fraction: number
+  }
+  risk_controls: {
+    max_entry_allocation: number
+    max_entry_exposure: number
+    max_drawdown_fraction: number
+    liquidate_on_drawdown: boolean
+    events: PortfolioRiskEvent[]
+  }
+}
+
+export type PortfolioData = PortfolioV1 | PortfolioV2 | PortfolioV3
 
 // Narrow unknown JSON objects before reading their fields.
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -100,7 +145,8 @@ export function parsePortfolioData(value: unknown): PortfolioData {
   }
 
   if (value.schema_version !== 1 &&
-      value.schema_version !== 2) {
+      value.schema_version !== 2 &&
+      value.schema_version !== 3) {
     throw new Error('Unsupported portfolio schema version')
   }
 
@@ -157,7 +203,7 @@ export function parsePortfolioData(value: unknown): PortfolioData {
     throw new Error('Invalid portfolio trade')
   }
 
-  if (schemaVersion === 2) {
+  if (schemaVersion >= 2) {
     const commission = value.total_commission
     const slippage = value.total_slippage_cost
     const total = value.total_execution_cost
@@ -206,6 +252,157 @@ export function parsePortfolioData(value: unknown): PortfolioData {
         !matches(slippage, tradeSlippage) ||
         !matches(total, commission + slippage)) {
       throw new Error('Execution cost totals disagree')
+    }
+  }
+
+  if (schemaVersion === 3) {
+    const metrics = value.risk_metrics
+    const exposure = value.exposure
+    const controls = value.risk_controls
+
+    if (!isRecord(metrics) ||
+        !isRecord(exposure) ||
+        !isRecord(controls)) {
+      throw new Error('Missing JSON v3 risk reporting')
+    }
+
+    if (!isNonNegativeInteger(metrics.return_observations) ||
+        !isFiniteNumber(metrics.periods_per_year) ||
+        metrics.periods_per_year <= 0 ||
+        !isFiniteNumber(metrics.risk_free_rate_per_period) ||
+        !isFiniteNumber(metrics.target_return_per_period)) {
+      throw new Error('Invalid risk sampling configuration')
+    }
+
+    const optionalMetrics = [
+      'annualized_volatility_pct',
+      'sharpe_ratio',
+      'downside_deviation_pct',
+      'sortino_ratio',
+    ] as const
+
+    for (const field of optionalMetrics) {
+      const statistic = metrics[field]
+      if (statistic !== null && !isFiniteNumber(statistic)) {
+        throw new Error('Invalid optional risk statistic')
+      }
+    }
+
+    if (!Array.isArray(exposure.observations) ||
+        !isFiniteNumber(exposure.maximum_observed_fraction) ||
+        exposure.maximum_observed_fraction < 0 ||
+        exposure.maximum_observed_fraction > 1) {
+      throw new Error('Invalid exposure reporting')
+    }
+
+    if (exposure.observations.length !== value.equity_curve.length) {
+      throw new Error('Exposure observation count mismatch')
+    }
+
+    let maximumExposure = 0
+
+    for (let i = 0; i < exposure.observations.length; i++) {
+      const point = exposure.observations[i]
+      const equity = value.equity_curve[i]
+
+      if (!isRecord(point) ||
+          point.index !== i ||
+          point.timestamp !== equity.timestamp ||
+          !isFiniteNumber(point.fraction) ||
+          point.fraction < 0 ||
+          point.fraction > 1) {
+        throw new Error('Invalid exposure observation')
+      }
+
+      if (equity.equity <= 0) {
+        throw new Error('Exposure requires positive equity')
+      }
+
+      const expected = (equity.equity - equity.cash) / equity.equity
+
+      if (!isFiniteNumber(expected) ||
+          Math.abs(point.fraction - expected) > 1e-7) {
+        throw new Error('Exposure accounting mismatch')
+      }
+
+      maximumExposure = Math.max(maximumExposure, point.fraction)
+    }
+
+    if (Math.abs(maximumExposure -
+        exposure.maximum_observed_fraction) > 1e-7) {
+      throw new Error('Maximum exposure mismatch')
+    }
+
+    if (!isFiniteNumber(controls.max_entry_allocation) ||
+        controls.max_entry_allocation < 0 ||
+        controls.max_entry_allocation > 1 ||
+        !isFiniteNumber(controls.max_entry_exposure) ||
+        controls.max_entry_exposure < 0 ||
+        controls.max_entry_exposure > 1 ||
+        !isFiniteNumber(controls.max_drawdown_fraction) ||
+        controls.max_drawdown_fraction <= 0 ||
+        controls.max_drawdown_fraction > 1 ||
+        typeof controls.liquidate_on_drawdown !== 'boolean' ||
+        !Array.isArray(controls.events)) {
+      throw new Error('Invalid risk-control configuration')
+    }
+
+    let previousIndex = -1
+    let breachIndex = -1
+
+    for (const event of controls.events) {
+      if (!isRecord(event) ||
+          !isNonNegativeInteger(event.index) ||
+          event.index >= value.equity_curve.length ||
+          event.index < previousIndex ||
+          event.timestamp !== value.equity_curve[event.index].timestamp ||
+          !isFiniteNumber(event.drawdown_fraction) ||
+          event.drawdown_fraction < 0 ||
+          event.drawdown_fraction > 1) {
+        throw new Error('Invalid risk-event observation')
+      }
+
+      if (event.type === 'DRAWDOWN_BREACH') {
+        if (breachIndex !== -1 ||
+            controls.max_drawdown_fraction === 1 ||
+            event.drawdown_fraction + 1e-12 <
+              controls.max_drawdown_fraction) {
+          throw new Error('Invalid drawdown breach')
+        }
+        breachIndex = event.index
+      } else if (event.type === 'LIQUIDATION_EXECUTED' ||
+                 event.type === 'LIQUIDATION_REJECTED') {
+        if (breachIndex < 0 ||
+            event.index <= breachIndex ||
+            !controls.liquidate_on_drawdown) {
+          throw new Error('Invalid liquidation event')
+        }
+
+        const sells = value.trades.filter(
+          (trade) => trade.index === event.index &&
+            trade.timestamp === event.timestamp &&
+            trade.side === 'SELL'
+        )
+
+        if (event.type === 'LIQUIDATION_EXECUTED' &&
+            sells.length !== 1) {
+          throw new Error('Missing liquidation SELL fill')
+        }
+
+        if (event.type === 'LIQUIDATION_REJECTED' &&
+            sells.length !== 0) {
+          throw new Error('Rejected liquidation has SELL fill')
+        }
+      } else {
+        throw new Error('Unknown risk-event type')
+      }
+
+      previousIndex = event.index
+    }
+
+    if (metrics.return_observations !==
+        Math.max(0, value.equity_curve.length - 1)) {
+      throw new Error('Risk return observation count mismatch')
     }
   }
 

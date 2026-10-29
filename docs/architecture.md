@@ -45,7 +45,7 @@ PerformanceAnalyzer
 PortfolioJsonExporter
         |
         v
-Versioned JSON (v1 / v2)
+Versioned JSON (v1 / v2 / v3)
         |
         v
 React + TypeScript Atlas Terminal
@@ -154,7 +154,7 @@ Schema v1 preserves the legacy portfolio contract.
 
 Schema v2 adds aggregate and per-fill execution costs.
 
-Both versions are supported by the frontend parser.
+All three versions are supported by the frontend parser.
 
 See [JSON contract](api.md).
 
@@ -179,8 +179,7 @@ periodic risk-free rate, and periodic downside target.
 
 Undefined statistics use `std::optional<double>`.
 
-The module is not yet integrated with portfolio JSON
-serialization or the React frontend.
+JSON v3 exposes these metrics through the React frontend.
 
 The implementation does not validate calendar spacing
 and does not establish real-market profitability.
@@ -316,3 +315,41 @@ Planned capabilities include:
 
 Atlas is educational research software, not a
 production brokerage or trading platform.
+
+## Phase 4.4 — Risk Reporting Architecture
+
+Phase 4.4 extends the historical research pipeline:
+
+```text
+PortfolioSimulator
+        |
+        +--> Executed fills and equity observations
+        |
+        +--> Drawdown and liquidation events
+        |
+        v
+RiskAnalyzer
+        |
+        v
+PortfolioJsonExporter (schema v3)
+        |
+        v
+Static JSON demonstration fixture
+        |
+        v
+TypeScript runtime validation
+        |
+        v
+Atlas Terminal risk dashboard
+```
+
+The dashboard displays quantitative risk metrics,
+historical exposure, and risk-control events.
+
+Python independently validates generated JSON v3
+during integration testing.
+
+The frontend still does not invoke the C++ engine
+through an HTTP API.
+
+See [Phase 4.4 risk reporting](phase4-risk-reporting.md).

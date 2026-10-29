@@ -31,6 +31,8 @@ demonstrate the project confidently.
 
 | [16 — Drawdown Circuit Breakers](16-drawdown-circuit-breakers.md) | High-water marks, trading halts, liquidation and gap risk |
 
+| [17 — Risk Reporting and JSON v3](17-risk-reporting-and-json-v3.md) | Versioned contracts, risk events and frontend validation |
+
 ## How to Use These Notes
 
 1. Read the simple explanation first.
@@ -46,8 +48,8 @@ demonstrate the project confidently.
 - Phase 2: Complete
 - Phase 3: Complete
 - Phase 4: In progress
-- C++: 24 CTest suites passed locally in Debug and Release
-- Frontend: 15 Vitest tests passed locally
+- C++: 27 CTest suites passed locally in Debug and Release
+- Frontend: 28 Vitest tests passed locally
 - GitHub CI verification for this milestone: Pending
 
 ## Important Limitations
