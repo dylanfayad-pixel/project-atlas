@@ -212,13 +212,13 @@ export function parseBacktestResult(
   return value as BacktestResult
 }
 
-// Submit the active research dataset to the local C++ service.
+// Submit the active dataset through the same-origin API gateway.
 export async function runBacktest(
   bars: OhlcvBar[],
   config: BacktestConfig,
   signal?: AbortSignal
 ): Promise<BacktestResult> {
-  const response = await fetch('/local-backtest', {
+  const response = await fetch('/api/backtest', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

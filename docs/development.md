@@ -1,6 +1,67 @@
 # Project Atlas — Development Guide
 
-## Current Local Backtesting Workflow — Phase 5.5
+## Phase 5.6 — Current Development Workflow
+
+### Build and test C++
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+cmake --build build --parallel 2
+ctest --test-dir build --output-on-failure
+```
+
+### Run local backend
+
+```bash
+python3 services/backtest/server.py
+```
+
+The development service defaults to loopback port 8765.
+
+### Run Atlas Terminal
+
+```bash
+cd frontend
+npm ci
+npm run dev
+```
+
+Vite proxies `/api/backtest` to the local Python service.
+
+### Verify Docker
+
+```bash
+sudo python3 scripts/test_backtest_container.py
+```
+
+### Verify the authenticated gateway
+
+```bash
+cd frontend
+sudo env PATH="$PATH" npm run test:integration
+```
+
+This integration test builds a temporary container,
+generates a test credential, executes a real C++
+backtest through the Node gateway, and cleans up.
+
+### Production Configuration
+
+Set `ATLAS_BACKTEST_ENV=production` on the backend.
+
+Configure matching `ATLAS_BACKTEST_SERVICE_KEY`
+values on the backend and gateway.
+
+Configure the gateway's `ATLAS_BACKTEST_URL`
+to the deployed HTTPS backend origin.
+
+Never commit credentials or local environment files.
+
+See [Phase 5.6 infrastructure](
+phase5-production-infrastructure.md).
+
+
+## Historical Local Backtesting Workflow — Phase 5.5
 
 Build the C++ engine:
 
@@ -25,7 +86,7 @@ npm run dev
 
 The Python service listens on `127.0.0.1:8765`.
 
-Vite proxies `/local-backtest` to `/backtest`.
+During Phase 5.5, Vite proxied `/local-backtest` to `/backtest`. The current development route is `/api/backtest`.
 
 Restart the Python service after changing its source.
 Vite hot reload does not restart Python.

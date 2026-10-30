@@ -33,6 +33,12 @@ demonstrate the project confidently.
 
 | [17 — Risk Reporting and JSON v3](17-risk-reporting-and-json-v3.md) | Versioned contracts, risk events and frontend validation |
 
+| [18 — Docker](18-docker-and-containerization.md) | Container images, builds and isolation |
+| [19 — HTTP Gateways](19-http-services-and-api-gateways.md) | HTTP services, routing and API gateways |
+| [20 — Production Security](20-production-security.md) | Authentication, TLS and abuse protection |
+| [21 — Cloud Deployment](21-cloud-deployment.md) | Railway, Vercel and production configuration |
+| [22 — CI/CD](22-production-ci-cd.md) | Automated verification and release engineering |
+
 ## How to Use These Notes
 
 1. Read the simple explanation first.
@@ -43,22 +49,53 @@ demonstrate the project confidently.
 
 ## Current Project Status
 
-- Phase 0: Complete
-- Phase 1: Complete
-- Phase 2: Complete
-- Phase 3: Complete
-- Phase 4: In progress
-- C++: 27 CTest suites passed locally in Debug and Release
-- Frontend: 28 Vitest tests passed locally
-- GitHub CI verification for this milestone: Pending
+- Phases 0–4: Complete.
+- Phase 5.5: Local historical backtesting complete.
+- Phase 5.6: Production infrastructure in progress.
+- C++: 28 CTest suites passed in the latest reported baseline.
+- Python HTTP: 15 tests passed.
+- Standard frontend: 195 Vitest tests passed.
+- Authenticated gateway-to-C++ integration: Passed.
+- Production deployment: Pending.
+- Updated GitHub Actions verification: Pending.
+
+These are reported local verification results, not
+evidence that the public deployment works.
 
 ## Important Limitations
 
-Atlas is an educational research project. Its current
-portfolio simulation uses synthetic data, fractional shares,
-next-bar opening-price fills, and configurable commission and adverse slippage.
+Atlas is an educational quantitative research platform.
 
-The current website loads exported demonstration data.
-It does not yet submit backtests to a live backend API.
+The C++ engine supports historical strategy evaluation,
+simulated portfolio execution, and risk analytics.
 
-Historical simulation results do not guarantee profitability.
+Atlas supports local C++ backtesting through a Python
+HTTP service and Node.js API gateway.
+
+The public website has not yet been verified against
+a deployed production C++ backend.
+
+The current simulator uses simplified next-bar fills,
+fractional shares, and floating-point accounting.
+
+No independently validated profitable strategy has
+been demonstrated.
+
+Historical backtesting does not guarantee future returns.
+
+## Future Research Roadmap
+
+Planned improvements include:
+
+- Ticker-symbol historical market-data retrieval.
+- Additional market-data sources and file formats.
+- More trading strategies and configurable parameters.
+- Automated strategy comparison and ranking.
+- Out-of-sample and walk-forward evaluation.
+- Risk-adjusted profitability analysis.
+- Explainable historical BUY and SELL markers.
+- Professional Atlas Terminal redesign.
+- Explicit NO QUALIFYING STRATEGY recommendations.
+
+See the [Phase 5.6 engineering documentation](
+../phase5-production-infrastructure.md).

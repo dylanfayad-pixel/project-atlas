@@ -1,5 +1,58 @@
 # Project Atlas — System Architecture
 
+## Phase 5.6 — Current Backtesting Architecture
+
+The current implementation supports authenticated,
+containerized historical backtesting locally.
+
+```text
+React Atlas Terminal
+        |
+        v
+POST /api/backtest
+        |
+        v
+Node.js API Gateway
+        |
+        | Service credential
+        v
+Python HTTP Adapter (Docker)
+        |
+        v
+C++20 Backtesting CLI
+        |
+        v
+Historical Replay and Strategy Evaluation
+        |
+        v
+Portfolio Simulation and Risk Analytics
+        |
+        v
+Versioned Financial JSON
+        |
+        v
+Gateway and Browser Validation
+```
+
+Development uses a Vite proxy from `/api/backtest`
+to the local Python service.
+
+Production is designed to use Vercel for the gateway
+and a managed container host for the backend.
+
+The public backend has not yet been deployed.
+
+The gateway validates successful financial responses.
+The Python service validates requests and executes
+the existing C++ CLI.
+
+Authentication is required when the backend runs
+with `ATLAS_BACKTEST_ENV=production`.
+
+See [Phase 5.6 infrastructure](
+phase5-production-infrastructure.md).
+
+
 ## Overview
 
 Project Atlas is a C++20 historical quantitative
@@ -11,7 +64,7 @@ JSON serialization, and visualization.
 
 Phase 5.5 introduces local browser-to-C++ backtesting.
 
-## Current Local Execution Architecture
+## Historical Phase 5.5 Local Execution Architecture
 
 ```text
 React Research Setup
@@ -273,7 +326,7 @@ local Python HTTP adapter in development.
 
 ## Testing and Continuous Integration
 
-CMake registers 20 CTest suites.
+The Phase 3 milestone registered 20 CTest suites. The latest reported Phase 5.6 baseline contains 28.
 
 The tests cover market-data validation, historical
 replay, strategy behavior, portfolio accounting,
@@ -357,8 +410,7 @@ historical exposure, and risk-control events.
 Python independently validates generated JSON v3
 during integration testing.
 
-The frontend still does not invoke the C++ engine
-through an HTTP API.
+At the Phase 4.4 milestone, the frontend did not invoke the C++ engine through an HTTP API. Phase 5.5 subsequently introduced local HTTP execution.
 
 See [Phase 4.4 risk reporting](phase4-risk-reporting.md).
 

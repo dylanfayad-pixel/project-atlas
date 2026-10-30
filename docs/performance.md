@@ -1,5 +1,69 @@
 # Project Atlas performance report
 
+## Phase 5.6 — Container and Gateway Performance
+
+### Current status
+
+Phase 5.6 introduces a containerized C++ execution
+service and a Node.js API gateway.
+
+The full gateway-to-Docker-to-C++ pipeline has passed
+a real local integration test.
+
+### Current resource configuration
+
+The tested Docker configuration includes:
+
+- 256 MiB container memory limit.
+- One CPU allocation.
+- Maximum two concurrent C++ executions.
+- Maximum eight active HTTP handler threads.
+- Five-second C++ subprocess timeout.
+- Eight-second gateway upstream timeout.
+- Maximum 2 MiB request body.
+- Maximum 8 MiB upstream response body.
+
+These values are configuration limits, not measured
+production capacity or throughput.
+
+### Local integration observation
+
+The latest reported gateway integration test
+completed successfully in approximately 2.31 seconds.
+
+That duration includes test setup and Docker activity.
+It is not a measurement of production request latency.
+
+### Measurements not yet established
+
+- Public API p50, p95, or p99 latency.
+- Sustained backtests per second.
+- Maximum safe concurrent public requests.
+- Cold-start latency.
+- Production container memory utilization.
+- Hosted network overhead.
+- Provider-specific deployment performance.
+
+### Future benchmarking
+
+Production performance evaluation should include:
+
+1. Representative historical datasets.
+2. Multiple dataset sizes.
+3. Repeated warm and cold executions.
+4. Controlled concurrency tests.
+5. CPU and memory monitoring.
+6. Gateway and backend latency separation.
+7. Error-rate and saturation analysis.
+
+Performance claims must identify the dataset,
+hardware, configuration, sample size, and
+measurement methodology.
+
+See [Phase 5.6 infrastructure](
+phase5-production-infrastructure.md).
+
+
 ## Phase 5.5 — Frontend Build Observation
 
 The latest reported local Vite production build produced:

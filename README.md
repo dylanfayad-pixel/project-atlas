@@ -18,7 +18,20 @@ Project Atlas is an educational systems-engineering project for validating marke
 | Phase 5 — Research terminal | In progress | Local backtesting, data import, dashboard |
 | Phase 6 — Public release | Planned | Secure hosted execution and deployment |
 
-## Current Atlas Terminal Status — Phase 5.5
+## Current Atlas Terminal Status — Phase 5.6
+
+Phase 5.5 local historical backtesting is complete.
+
+Phase 5.6 adds containerized backend infrastructure,
+a same-origin API gateway, production authentication,
+and deployment preparation.
+
+These capabilities are verified locally. Public
+production execution remains pending.
+
+See [Phase 5.6 production infrastructure](
+docs/phase5-production-infrastructure.md).
+
 
 Atlas Terminal now supports local historical backtesting
 through the existing C++ quantitative engine.
@@ -40,12 +53,12 @@ through the existing C++ quantitative engine.
 ### Latest local verification
 
 - 28 CTest suites passed.
-- 8 Python HTTP integration tests passed.
-- 180 frontend Vitest tests passed.
+- 15 Python HTTP integration tests passed.
+- 195 standard frontend Vitest tests passed.
 - Frontend and API TypeScript passed.
 - ESLint passed.
 - Production frontend build passed.
-- Real local browser-to-C++ backtesting verified.
+- Real authenticated gateway-to-Docker-to-C++ integration verified locally.
 
 These are local verification results. GitHub Actions
 must be checked after publishing the release.
@@ -297,7 +310,7 @@ See [frontend setup](frontend/README.md).
 
 ## Testing and CI
 
-The latest Phase 5.2 local frontend verification passed 67 Vitest tests, TypeScript, ESLint, and the Vite production build. The established C++ baseline is 27 CTest suites from Phase 4.4; rerun Debug and Release CTest before this release. Local results do not establish that a new GitHub Actions run has passed.
+The latest reported local baseline is 195 standard frontend Vitest tests, 15 Python HTTP tests, and 28 CTest suites. The authenticated gateway-to-Docker integration test also passed. Debug and Release CTest and the updated GitHub Actions workflow must be verified before the Phase 5.6 release.
 
 The GitHub Actions workflow is configured for C++ Debug, C++ Release, and frontend tests/lint/build. Verify the workflow on GitHub after pushing changes.
 
@@ -313,7 +326,7 @@ See [performance documentation](docs/performance.md).
 
 ## Learning Notes
 
-The [Project Atlas learning guide](docs/notes/README.md) contains 13 topic guides covering project architecture, C++, market data, strategies, backtesting, accounting, frontend development, JSON integration, testing, performance, interviews, and project demonstrations.
+The [Project Atlas learning guide](docs/notes/README.md) contains 17 numbered topic guides covering project architecture, C++, market data, strategies, backtesting, accounting, frontend development, JSON integration, testing, performance, interviews, and project demonstrations.
 
 ## Engineering Documentation
 

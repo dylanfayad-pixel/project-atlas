@@ -1,6 +1,81 @@
 # Project Atlas — JSON Contract and API Boundary
 
-## Current Status — Phase 5.5
+## Phase 5.6 — Current Backtesting API
+
+The frontend submits historical research requests to:
+
+`POST /api/backtest`
+
+The Node.js gateway forwards authorized requests to:
+
+`POST /backtest`
+
+The backend runs the C++20 backtesting CLI and
+returns a versioned financial response.
+
+### Request
+
+Required research inputs include:
+
+- Historical daily OHLCV observations.
+- Strategy identifier.
+- Starting capital and execution configuration.
+
+Supported strategies:
+
+- `buy-and-hold`
+- `sma-crossover`
+
+Configuration includes:
+
+- `capital`
+- `commission`
+- `slippage_bps`
+- `fast`
+- `slow`
+
+### Response
+
+The response includes:
+
+- `response_version: 1`
+- Historical strategy signals.
+- Portfolio JSON schema v3.
+- Simulated trades and equity observations.
+- Performance and risk metrics.
+
+Signals are decisions, not necessarily executed fills.
+
+### Gateway Security
+
+- Production requires an HTTPS backend URL.
+- Production requires a configured service credential.
+- The credential is forwarded server-to-server.
+- Browser requests never contain the service key.
+- Request bodies are limited to 2 MiB.
+- Upstream response bodies are limited to 8 MiB.
+- Upstream requests have an 8-second timeout.
+- HTTP redirects are disabled.
+- Successful financial responses undergo runtime validation.
+
+The Python backend independently authenticates
+execution requests and validates their configuration.
+
+Production rate limiting and deployment verification
+remain outstanding.
+
+### Deployment Status
+
+The gateway and backend have passed local
+authenticated integration testing.
+
+The public C++ backend is not yet deployed.
+
+See [Phase 5.6 infrastructure](
+phase5-production-infrastructure.md).
+
+
+## Historical Status — Phase 5.5
 
 Atlas supports local HTTP historical backtesting.
 
@@ -14,7 +89,7 @@ returns the resulting JSON.
 This endpoint is not deployed as a public
 production service.
 
-## Local Backtesting Endpoint
+## Historical Phase 5.5 Local Backtesting Endpoint
 
 Browser development route:
 
@@ -233,7 +308,7 @@ breach timestamps, or liquidation reasons.
 
 See [drawdown controls](phase4-drawdown-controls.md).
 
-## Future HTTP API
+## Historical HTTP API Roadmap
 
 A future backend will accept user-selected strategy
 configurations and return simulation results.

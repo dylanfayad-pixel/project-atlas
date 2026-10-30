@@ -196,7 +196,7 @@ They do not authenticate the uploaded market data.
 
 ### Testing
 
-The current local frontend suite contains 67 Vitest tests.
+The latest reported standard frontend suite contains 195 passing Vitest tests. The authenticated Docker integration test runs separately.
 
 The stack includes React Testing Library, User Event,
 jest-dom, and jsdom for interaction and integration tests.

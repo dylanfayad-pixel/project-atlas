@@ -1,6 +1,64 @@
 # Project Atlas — Testing and CI
 
-## Current Verification — Phase 5.5
+## Phase 5.6 — Current Verification Baseline
+
+Latest reported local results:
+
+| Suite | Result |
+|---|---|
+| C++ CTest | 28/28 passed |
+| Python HTTP | 15/15 passed |
+| Standard frontend Vitest | 195/195 passed |
+| Authenticated gateway integration | 1/1 passed |
+| TypeScript | Passed |
+| ESLint | Passed |
+| Production frontend build | Passed |
+
+### Standard frontend tests
+
+```bash
+cd frontend
+npm run test
+npx tsc --noEmit -p tsconfig.app.json
+npx tsc --noEmit -p tsconfig.api.json
+npm run lint
+npm run build
+```
+
+The standard suite excludes the Docker-dependent
+gateway integration test.
+
+### Docker smoke test
+
+```bash
+sudo python3 scripts/test_backtest_container.py
+```
+
+### Real gateway integration
+
+```bash
+cd frontend
+sudo env PATH="$PATH" npm run test:integration
+```
+
+### CI
+
+The updated workflow includes:
+
+- C++ Debug and Release builds.
+- Python HTTP integration tests.
+- Frontend tests, lint, and production build.
+- Docker container smoke testing.
+- Authenticated gateway-to-C++ integration testing.
+
+The updated CI workflow has not yet been verified
+on GitHub after publication.
+
+See [Phase 5.6 infrastructure](
+phase5-production-infrastructure.md).
+
+
+## Historical Verification — Phase 5.5
 
 Latest reported local results:
 
@@ -168,7 +226,7 @@ The historical Phase 2 tests alone did not establish:
 
 These require additional implementation and testing.
 
-## Current Portfolio and Frontend Verification
+## Historical Portfolio and Frontend Verification
 
 The most recently reported local results are:
 

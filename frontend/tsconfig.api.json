@@ -22,6 +22,7 @@
     "src/lib/historicalDataRequest.ts",
     "src/lib/historicalDataResponse.ts",
     "src/lib/instrumentMetadata.ts",
-    "src/lib/ohlcvData.ts"
+    "src/lib/ohlcvData.ts",
+    "src/lib/backtestApi.ts"
   ]
 }

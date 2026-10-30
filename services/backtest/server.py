@@ -1,22 +1,36 @@
 """Local-only HTTP adapter for the Atlas C++ backtesting CLI."""
 
 import json
+import hmac
 import math
 import re
 import os
 import subprocess
 import tempfile
+import threading
 
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[2]
-BINARY = ROOT / "build" / "atlas_backtest_cli"
+# Production containers may install the CLI outside the build tree.
+BINARY = Path(
+    os.environ.get(
+        "ATLAS_BACKTEST_BINARY",
+        str(ROOT / "build" / "atlas_backtest_cli"),
+    )
+)
 
 MAX_BODY_BYTES = 2 * 1024 * 1024
 MAX_BARS = 10000
 TIMEOUT_SECONDS = 5
+
+# Bound expensive C++ executions per service process.
+MAX_CONCURRENT_BACKTESTS = 2
+EXECUTION_SLOTS = threading.BoundedSemaphore(
+    MAX_CONCURRENT_BACKTESTS
+)
 
 
 DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -126,6 +140,45 @@ def validate_config(payload):
     return config
 
 
+class BoundedHTTPServer(ThreadingHTTPServer):
+    """Limit active HTTP handler threads per service instance."""
+
+    daemon_threads = True
+    block_on_close = False
+
+    MAX_ACTIVE_HANDLERS = 8
+
+    def __init__(self, server_address, handler_class):
+        self.handler_slots = threading.BoundedSemaphore(
+            self.MAX_ACTIVE_HANDLERS
+        )
+        super().__init__(server_address, handler_class)
+
+    def process_request(self, request, client_address):
+        # Bound how long a client can stall a socket operation.
+        request.settimeout(5)
+
+        # Reject excess connections before creating a new thread.
+        if not self.handler_slots.acquire(blocking=False):
+            self.shutdown_request(request)
+            return
+
+        try:
+            super().process_request(request, client_address)
+        except BaseException:
+            self.handler_slots.release()
+            raise
+
+    def process_request_thread(self, request, client_address):
+        try:
+            super().process_request_thread(
+                request,
+                client_address,
+            )
+        finally:
+            self.handler_slots.release()
+
+
 class BacktestHandler(BaseHTTPRequestHandler):
     """Validate requests and execute only the approved Atlas CLI."""
 
@@ -139,10 +192,48 @@ class BacktestHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def do_GET(self):
+        # Health checks never execute user-supplied workloads.
+        if self.path != "/health":
+            self.send_json(404, {"error": "Not found"})
+            return
+
+        if BINARY.is_file() and os.access(BINARY, os.X_OK):
+            self.send_json(200, {
+                "status": "ok",
+                "service": "atlas-backtest",
+            })
+        else:
+            self.send_json(503, {
+                "status": "unavailable",
+                "service": "atlas-backtest",
+            })
+
     def do_POST(self):
         if self.path != "/backtest":
             self.send_json(404, {"error": "Not found"})
             return
+
+        # A configured service key protects the execution endpoint.
+        # Local development remains usable without a key.
+        expected_key = os.environ.get(
+            "ATLAS_BACKTEST_SERVICE_KEY", ""
+        )
+
+        if expected_key:
+            supplied_key = self.headers.get(
+                "X-Atlas-Service-Key", ""
+            )
+
+            if not hmac.compare_digest(
+                supplied_key,
+                expected_key,
+            ):
+                self.send_json(
+                    401,
+                    {"error": "Unauthorized"},
+                )
+                return
 
         try:
             length = int(self.headers.get("Content-Length", "0"))
@@ -197,13 +288,25 @@ class BacktestHandler(BaseHTTPRequestHandler):
                     "--slow", str(config["slow"]),
                 ]
 
-                result = subprocess.run(
-                    arguments,
-                    capture_output=True,
-                    text=True,
-                    timeout=TIMEOUT_SECONDS,
-                    check=False,
-                )
+                # Reject excess execution work rather than queueing
+                # unbounded C++ subprocesses.
+                if not EXECUTION_SLOTS.acquire(blocking=False):
+                    self.send_json(
+                        503,
+                        {"error": "Backtest service busy"},
+                    )
+                    return
+
+                try:
+                    result = subprocess.run(
+                        arguments,
+                        capture_output=True,
+                        text=True,
+                        timeout=TIMEOUT_SECONDS,
+                        check=False,
+                    )
+                finally:
+                    EXECUTION_SLOTS.release()
 
                 if result.returncode != 0:
                     self.send_json(
@@ -223,11 +326,39 @@ class BacktestHandler(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    # Development-only listener; never bind publicly.
-    server = ThreadingHTTPServer(
-        ("127.0.0.1", 8765),
+    # Production must never start without gateway authentication.
+    environment = os.environ.get(
+        "ATLAS_BACKTEST_ENV",
+        "development",
+    )
+    service_key = os.environ.get(
+        "ATLAS_BACKTEST_SERVICE_KEY",
+        "",
+    )
+
+    if environment not in ("development", "production"):
+        raise ValueError("Invalid backtest environment")
+
+    if environment == "production" and len(service_key) < 32:
+        raise ValueError(
+            "Production requires a service key of at least 32 characters"
+        )
+
+    # Development defaults to loopback; containers explicitly set
+    # their bind address through ATLAS_BACKTEST_HOST.
+    host = os.environ.get(
+        "ATLAS_BACKTEST_HOST",
+        "127.0.0.1",
+    )
+    port = int(os.environ.get("PORT", "8765"))
+
+    if not 1 <= port <= 65535:
+        raise ValueError("Invalid HTTP port")
+
+    server = BoundedHTTPServer(
+        (host, port),
         BacktestHandler,
     )
 
-    print("Atlas local backtest service: http://127.0.0.1:8765")
+    print(f"Atlas backtest service: http://{host}:{port}")
     server.serve_forever()

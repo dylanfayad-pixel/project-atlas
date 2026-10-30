@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run --exclude api/backtest.integration.test.ts",
+    "test:integration": "vitest run api/backtest.integration.test.ts --maxWorkers=1 --no-file-parallelism"
   },
   "dependencies": {
     "lightweight-charts": "^5.2.1",

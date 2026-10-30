@@ -1,19 +1,20 @@
 """Automated HTTP integration tests for Atlas backtesting."""
 
+import os
 import json
 import math
 import sys
 import threading
+from unittest.mock import patch
 import unittest
 import urllib.error
 import urllib.request
 
 from pathlib import Path
-from http.server import ThreadingHTTPServer
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from server import BacktestHandler, BINARY
+from server import BacktestHandler, BINARY, BoundedHTTPServer
 
 
 class BacktestHttpTests(unittest.TestCase):
@@ -26,7 +27,7 @@ class BacktestHttpTests(unittest.TestCase):
                 "Build atlas_backtest_cli before HTTP tests"
             )
 
-        cls.server = ThreadingHTTPServer(
+        cls.server = BoundedHTTPServer(
             ("127.0.0.1", 0),
             BacktestHandler,
         )
@@ -90,6 +91,172 @@ class BacktestHttpTests(unittest.TestCase):
                 "volume": 1000,
             },
         ]
+
+    def test_health_endpoint(self):
+        request = urllib.request.Request(
+            f"http://127.0.0.1:{self.port}/health",
+            method="GET",
+        )
+
+        with urllib.request.urlopen(
+            request, timeout=10
+        ) as response:
+            result = json.load(response)
+
+            self.assertEqual(response.status, 200)
+            self.assertEqual(result["status"], "ok")
+            self.assertEqual(
+                result["service"],
+                "atlas-backtest",
+            )
+
+    def test_unknown_health_route(self):
+        request = urllib.request.Request(
+            f"http://127.0.0.1:{self.port}/unknown",
+            method="GET",
+        )
+
+        with self.assertRaises(
+            urllib.error.HTTPError
+        ) as caught:
+            urllib.request.urlopen(
+                request, timeout=10
+            )
+
+        self.assertEqual(caught.exception.code, 404)
+
+    def test_busy_service_rejects_execution(self):
+        # Occupy all execution slots without starting C++.
+        from server import EXECUTION_SLOTS, MAX_CONCURRENT_BACKTESTS
+
+        acquired = 0
+        try:
+            for _ in range(MAX_CONCURRENT_BACKTESTS):
+                self.assertTrue(
+                    EXECUTION_SLOTS.acquire(blocking=False)
+                )
+                acquired += 1
+
+            status, result = self.request({
+                "strategy": "buy-and-hold",
+                "bars": self.valid_bars(),
+            })
+
+            self.assertEqual(status, 503)
+            self.assertEqual(
+                result["error"],
+                "Backtest service busy",
+            )
+        finally:
+            for _ in range(acquired):
+                EXECUTION_SLOTS.release()
+
+    def test_handler_limit_rejects_excess_connection(self):
+        # Occupy every handler slot without starting threads.
+        slots = self.server.handler_slots
+        acquired = 0
+
+        try:
+            for _ in range(self.server.MAX_ACTIVE_HANDLERS):
+                self.assertTrue(slots.acquire(blocking=False))
+                acquired += 1
+
+            self.assertFalse(slots.acquire(blocking=False))
+        finally:
+            for _ in range(acquired):
+                slots.release()
+
+    def test_handler_capacity_recovers_after_request(self):
+        # Verify that completed requests restore handler capacity
+        # without inspecting private semaphore internals.
+        request = urllib.request.Request(
+            f"http://127.0.0.1:{self.port}/health",
+            method="GET",
+        )
+
+        for _ in range(3):
+            with urllib.request.urlopen(
+                request, timeout=10
+            ) as response:
+                self.assertEqual(response.status, 200)
+
+        # The server must remain capable of handling new work.
+        status, result = self.request({
+            "strategy": "buy-and-hold",
+            "bars": self.valid_bars(),
+        })
+
+        self.assertEqual(status, 200)
+        self.assertEqual(result["response_version"], 1)
+
+    def test_service_key_authentication(self):
+        # Authentication must reject requests without the
+        # configured server-side service credential.
+        payload = json.dumps({
+            "strategy": "buy-and-hold",
+            "bars": self.valid_bars(),
+        }).encode("utf-8")
+
+        url = f"http://127.0.0.1:{self.port}/backtest"
+
+        with patch.dict(
+            "os.environ",
+            {"ATLAS_BACKTEST_SERVICE_KEY": "test-secret"},
+        ):
+            request = urllib.request.Request(
+                url,
+                data=payload,
+                headers={"Content-Type": "application/json"},
+                method="POST",
+            )
+
+            with self.assertRaises(
+                urllib.error.HTTPError
+            ) as caught:
+                urllib.request.urlopen(
+                    request, timeout=10
+                )
+
+            self.assertEqual(caught.exception.code, 401)
+
+            authorized = urllib.request.Request(
+                url,
+                data=payload,
+                headers={
+                    "Content-Type": "application/json",
+                    "X-Atlas-Service-Key": "test-secret",
+                },
+                method="POST",
+            )
+
+            with urllib.request.urlopen(
+                authorized, timeout=10
+            ) as response:
+                self.assertEqual(response.status, 200)
+
+    def test_production_requires_service_key(self):
+        # Production must fail before binding a network port.
+        import subprocess
+        import sys
+
+        environment = os.environ.copy()
+        environment["ATLAS_BACKTEST_ENV"] = "production"
+        environment.pop("ATLAS_BACKTEST_SERVICE_KEY", None)
+
+        result = subprocess.run(
+            [sys.executable, str(Path(__file__).with_name("server.py"))],
+            env=environment,
+            capture_output=True,
+            text=True,
+            timeout=5,
+            check=False,
+        )
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn(
+            "Production requires a service key",
+            result.stderr,
+        )
 
     def test_valid_backtest(self):
         status, result = self.request({

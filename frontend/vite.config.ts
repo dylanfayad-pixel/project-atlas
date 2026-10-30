@@ -6,11 +6,11 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/local-backtest': {
+      '/api/backtest': {
         target: 'http://127.0.0.1:8765',
         changeOrigin: false,
         rewrite: (path) =>
-          path.replace('/local-backtest', '/backtest'),
+          path.replace(/^\/api\/backtest$/, '/backtest'),
       },
     },
   },
