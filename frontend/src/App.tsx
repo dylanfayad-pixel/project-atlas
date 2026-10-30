@@ -17,6 +17,7 @@ import type { OhlcvBar } from './lib/ohlcvData'
 import type {
   InstrumentMetadata,
 } from './lib/instrumentMetadata'
+import { useBacktestController } from './hooks/useBacktestController'
 import './App.css'
 
 const titles: Record<WorkspaceView, string> = {
@@ -34,6 +35,11 @@ function App() {
 
   const [session, setSession] = useState(createResearchSession)
   const [demoMode, setDemoMode] = useState(false)
+
+  const backtest = useBacktestController(
+    session.dataset,
+    () => setActiveView('backtests')
+  )
 
   // Remove synthetic results when changing research sources.
   function clearDemoResults() {
@@ -250,7 +256,11 @@ function App() {
         {!loading && !error && (
           <WorkspaceContent
             view={activeView}
-            session={session}
+              session={session}
+              backtestDraft={backtest.draft}
+              backtestExecution={backtest.execution}
+              onBacktestDraftChange={backtest.updateDraft}
+              onRunBacktest={backtest.execute}
               demoMode={demoMode}
             onDatasetImported={handleDatasetImported}
             onManualDataLoaded={handleManualDataLoaded}

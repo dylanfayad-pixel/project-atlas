@@ -330,7 +330,7 @@ describe('Manual research workflow', () => {
       }))
 
       expect(
-        screen.getByText('No Backtest Executed')
+        screen.getByText('No backtest has been executed for this dataset.')
       ).toBeTruthy()
 
       expect(
@@ -462,7 +462,7 @@ describe('Atlas research workflow', () => {
     }))
 
     expect(screen.getByText('AAPL')).toBeTruthy()
-    expect(screen.getByText('No Backtest Executed')).toBeTruthy()
+    expect(screen.getByText('No backtest has been executed for this dataset.')).toBeTruthy()
   })
 
   it('resets metadata when a new dataset is uploaded', async () => {
@@ -509,7 +509,7 @@ describe('Atlas research workflow', () => {
       name: 'Backtests',
     }))
 
-    expect(screen.getByText('No Backtest Executed')).toBeTruthy()
+    expect(screen.getByText('No backtest has been executed for this dataset.')).toBeTruthy()
     expect(
       screen.queryByTestId('portfolio-analytics')
     ).toBeNull()
@@ -533,5 +533,101 @@ describe('Atlas research workflow', () => {
 
     expect(await screen.findByRole('alert')).toBeTruthy()
     expect(screen.getByText('Dataset Preview')).toBeTruthy()
+  })
+})
+
+
+describe('Shared backtest workflow', () => {
+  it('shows backtest configuration after manual data load', async () => {
+    mockFetch()
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.click(screen.getByRole('button', {
+      name: 'Manual Entry',
+    }))
+
+    const fields = [
+      ['Date (YYYY-MM-DD)', '2026-01-05'],
+      ['Open', '100'],
+      ['High', '105'],
+      ['Low', '98'],
+      ['Close', '103'],
+      ['Volume', '1500000'],
+    ]
+
+    for (const [label, value] of fields) {
+      await user.type(
+        screen.getByRole('textbox', {
+          name: `${label} row 1`,
+        }),
+        value
+      )
+    }
+
+    await user.click(screen.getByRole('button', {
+      name: 'Validate & Load Data',
+    }))
+
+    expect(
+      await screen.findByText('Configure & Run Backtest')
+    ).toBeTruthy()
+
+    expect(
+      screen.getByRole('button', { name: 'Run Backtest' })
+    ).toBeTruthy()
+  })
+
+  it('automatically opens Backtests when execution starts', async () => {
+    mockFetch()
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.click(screen.getByRole('button', {
+      name: 'Manual Entry',
+    }))
+
+    const fields = [
+      ['Date (YYYY-MM-DD)', '2026-01-05'],
+      ['Open', '100'],
+      ['High', '105'],
+      ['Low', '98'],
+      ['Close', '103'],
+      ['Volume', '1500000'],
+    ]
+
+    for (const [label, value] of fields) {
+      await user.type(
+        screen.getByRole('textbox', {
+          name: `${label} row 1`,
+        }),
+        value
+      )
+    }
+
+    await user.click(screen.getByRole('button', {
+      name: 'Validate & Load Data',
+    }))
+
+    const capital = screen.getByLabelText(
+      'Starting Capital ($)'
+    ) as HTMLInputElement
+
+    await user.clear(capital)
+    expect(capital.value).toBe('')
+
+    await user.type(capital, '12500.50')
+    expect(capital.valueAsNumber).toBe(12500.5)
+
+    await user.click(screen.getByRole('button', {
+      name: 'Run Backtest',
+    }))
+
+    expect(
+      await screen.findByRole('heading', {
+        name: 'Backtest Research',
+        level: 1,
+      })
+    ).toBeTruthy()
   })
 })

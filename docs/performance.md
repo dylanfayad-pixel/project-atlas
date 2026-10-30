@@ -1,5 +1,31 @@
 # Project Atlas performance report
 
+## Phase 5.5 — Frontend Build Observation
+
+The latest reported local Vite production build produced:
+
+| Artifact | Uncompressed size |
+|---|---:|
+| Main application JavaScript | 432.39 kB |
+| Chart-library chunk | 351.08 kB |
+| BacktestResults chunk | 3.68 kB |
+| PriceChart chunk | 4.96 kB |
+| PortfolioAnalytics chunk | 8.57 kB |
+
+These values describe build artifacts, not measured
+browser startup latency or network transfer time.
+
+The application uses lazy loading for chart-heavy
+components and backtest results.
+
+These observations are not directly comparable to
+earlier frontend bundle experiments unless the
+application scope and build configuration are held
+constant.
+
+Historical C++ performance experiments below remain
+unchanged.
+
 **Status:** Historical, preliminary measurements; not a production performance claim. All results are from synthetic OHLCV data in an ARM64 Kali Linux VM on macOS, using C++20 Release builds. Exact host CPU and VM resource allocation were not recorded and remain a reproducibility limitation.
 
 ## Benchmark 001 — Repeated small-file ingestion

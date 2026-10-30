@@ -35,6 +35,9 @@ jobs:
       - name: Run automated tests
         run: ctest --test-dir build --output-on-failure
 
+      - name: Run Python HTTP integration tests
+        run: python3 services/backtest/test_server.py
+
 
   frontend-checks:
     name: Frontend Tests and Build

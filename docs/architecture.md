@@ -2,58 +2,66 @@
 
 ## Overview
 
-Project Atlas is a C++20 quantitative research and
-historical backtesting engine with a React and TypeScript
-frontend called Atlas Terminal.
+Project Atlas is a C++20 historical quantitative
+research engine with a React and TypeScript frontend.
 
-The system separates market-data processing, strategy
-evaluation, simulated execution, performance analysis,
-serialization, and visualization.
+The system separates market-data validation, historical
+strategy evaluation, portfolio execution, risk analytics,
+JSON serialization, and visualization.
 
-The current website uses static demonstration fixtures.
-It does not yet provide a live HTTP backtesting API.
+Phase 5.5 introduces local browser-to-C++ backtesting.
 
-## System Pipeline
+## Current Local Execution Architecture
 
 ```text
-Historical OHLCV CSV
-        |
-        v
-CsvReader + MarketBar Validation
-        |
-        v
-HistoricalReplay
-        |
-        v
-Strategy / BacktestRunner
-        |
-        v
-BUY / SELL / HOLD Signals
-        |
-        v
-PortfolioSimulator
-        |
-        +--> Commission and Slippage
-        |
-        v
-Cash, Shares, Executed Fills, Equity
-        |
-        v
-PerformanceAnalyzer
-        |
-        v
-PortfolioJsonExporter
-        |
-        v
-Versioned JSON (v1 / v2 / v3)
-        |
-        v
-React + TypeScript Atlas Terminal
+React Research Setup
+    |
+    v
+Validated Historical OHLCV Dataset
+    |
+    v
+Shared Backtest Controller
+    |
+    v
+POST /local-backtest
+    |
+    v
+Vite Development Proxy
+    |
+    v
+Python HTTP Adapter (127.0.0.1:8765)
+    |
+    v
+C++ Backtest CLI
+    |
+    v
+Historical Replay + Strategy
+    |
+    v
+Portfolio Simulation + Risk Analytics
+    |
+    v
+JSON Response (response_version 1)
+    |
+    v
+TypeScript Runtime Validation
+    |
+    v
+Atlas Backtests Dashboard
 ```
 
-The pipeline describes logical processing responsibilities.
-The current frontend reads exported fixtures rather than
-calling the C++ engine through an HTTP service.
+The local HTTP service is development-only.
+
+It is not a public production backtesting API.
+
+The C++ engine remains responsible for financial
+calculations; the Python adapter handles request
+validation and process execution.
+
+Signals are distinct from executed simulated trades.
+
+See [Phase 5.5 local backtesting](
+phase5-local-backtesting.md).
 
 ## Market Data Layer
 
@@ -260,8 +268,8 @@ The dashboard displays historical demonstration data,
 portfolio metrics, equity curves, simulated fills,
 and schema v2 execution costs.
 
-The current frontend is not connected to a live
-C++ HTTP backend.
+The frontend connects to the C++ engine through a
+local Python HTTP adapter in development.
 
 ## Testing and Continuous Integration
 
@@ -387,8 +395,8 @@ WorkspaceContent prevents unrelated synthetic
 demonstration results from appearing as results
 for an uploaded dataset.
 
-The browser does not currently execute the C++
-backtesting engine.
+The browser can request local C++ backtests through
+the Python HTTP adapter.
 
 Session state is not persisted across page reloads.
 

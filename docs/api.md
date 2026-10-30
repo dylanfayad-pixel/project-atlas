@@ -1,11 +1,84 @@
 # Project Atlas — JSON Contract and API Boundary
 
-## Current Status
+## Current Status — Phase 5.5
 
-Project Atlas exports portfolio results from C++ to JSON.
+Atlas supports local HTTP historical backtesting.
 
-The React dashboard currently reads a static demonstration
-JSON file. A live HTTP backend API is not implemented yet.
+The browser sends validated daily OHLCV observations
+and strategy configuration through Vite to a local
+Python adapter.
+
+The adapter invokes the C++ backtesting CLI and
+returns the resulting JSON.
+
+This endpoint is not deployed as a public
+production service.
+
+## Local Backtesting Endpoint
+
+Browser development route:
+
+`POST /local-backtest`
+
+Python service route:
+
+`POST http://127.0.0.1:8765/backtest`
+
+### Request fields
+
+| Field | Description |
+|---|---|
+| bars | Array of validated daily OHLCV observations |
+| strategy | buy-and-hold or sma-crossover |
+| capital | Positive initial capital |
+| commission | Nonnegative fixed commission |
+| slippage_bps | Adverse slippage in basis points |
+| fast | Fast SMA period |
+| slow | Slow SMA period |
+
+Each observation requires:
+
+`timestamp, open, high, low, close, volume`
+
+The local adapter limits requests to 10,000 bars
+and a maximum 2 MiB body.
+
+### Response
+
+The top-level response contains:
+
+- `response_version: 1`
+- `signals`
+- `portfolio`
+
+The portfolio uses JSON schema version 3.
+
+Signals represent strategy decisions, not
+necessarily executed fills.
+
+### HTTP error behavior
+
+- 400: Invalid request or unsupported configuration.
+- 404: Unknown endpoint.
+- 413: Request body exceeds allowed limits.
+- 422: C++ execution rejected the request.
+- 503: Backtest engine unavailable.
+- 504: Execution timeout.
+
+The current Python adapter uses a five-second
+subprocess timeout.
+
+### Security boundary
+
+The adapter binds to loopback and is intended
+only for local development.
+
+Public deployment requires authentication,
+resource isolation, abuse protection, and
+additional security testing.
+
+See [Phase 5.5 engineering documentation](
+phase5-local-backtesting.md).
 
 ## Schema Version
 
@@ -120,8 +193,8 @@ The verifier executes the real C++ demonstration, parses
 its JSON, reconciles financial values, and checks the
 committed frontend fixture.
 
-The website currently reads static JSON. There is no
-public HTTP backtesting endpoint.
+The website supports local Python/C++ backtesting.
+No production-hosted backtesting endpoint is deployed.
 
 ## Phase 4.2 Execution Configuration
 
@@ -175,7 +248,7 @@ Before public deployment, it will require:
 - Reproducible simulation configurations.
 - Security and deployment testing.
 
-No public HTTP API endpoint is currently available.
+No production-hosted C++ backtesting endpoint is currently available.
 
 ## Limitations
 

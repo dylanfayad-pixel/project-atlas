@@ -15,6 +15,7 @@ add_library(atlas_core STATIC
     src/csv_reader.cpp
     src/historical_replay.cpp
     src/backtest_runner.cpp
+    src/backtest_response.cpp
     src/portfolio_simulator.cpp
     src/performance_metrics.cpp
     src/risk_analytics.cpp
@@ -38,7 +39,34 @@ target_compile_options(atlas PRIVATE
     -Wall -Wextra -Wpedantic
 )
 
+# User-data backtesting CLI.
+# Reuses the existing Atlas quantitative engine.
+add_executable(atlas_backtest_cli
+    src/backtest_cli.cpp
+)
+
+target_link_libraries(
+    atlas_backtest_cli PRIVATE atlas_core
+)
+
+target_compile_options(atlas_backtest_cli PRIVATE
+    -Wall -Wextra -Wpedantic
+)
+
 include(CTest)
+
+# Exercise the compiled CLI with real process boundaries.
+find_package(Python3 COMPONENTS Interpreter REQUIRED)
+
+add_test(
+    NAME backtest_cli_integration
+    COMMAND
+        ${Python3_EXECUTABLE}
+        ${PROJECT_SOURCE_DIR}/tests/test_backtest_cli.py
+        $<TARGET_FILE:atlas_backtest_cli>
+)
+
+
 
 if(BUILD_TESTING)
     add_test(

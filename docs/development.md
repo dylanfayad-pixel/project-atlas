@@ -1,5 +1,39 @@
 # Project Atlas — Development Guide
 
+## Current Local Backtesting Workflow — Phase 5.5
+
+Build the C++ engine:
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+cmake --build build --parallel 2
+```
+
+Start the Python service in one terminal:
+
+```bash
+python3 services/backtest/server.py
+```
+
+Start the frontend in another terminal:
+
+```bash
+cd frontend
+npm ci
+npm run dev
+```
+
+The Python service listens on `127.0.0.1:8765`.
+
+Vite proxies `/local-backtest` to `/backtest`.
+
+Restart the Python service after changing its source.
+Vite hot reload does not restart Python.
+
+The service is intended only for local development.
+
+See [Phase 5.5 local backtesting](phase5-local-backtesting.md).
+
 ## Environment
 
 Primary development environment:

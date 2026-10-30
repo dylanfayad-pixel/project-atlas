@@ -749,3 +749,83 @@ button.nav-item:focus-visible {
   color: #e2e8f0;
   font-weight: 600;
 }
+
+/* User-driven C++ backtesting controls. */
+.backtest-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.backtest-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  color: #cbd5e1;
+  font-size: 0.85rem;
+}
+
+.backtest-form input,
+.backtest-form select {
+  width: 100%;
+  padding: 0.7rem;
+  border: 1px solid #334155;
+  border-radius: 0.5rem;
+  background: #0f172a;
+  color: #f8fafc;
+}
+
+.backtest-results {
+  margin-top: 1.5rem;
+}
+
+/* C++ backtesting results and history tables. */
+.backtest-chart,
+.backtest-history {
+  margin-top: 1.5rem;
+}
+
+.backtest-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 1rem;
+}
+
+.backtest-table-scroll table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.backtest-table-scroll th,
+.backtest-table-scroll td {
+  padding: 0.8rem;
+  border-bottom: 1px solid #334155;
+  white-space: nowrap;
+}
+
+.backtest-table-scroll th {
+  color: #94a3b8;
+  font-size: 0.75rem;
+}
+
+/* Editable backtesting inputs. */
+.backtest-form input,
+.backtest-form select {
+  background-color: #080f1d;
+  color: #f8fafc;
+  border: 1px solid #38506d;
+  min-height: 42px;
+  font-size: 0.9rem;
+}
+
+.backtest-form input::placeholder {
+  color: #64748b;
+}
+
+.backtest-form input:focus,
+.backtest-form select:focus {
+  outline: 2px solid #60a5fa;
+  outline-offset: 2px;
+}

@@ -1,5 +1,49 @@
 # Project Atlas — Testing and CI
 
+## Current Verification — Phase 5.5
+
+Latest reported local results:
+
+| Suite | Result |
+|---|---|
+| C++ CTest | 28/28 passed |
+| Python HTTP integration | 8/8 passed |
+| Frontend Vitest | 180/180 passed |
+| Frontend TypeScript | Passed |
+| API TypeScript | Passed |
+| ESLint | Passed |
+| Production build | Passed |
+
+Run backend verification from the repository root:
+
+```bash
+ctest --test-dir build --output-on-failure
+python3 services/backtest/test_server.py
+```
+
+Run frontend verification:
+
+```bash
+cd frontend
+npm run test
+npx tsc --noEmit -p tsconfig.app.json
+npx tsc --noEmit -p tsconfig.api.json
+npm run lint
+npm run build
+```
+
+GitHub Actions runs C++ Debug and Release builds,
+frontend checks, and Python HTTP integration tests.
+
+These are local verification results. CI status must
+be verified after publishing.
+
+Historical milestone test counts below are retained
+for reproducibility and should not be interpreted as
+the current test baseline.
+
+See [Phase 5.5 local backtesting](phase5-local-backtesting.md).
+
 ## Automated Test Suites
 
 Phase 1 originally registered seven CTest suites.

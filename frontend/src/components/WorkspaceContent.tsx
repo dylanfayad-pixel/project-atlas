@@ -1,3 +1,13 @@
+import type {
+  BacktestDraft,
+  BacktestExecution,
+} from '../lib/backtestWorkspace'
+import { BacktestConfigForm } from './BacktestConfigForm'
+const BacktestResults = lazy(
+  () => import('./BacktestResults').then((module) => ({
+    default: module.BacktestResults,
+  }))
+)
 import { ResearchSetup } from './ResearchSetup'
 import { CandlestickChart } from './CandlestickChart'
 import type {
@@ -30,6 +40,13 @@ import { SignalTable } from './SignalTable'
 type Props = {
   view: WorkspaceView
   session: ResearchSession
+  backtestDraft: BacktestDraft
+  backtestExecution: BacktestExecution
+  onBacktestDraftChange: (
+    key: keyof BacktestDraft,
+    value: string
+  ) => void
+  onRunBacktest: () => void
   demoMode: boolean
   onDatasetImported: (
     filename: string,
@@ -50,6 +67,10 @@ type Props = {
 export function WorkspaceContent({
   view,
   session,
+  backtestDraft,
+  backtestExecution,
+  onBacktestDraftChange,
+  onRunBacktest,
   demoMode,
   onDatasetImported,
   onManualDataLoaded,
@@ -61,12 +82,22 @@ export function WorkspaceContent({
 }: Props) {
   if (view === 'research-setup') {
     return (
-      <ResearchSetup
-        dataset={session.dataset}
-        onDatasetImported={onDatasetImported}
-        onManualDataLoaded={onManualDataLoaded}
-        onInstrumentSaved={onInstrumentSaved}
-      />
+      <>
+        <ResearchSetup
+          dataset={session.dataset}
+          onDatasetImported={onDatasetImported}
+          onManualDataLoaded={onManualDataLoaded}
+          onInstrumentSaved={onInstrumentSaved}
+        />
+        {session.dataset && (
+          <BacktestConfigForm
+            draft={backtestDraft}
+            running={backtestExecution.status === 'running'}
+            onChange={onBacktestDraftChange}
+            onRun={onRunBacktest}
+          />
+        )}
+      </>
     )
   }
 
@@ -106,10 +137,31 @@ export function WorkspaceContent({
             <strong>{dataset.lastTimestamp}</strong>
           </div>
         </div>
-        <p className="workspace-description">
-          No backtest has been executed for this dataset.
-          Performance metrics are not available yet.
-        </p>
+        <div className="workspace-description">
+          {backtestExecution.status === 'success' &&
+          backtestExecution.result ? (
+            <div>
+              <strong>Latest Backtest</strong>
+              <p>
+                Strategy: {backtestExecution.result.portfolio.strategy}
+              </p>
+              <p>
+                Final equity: {'$'}
+                {backtestExecution.result.portfolio.final_equity.toFixed(2)}
+              </p>
+              <p>
+                Total return: {' '}
+                {backtestExecution.result.portfolio.total_return_pct.toFixed(2)}%
+              </p>
+            </div>
+          ) : backtestExecution.status === 'running' ? (
+            <p>Backtest currently running.</p>
+          ) : backtestExecution.status === 'error' ? (
+            <p>Latest backtest failed. Review the Backtests tab.</p>
+          ) : (
+            <p>No backtest has been executed for this dataset.</p>
+          )}
+        </div>
       </section>
     )
   }
@@ -122,21 +174,35 @@ export function WorkspaceContent({
             <h2>Strategy Configuration</h2>
             <p>Settings for the active research session</p>
           </div>
-          <span className="panel-tag">NOT EXECUTED</span>
+          <span className="panel-tag">
+              {backtestExecution.status === 'success'
+                ? 'BACKTEST COMPLETE'
+                : backtestExecution.status === 'running'
+                  ? 'RUNNING'
+                  : 'NOT EXECUTED'}
+            </span>
         </div>
         <div className="detail-grid">
           <div className="detail-card">
             <span>STRATEGY</span>
-            <strong>SMA Crossover</strong>
+            <strong>
+              {backtestDraft.strategy === 'buy-and-hold'
+                ? 'Buy & Hold'
+                : 'SMA Crossover'}
+            </strong>
           </div>
-          <div className="detail-card">
-            <span>FAST WINDOW</span>
-            <strong>{session.strategy.fastWindow} candles</strong>
-          </div>
-          <div className="detail-card">
-            <span>SLOW WINDOW</span>
-            <strong>{session.strategy.slowWindow} candles</strong>
-          </div>
+          {backtestDraft.strategy === 'sma-crossover' && (
+            <>
+              <div className="detail-card">
+                <span>FAST WINDOW</span>
+                <strong>{backtestDraft.fast} candles</strong>
+              </div>
+              <div className="detail-card">
+                <span>SLOW WINDOW</span>
+                <strong>{backtestDraft.slow} candles</strong>
+              </div>
+            </>
+          )}
         </div>
         <p className="workspace-description">
           These are configuration values, not generated signals.
@@ -155,13 +221,24 @@ export function WorkspaceContent({
   if (session.dataset && view === 'backtests') {
     return (
       <section className="panel">
-        <h2>No Backtest Executed</h2>
-        <p className="workspace-description">
-          Your dataset is loaded, but the C++ backtesting
-          engine is not connected to this browser session.
-          No trades, returns, or risk metrics have been
-          calculated for the uploaded data.
-        </p>
+        <h2>Backtest Research</h2>
+        {backtestExecution.status === 'idle' && (
+          <p>No backtest has been executed for this dataset.</p>
+        )}
+        {backtestExecution.status === 'running' && (
+          <p role="status">Running C++ backtest...</p>
+        )}
+        {backtestExecution.status === 'error' && (
+          <div className="error-banner" role="alert">
+            {backtestExecution.error}
+          </div>
+        )}
+        {backtestExecution.status === 'success' &&
+          backtestExecution.result && (
+            <Suspense fallback={<p>Loading results...</p>}>
+              <BacktestResults result={backtestExecution.result} />
+            </Suspense>
+          )}
       </section>
     )
   }

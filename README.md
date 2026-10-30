@@ -8,43 +8,47 @@ Project Atlas is an educational systems-engineering project for validating marke
 
 ## Status
 
-| Area | Status | Current capability |
+| Phase | Status | Capability |
 |---|---|---|
-| Phase 0 — Foundation | Complete | C++20, CMake, Git, initial CI |
-| Phase 1 — Market data | Complete | OHLCV parsing, validation, chronology checks, benchmarks |
-| Phase 2 — Historical research | Complete | Replay, strategies, portfolio simulation, metrics, JSON export, dashboard |
-| Phase 3 — Execution realism | Complete | Configurable commissions, adverse slippage, cost-aware accounting, JSON v2, dashboard analytics |
-| Phase 4 — Portfolio and risk | In progress | Risk analytics, entry controls, drawdown safeguards, JSON v3 risk reporting, and dashboard visualization |
-| Phase 5 — Research and performance | In progress | Data-first research setup, daily OHLCV imports, interactive candlesticks, shared sessions, and instrument metadata |
-| Phase 6 — Public release | Planned | Backend API, deployment, release hardening |
+| Phase 0 — Foundation | Complete | C++20, CMake, Git, CI |
+| Phase 1 — Market data | Complete | CSV ingestion and validation |
+| Phase 2 — Historical research | Complete | Strategies, replay, portfolio simulation |
+| Phase 3 — Execution realism | Complete | Commission and slippage modeling |
+| Phase 4 — Portfolio and risk | Complete | Risk metrics, controls, JSON v3 |
+| Phase 5 — Research terminal | In progress | Local backtesting, data import, dashboard |
+| Phase 6 — Public release | Planned | Secure hosted execution and deployment |
 
+## Current Atlas Terminal Status — Phase 5.5
 
-## Current Atlas Terminal Status — Phase 5.3
-
-Project Atlas now includes a data-first browser research
-workspace.
+Atlas Terminal now supports local historical backtesting
+through the existing C++ quantitative engine.
 
 ### Implemented locally
 
-- Empty workspace on initial application load.
-- Explicit synthetic Demo Mode.
-- Daily OHLCV CSV and manual data entry.
-- Interactive candlestick and volume visualization.
-- Shared research sessions and instrument metadata.
-- Separation of user data from demonstration results.
-- Historical market-data API foundation.
-- Massive provider adapter with mocked HTTP tests.
+- Daily OHLCV CSV uploads and manual entry.
+- Validated research datasets and instrument metadata.
+- Interactive candlestick and volume charts.
+- Buy & Hold and SMA Crossover strategies.
+- Editable capital, commission, slippage, and SMA settings.
+- Automatic navigation to Backtests after execution.
+- Python HTTP adapter and C++ backtesting CLI.
+- Actual historical signals, simulated fills, and equity curves.
+- Portfolio returns, drawdowns, and risk analytics.
+- Dataset-bound result isolation and request cancellation.
+- Explicit separation of synthetic Demo Mode.
 
 ### Latest local verification
 
-- 157 Vitest tests passed.
-- Frontend and backend TypeScript passed.
+- 28 CTest suites passed.
+- 8 Python HTTP integration tests passed.
+- 180 frontend Vitest tests passed.
+- Frontend and API TypeScript passed.
 - ESLint passed.
-- Production build passed.
+- Production frontend build passed.
+- Real local browser-to-C++ backtesting verified.
 
-The C++ engine previously passed 27 CTest suites in
-Debug and Release. Rerun both configurations before
-this release.
+These are local verification results. GitHub Actions
+must be checked after publishing the release.
 
 ### Public deployment
 
@@ -52,18 +56,28 @@ Public preview:
 
 https://project-atlas-two-rho.vercel.app
 
-The Phase 5.3 changes have not yet been verified
-on the public deployment.
+The local Python/C++ backtesting service is not yet
+deployed as a production backend.
 
-Live historical-data retrieval remains disabled.
-Uploaded and manually entered data cannot yet run
-through the C++ backtester from the website.
+The hosted preview must not be described as supporting
+the local backtesting workflow until independently
+verified.
 
-Atlas is an educational research platform, not a
-live trading service.
+The historical market-data provider remains
+unconfigured in production.
 
-See [Phase 5.3 engineering documentation](
-docs/phase5-data-first-workspace.md).
+### Research limitations
+
+Atlas is an educational quantitative research platform.
+
+Backtests use simplified execution assumptions and
+do not guarantee profitable trading decisions.
+
+Five-bar examples are integration smoke tests, not
+statistically meaningful strategy evaluations.
+
+See [Phase 5.5 engineering documentation](
+docs/phase5-local-backtesting.md).
 
 ## Features
 
@@ -92,7 +106,7 @@ docs/phase5-data-first-workspace.md).
 - Runtime validation of portfolio JSON.
 - Lazy-loaded charts to reduce the initial JavaScript bundle.
 
-Atlas Terminal supports browser-local daily OHLCV CSV imports alongside static synthetic demonstration fixtures. Uploaded data is not yet submitted to the C++ engine. A public API for user-selected backtests has not yet been implemented.
+Atlas Terminal supports browser-local daily OHLCV CSV imports alongside static synthetic demonstration fixtures. Uploaded data can be submitted to the C++ engine through the local development HTTP adapter. A production-hosted backtesting API has not yet been deployed.
 
 ### Execution realism — Phase 3
 
@@ -277,7 +291,7 @@ npm run build
 npm run dev
 ```
 
-Open the local URL printed by Vite. The current Backtests view uses a static portfolio JSON fixture generated by the C++ demonstration.
+Open the local URL printed by Vite. Start the local Python backtest service separately to execute user-selected strategies. Synthetic Demo Mode remains distinct from real local research.
 
 See [frontend setup](frontend/README.md).
 
@@ -311,7 +325,7 @@ The [Project Atlas learning guide](docs/notes/README.md) contains 13 topic guide
 
 ## Current Limitations
 
-- The frontend uses static demonstration fixtures rather than a live backtesting API.
+- The frontend supports local historical backtesting through a Python/C++ adapter. The public deployment does not yet provide this execution service.
 - Data and strategy demonstrations are educational and use synthetic input.
 - Execution uses simplified next-bar fills, fractional shares, configurable fixed commissions, and adverse slippage. Order-book liquidity and market impact are not modeled.
 - The simulator is not a production brokerage or order-routing system.
