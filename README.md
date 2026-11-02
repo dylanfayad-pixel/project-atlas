@@ -13,7 +13,7 @@ financial risk analytics, and automated research insights.
 Phase 6.1 introduces automatic browser-side historical
 market analysis for validated daily OHLCV data.
 
-## Current Product Status — Phase 6.1
+## Current Product Status — Phase 6.2
 
 **Implemented and verified locally:**
 
@@ -53,6 +53,35 @@ docs/phase6-market-intelligence.md).
 > predictions or financial advice.
 
 ---
+
+### Phase 6.2 — Research Terminal
+
+The active frontend now contains five research workspaces:
+
+- Market Overview.
+- Data Workspace.
+- Technical Indicators.
+- Market Explorer.
+- Risk Intelligence.
+
+The active application no longer initializes the legacy
+backtesting controller or synthetic demonstration system.
+
+The new terminal retains CSV uploads, manual data entry,
+instrument metadata, candlestick charts, and automatic
+historical market analytics.
+
+Latest reported local verification:
+
+- 200 frontend tests passed across 22 suites.
+- Application TypeScript and ESLint passed.
+- Production frontend build passed.
+
+The Phase 6.2 changes are not yet verified on the public
+deployment.
+
+See [Phase 6 engineering documentation](
+docs/phase6-market-intelligence.md).
 
 ## Historical Engineering Documentation
 

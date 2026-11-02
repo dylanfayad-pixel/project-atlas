@@ -1,5 +1,34 @@
 # Project Atlas — System Architecture
 
+## Phase 6.2 — Active Research Terminal
+
+The active frontend contains five workspaces:
+
+1. Market Overview
+2. Data Workspace
+3. Technical Indicators
+4. Market Explorer
+5. Risk Intelligence
+
+Application state is owned by `App.tsx`.
+
+`WorkspaceContent.tsx` renders research views using
+the validated dataset stored in `ResearchSession`.
+
+The active application no longer initializes the
+backtest controller or synthetic demonstration system.
+
+Market calculations run in the browser using
+`marketAnalytics.ts`.
+
+The historical C++ engine and backend remain in
+the repository but are not required by the active UI.
+
+See [Phase 6 documentation](phase6-market-intelligence.md).
+
+---
+
+
 ## Current Architecture — Atlas Intelligence Phase 6.1
 
 The active Market Intelligence workflow runs in the browser:

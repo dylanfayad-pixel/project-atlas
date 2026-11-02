@@ -53,12 +53,12 @@ demonstrate the project confidently.
 
 - Phases 0–4: Historical C++ engineering foundation complete.
 - Phase 5: Historical terminal and backtesting implementation.
-- Phase 6.1: Automatic Market Intelligence implemented locally.
-- Frontend: 206 tests passed across 22 suites.
+- Phase 6.2: Five-workspace Atlas Intelligence terminal implemented locally.
+- Frontend: 200 tests passed across 22 suites.
 - Application and API TypeScript: Passed.
 - ESLint and frontend production build: Passed.
 - Public Phase 6 deployment: Pending.
-- Professional terminal redesign: Planned.
+- Research terminal migration: Implemented locally.
 
 The legacy backtesting code remains available as
 historical engineering work during the migration.

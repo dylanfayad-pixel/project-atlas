@@ -1,5 +1,41 @@
 # Project Atlas — Testing and CI
 
+## Phase 6.2 — Research Terminal Verification
+
+Latest reported local verification:
+
+| Check | Result |
+|---|---|
+| Frontend Vitest | 200 passed |
+| Test suites | 22 passed |
+| Application TypeScript | Passed |
+| ESLint | Passed |
+| Production frontend build | Passed |
+| Documentation links | Passed |
+| Git whitespace | Passed |
+
+Application integration tests verify:
+
+- Five research navigation views.
+- Explicit empty-data states.
+- CSV ingestion and automatic analytics.
+- Manual observations and automatic analytics.
+- Technical indicators and risk measurements.
+- Dataset preservation across navigation.
+- Instrument metadata reset on replacement.
+- Invalid CSV handling.
+
+The historical backend tests remain in the
+repository during migration.
+
+Updated GitHub Actions and public deployment
+verification are pending.
+
+See [Phase 6 documentation](phase6-market-intelligence.md).
+
+---
+
+
 ## Current Verification — Atlas Intelligence Phase 6.1
 
 Latest reported local verification:

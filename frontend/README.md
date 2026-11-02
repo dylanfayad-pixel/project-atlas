@@ -1,5 +1,45 @@
 # Atlas Terminal
 
+## Atlas Intelligence — Phase 6.2
+
+The active React application provides five
+quantitative research workspaces:
+
+- Market Overview
+- Data Workspace
+- Technical Indicators
+- Market Explorer
+- Risk Intelligence
+
+The frontend supports validated daily OHLCV CSV
+uploads, manual data entry, instrument metadata,
+candlestick charts, and automatic historical analytics.
+
+These calculations run locally in the browser.
+
+The active UI no longer requires the historical
+backtesting service.
+
+### Local Verification
+
+```bash
+npm ci
+npm run test
+npm run lint
+npm run build
+```
+
+Latest reported local baseline: 200 passing
+frontend tests across 22 suites.
+
+The Phase 6.2 public deployment remains unverified.
+
+See [Phase 6 engineering documentation](
+../docs/phase6-market-intelligence.md).
+
+---
+
+
 Atlas Terminal is the React and TypeScript frontend
 for Project Atlas, a C++20 quantitative research and
 historical backtesting project.

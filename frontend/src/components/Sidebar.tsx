@@ -1,19 +1,19 @@
 import {
   Activity,
-  BarChart3,
   ChartNoAxesCombined,
   Database,
-  Layers3,
+  LayoutDashboard,
+  Search,
   ShieldCheck,
 } from 'lucide-react'
 
-// Supported workspace views.
+// Research-only navigation; no trade simulation views.
 export type WorkspaceView =
-  | 'research-setup'
-  | 'overview'
-  | 'strategies'
-  | 'market-data'
-  | 'backtests'
+  | 'market-overview'
+  | 'data-workspace'
+  | 'technical-indicators'
+  | 'market-explorer'
+  | 'risk-intelligence'
 
 type Props = {
   activeView: WorkspaceView
@@ -21,11 +21,31 @@ type Props = {
 }
 
 const navigation = [
-  { id: 'research-setup', label: 'Research Setup', icon: Database },
-  { id: 'overview', label: 'Overview', icon: BarChart3 },
-  { id: 'strategies', label: 'Strategies', icon: ChartNoAxesCombined },
-  { id: 'market-data', label: 'Market Data', icon: Database },
-  { id: 'backtests', label: 'Backtests', icon: Layers3 },
+  {
+    id: 'market-overview',
+    label: 'Market Overview',
+    icon: LayoutDashboard,
+  },
+  {
+    id: 'data-workspace',
+    label: 'Data Workspace',
+    icon: Database,
+  },
+  {
+    id: 'technical-indicators',
+    label: 'Technical Indicators',
+    icon: ChartNoAxesCombined,
+  },
+  {
+    id: 'market-explorer',
+    label: 'Market Explorer',
+    icon: Search,
+  },
+  {
+    id: 'risk-intelligence',
+    label: 'Risk Intelligence',
+    icon: ShieldCheck,
+  },
 ] as const
 
 // Navigation is controlled by the application shell.
@@ -36,11 +56,11 @@ export function Sidebar({ activeView, onNavigate }: Props) {
         <Activity size={25} />
         <div>
           <strong>ATLAS</strong>
-          <span>QUANT TERMINAL</span>
+          <span>INTELLIGENCE</span>
         </div>
       </div>
 
-      <div className="nav-label">WORKSPACE</div>
+      <div className="nav-label">RESEARCH WORKSPACE</div>
 
       <nav className="navigation" aria-label="Workspace">
         {navigation.map(({ id, label, icon: Icon }) => (
@@ -50,7 +70,9 @@ export function Sidebar({ activeView, onNavigate }: Props) {
             className={
               `nav-item ${activeView === id ? 'active' : ''}`
             }
-            aria-current={activeView === id ? 'page' : undefined}
+            aria-current={
+              activeView === id ? 'page' : undefined
+            }
             onClick={() => onNavigate(id)}
           >
             <Icon size={18} />
@@ -61,7 +83,7 @@ export function Sidebar({ activeView, onNavigate }: Props) {
 
       <div className="sidebar-bottom">
         <ShieldCheck size={16} />
-        <span>Research environment</span>
+        <span>Historical market research</span>
       </div>
     </aside>
   )
