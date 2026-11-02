@@ -3,13 +3,13 @@
 import { describe, expect, it } from 'vitest'
 import { EventEmitter } from 'node:events'
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import { createMarketDataHandler } from './market-data'
+import { createMarketDataHandler } from '../../api/market-data'
 import {
   MarketDataProviderError,
-} from './providers/types'
+} from '../providers/types'
 import type {
   HistoricalMarketDataProvider,
-} from './providers/types'
+} from '../providers/types'
 
 const validUrl =
   '/api/market-data?symbol=AAPL&start=2025-01-01&end=2025-12-31'

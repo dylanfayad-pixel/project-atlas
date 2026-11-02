@@ -3,7 +3,7 @@
 import { describe, expect, it } from 'vitest'
 import { EventEmitter } from 'node:events'
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import handler from './market-data'
+import handler from '../../api/market-data'
 
 type Result = {
   status: number

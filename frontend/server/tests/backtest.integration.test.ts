@@ -6,7 +6,7 @@ import { randomBytes } from 'node:crypto'
 import { EventEmitter } from 'node:events'
 import { Readable } from 'node:stream'
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import handler from './backtest'
+import handler from '../../api/backtest'
 
 const image = 'atlas-backtest:integration'
 const name = `atlas-gateway-${randomBytes(6).toString('hex')}`

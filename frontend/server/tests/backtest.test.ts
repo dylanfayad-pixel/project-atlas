@@ -4,8 +4,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { Readable } from 'node:stream'
 import { EventEmitter } from 'node:events'
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import handler from './backtest'
-import { validResponse } from '../src/lib/backtestTestFixture'
+import handler from '../../api/backtest'
+import { validResponse } from '../../src/lib/backtestTestFixture'
 
 type Result = {
   status: number
