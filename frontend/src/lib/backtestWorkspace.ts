@@ -2,7 +2,7 @@ import type {
   BacktestConfig,
   BacktestResult,
   BacktestStrategy,
-} from './backtestApi.ts'
+} from './backtestApi.js'
 
 // Preserve editable text until the user submits the form.
 export type BacktestDraft = {

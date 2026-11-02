@@ -1,12 +1,12 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import { createHistoricalDataRequest } from '../src/lib/historicalDataRequest.ts'
-import { executeProviderRequest } from '../server/providers/execute.ts'
+import { createHistoricalDataRequest } from '../src/lib/historicalDataRequest.js'
+import { executeProviderRequest } from '../server/providers/execute.js'
 import {
   MarketDataProviderError,
-} from '../server/providers/types.ts'
+} from '../server/providers/types.js'
 import type {
   HistoricalMarketDataProvider,
-} from '../server/providers/types.ts'
+} from '../server/providers/types.js'
 
 type ApiError = {
   error: string

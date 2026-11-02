@@ -1,7 +1,7 @@
 // Validate historical market-data requests before they
 // are submitted to a future server-side provider adapter.
 
-import { validateSymbol } from './instrumentMetadata.ts'
+import { validateSymbol } from './instrumentMetadata.js'
 
 export type HistoricalDataRequest = {
   symbol: string

@@ -1,12 +1,12 @@
 import type {
   HistoricalDataRequest,
-} from '../../src/lib/historicalDataRequest.ts'
+} from '../../src/lib/historicalDataRequest.js'
 import type {
   HistoricalDataResponse,
-} from '../../src/lib/historicalDataResponse.ts'
+} from '../../src/lib/historicalDataResponse.js'
 import {
   MarketDataProviderError,
-} from './types.ts'
+} from './types.js'
 
 type MassiveBar = {
   t: number

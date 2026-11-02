@@ -1,18 +1,18 @@
 import type {
   HistoricalDataRequest,
-} from '../../src/lib/historicalDataRequest.ts'
+} from '../../src/lib/historicalDataRequest.js'
 import type {
   HistoricalDataResponse,
-} from '../../src/lib/historicalDataResponse.ts'
+} from '../../src/lib/historicalDataResponse.js'
 import {
   normalizeMassiveResponse,
-} from './massive.ts'
+} from './massive.js'
 import {
   MarketDataProviderError,
-} from './types.ts'
+} from './types.js'
 import type {
   HistoricalMarketDataProvider,
-} from './types.ts'
+} from './types.js'
 
 const MASSIVE_BASE_URL = 'https://api.massive.com'
 const MAX_RESPONSE_BYTES = 2_000_000

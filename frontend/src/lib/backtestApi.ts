@@ -1,4 +1,4 @@
-import type { OhlcvBar } from './ohlcvData.ts'
+import type { OhlcvBar } from './ohlcvData.js'
 
 export type BacktestStrategy =
   | 'buy-and-hold'

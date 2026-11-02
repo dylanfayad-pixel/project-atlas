@@ -1,10 +1,10 @@
 import type {
   HistoricalDataRequest,
-} from '../../src/lib/historicalDataRequest.ts'
+} from '../../src/lib/historicalDataRequest.js'
 
 import type {
   HistoricalDataResponse,
-} from '../../src/lib/historicalDataResponse.ts'
+} from '../../src/lib/historicalDataResponse.js'
 
 // Provider implementations must return the normalized
 // Atlas contract rather than provider-specific JSON.
