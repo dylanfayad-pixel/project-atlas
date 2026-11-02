@@ -152,19 +152,34 @@ class BacktestHttpTests(unittest.TestCase):
                 EXECUTION_SLOTS.release()
 
     def test_handler_limit_rejects_excess_connection(self):
-        # Occupy every handler slot without starting threads.
-        slots = self.server.handler_slots
-        acquired = 0
+        # Use an isolated server so live request threads cannot
+        # interfere with deterministic handler-slot assertions.
+        from server import BoundedHTTPServer, BacktestHandler
+
+        isolated = BoundedHTTPServer(
+            ("127.0.0.1", 0),
+            BacktestHandler,
+        )
 
         try:
-            for _ in range(self.server.MAX_ACTIVE_HANDLERS):
-                self.assertTrue(slots.acquire(blocking=False))
-                acquired += 1
+            slots = isolated.handler_slots
+            acquired = 0
 
-            self.assertFalse(slots.acquire(blocking=False))
+            try:
+                for _ in range(isolated.MAX_ACTIVE_HANDLERS):
+                    self.assertTrue(
+                        slots.acquire(blocking=False)
+                    )
+                    acquired += 1
+
+                self.assertFalse(
+                    slots.acquire(blocking=False)
+                )
+            finally:
+                for _ in range(acquired):
+                    slots.release()
         finally:
-            for _ in range(acquired):
-                slots.release()
+            isolated.server_close()
 
     def test_handler_capacity_recovers_after_request(self):
         # Verify that completed requests restore handler capacity
