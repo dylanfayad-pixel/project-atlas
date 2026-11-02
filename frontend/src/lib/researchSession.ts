@@ -1,4 +1,4 @@
-import type { OhlcvBar } from './ohlcvData'
+import type { OhlcvBar } from './ohlcvData.ts'
 
 // A dataset's origin must remain explicit so the UI never
 // confuses imported observations with synthetic fixtures.

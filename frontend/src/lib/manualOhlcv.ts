@@ -1,5 +1,5 @@
-import { parseOhlcvCsv } from './ohlcvData'
-import type { OhlcvBar } from './ohlcvData'
+import { parseOhlcvCsv } from './ohlcvData.ts'
+import type { OhlcvBar } from './ohlcvData.ts'
 
 // Keep input values as strings until validation so empty
 // fields cannot silently become numeric zero.

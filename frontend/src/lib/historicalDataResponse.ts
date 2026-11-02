@@ -1,6 +1,6 @@
-import { parseOhlcvCsv } from './ohlcvData'
-import type { OhlcvBar } from './ohlcvData'
-import { createHistoricalDataRequest } from './historicalDataRequest'
+import { parseOhlcvCsv } from './ohlcvData.ts'
+import type { OhlcvBar } from './ohlcvData.ts'
+import { createHistoricalDataRequest } from './historicalDataRequest.ts'
 
 export type HistoricalDataResponse = {
   schema_version: 1

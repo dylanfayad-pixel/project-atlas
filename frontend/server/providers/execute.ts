@@ -1,22 +1,22 @@
 import type {
   HistoricalDataRequest,
-} from '../../src/lib/historicalDataRequest'
+} from '../../src/lib/historicalDataRequest.ts'
 
 import {
   validateHistoricalResponseForRequest,
-} from '../../src/lib/historicalDataResponse'
+} from '../../src/lib/historicalDataResponse.ts'
 
 import type {
   HistoricalDataResponse,
-} from '../../src/lib/historicalDataResponse'
+} from '../../src/lib/historicalDataResponse.ts'
 
 import {
   MarketDataProviderError,
-} from './types'
+} from './types.ts'
 
 import type {
   HistoricalMarketDataProvider,
-} from './types'
+} from './types.ts'
 
 export const PROVIDER_TIMEOUT_MS = 8000
 

@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import { parseBacktestResult } from '../src/lib/backtestApi'
+import { parseBacktestResult } from '../src/lib/backtestApi.ts'
 
 
 const MAX_BODY_BYTES = 2 * 1024 * 1024
