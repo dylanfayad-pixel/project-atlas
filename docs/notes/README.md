@@ -39,6 +39,8 @@ demonstrate the project confidently.
 | [21 — Cloud Deployment](21-cloud-deployment.md) | Railway, Vercel and production configuration |
 | [22 — CI/CD](22-production-ci-cd.md) | Automated verification and release engineering |
 
+| [23 — Market Intelligence Analytics](23-market-intelligence-analytics.md) | Returns, volatility, drawdown, SMA and RSI |
+
 ## How to Use These Notes
 
 1. Read the simple explanation first.
@@ -49,18 +51,18 @@ demonstrate the project confidently.
 
 ## Current Project Status
 
-- Phases 0–4: Complete.
-- Phase 5.5: Local historical backtesting complete.
-- Phase 5.6: Production infrastructure in progress.
-- C++: 28 CTest suites passed in the latest reported baseline.
-- Python HTTP: 15 tests passed.
-- Standard frontend: 195 Vitest tests passed.
-- Authenticated gateway-to-C++ integration: Passed.
-- Production deployment: Pending.
-- Updated GitHub Actions verification: Pending.
+- Phases 0–4: Historical C++ engineering foundation complete.
+- Phase 5: Historical terminal and backtesting implementation.
+- Phase 6.1: Automatic Market Intelligence implemented locally.
+- Frontend: 206 tests passed across 22 suites.
+- Application and API TypeScript: Passed.
+- ESLint and frontend production build: Passed.
+- Public Phase 6 deployment: Pending.
+- Professional terminal redesign: Planned.
 
-These are reported local verification results, not
-evidence that the public deployment works.
+The legacy backtesting code remains available as
+historical engineering work during the migration.
+
 
 ## Important Limitations
 
@@ -83,19 +85,22 @@ been demonstrated.
 
 Historical backtesting does not guarantee future returns.
 
-## Future Research Roadmap
+## Atlas Intelligence Roadmap
 
-Planned improvements include:
+The active product roadmap focuses on:
 
-- Ticker-symbol historical market-data retrieval.
-- Additional market-data sources and file formats.
-- More trading strategies and configurable parameters.
-- Automated strategy comparison and ranking.
-- Out-of-sample and walk-forward evaluation.
-- Risk-adjusted profitability analysis.
-- Explainable historical BUY and SELL markers.
-- Professional Atlas Terminal redesign.
-- Explicit NO QUALIFYING STRATEGY recommendations.
+- Automatic ticker-symbol market-data retrieval.
+- Additional validated financial data sources.
+- EMA, MACD, and additional technical indicators.
+- Market regime classification.
+- Quantitative stock screening and rankings.
+- Portfolio risk and concentration analytics.
+- Automated, explainable research summaries.
+- Professional terminal redesign.
+- Reliable public deployment and CI verification.
 
-See the [Phase 5.6 engineering documentation](
-../phase5-production-infrastructure.md).
+Legacy backtesting guides remain available as
+historical engineering documentation.
+
+See [Phase 6 engineering documentation](
+../phase6-market-intelligence.md).

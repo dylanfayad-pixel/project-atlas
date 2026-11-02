@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { cleanup, render, screen, waitFor } from '@testing-library/react'
+import { cleanup, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from './App'
 
@@ -282,7 +282,7 @@ describe('Manual research workflow', () => {
     render(<App />)
 
     await screen.findByText('Market Data Import')
-    await loadManualData(user)
+    await loadIntelligenceManualData(user)
 
     expect(
       screen.getByText('MANUALLY ENTERED DATA')
@@ -537,97 +537,89 @@ describe('Atlas research workflow', () => {
 })
 
 
-describe('Shared backtest workflow', () => {
-  it('shows backtest configuration after manual data load', async () => {
+
+// Enter one validated daily OHLCV observation.
+async function loadIntelligenceManualData(
+  user: ReturnType<typeof userEvent.setup>,
+) {
+  await user.click(screen.getByRole('button', {
+    name: 'Manual Entry',
+  }))
+
+  const fields = [
+    ['Date (YYYY-MM-DD)', '2026-01-05'],
+    ['Open', '100'],
+    ['High', '105'],
+    ['Low', '98'],
+    ['Close', '103'],
+    ['Volume', '1500000'],
+  ]
+
+  for (const [label, value] of fields) {
+    await user.type(
+      screen.getByRole('textbox', {
+        name: `${label} row 1`,
+      }),
+      value,
+    )
+  }
+
+  await user.click(screen.getByRole('button', {
+    name: 'Validate & Load Data',
+  }))
+}
+
+describe('Automatic market intelligence workflow', () => {
+  it('analyzes uploaded CSV data without a backtest', async () => {
     mockFetch()
     const user = userEvent.setup()
     render(<App />)
 
-    await user.click(screen.getByRole('button', {
-      name: 'Manual Entry',
-    }))
-
-    const fields = [
-      ['Date (YYYY-MM-DD)', '2026-01-05'],
-      ['Open', '100'],
-      ['High', '105'],
-      ['Low', '98'],
-      ['Close', '103'],
-      ['Volume', '1500000'],
-    ]
-
-    for (const [label, value] of fields) {
-      await user.type(
-        screen.getByRole('textbox', {
-          name: `${label} row 1`,
-        }),
-        value
-      )
-    }
-
-    await user.click(screen.getByRole('button', {
-      name: 'Validate & Load Data',
-    }))
+    await uploadCsv(user, sampleCsv)
 
     expect(
-      await screen.findByText('Configure & Run Backtest')
+      await screen.findByRole('region', {
+        name: 'Market Intelligence',
+      }),
     ).toBeTruthy()
 
+    const dashboard = screen.getByRole('region', {
+      name: 'Market Intelligence',
+    })
+
+    expect(within(dashboard).getByText('106.00')).toBeTruthy()
+    expect(within(dashboard).getByText('2.91%')).toBeTruthy()
+
     expect(
-      screen.getByRole('button', { name: 'Run Backtest' })
-    ).toBeTruthy()
+      screen.queryByRole('button', {
+        name: 'Run Backtest',
+      }),
+    ).toBeNull()
   })
 
-  it('automatically opens Backtests when execution starts', async () => {
+  it('automatically analyzes manually entered data', async () => {
     mockFetch()
     const user = userEvent.setup()
     render(<App />)
 
-    await user.click(screen.getByRole('button', {
-      name: 'Manual Entry',
-    }))
-
-    const fields = [
-      ['Date (YYYY-MM-DD)', '2026-01-05'],
-      ['Open', '100'],
-      ['High', '105'],
-      ['Low', '98'],
-      ['Close', '103'],
-      ['Volume', '1500000'],
-    ]
-
-    for (const [label, value] of fields) {
-      await user.type(
-        screen.getByRole('textbox', {
-          name: `${label} row 1`,
-        }),
-        value
-      )
-    }
-
-    await user.click(screen.getByRole('button', {
-      name: 'Validate & Load Data',
-    }))
-
-    const capital = screen.getByLabelText(
-      'Starting Capital ($)'
-    ) as HTMLInputElement
-
-    await user.clear(capital)
-    expect(capital.value).toBe('')
-
-    await user.type(capital, '12500.50')
-    expect(capital.valueAsNumber).toBe(12500.5)
-
-    await user.click(screen.getByRole('button', {
-      name: 'Run Backtest',
-    }))
+    await loadIntelligenceManualData(user)
 
     expect(
-      await screen.findByRole('heading', {
-        name: 'Backtest Research',
-        level: 1,
-      })
+      await screen.findByRole('region', {
+        name: 'Market Intelligence',
+      }),
     ).toBeTruthy()
+
+    const dashboard = screen.getByRole('region', {
+      name: 'Market Intelligence',
+    })
+
+    expect(within(dashboard).getByText('103.00')).toBeTruthy()
+
+    expect(
+      screen.queryByRole('button', {
+        name: 'Run Backtest',
+      }),
+    ).toBeNull()
   })
 })

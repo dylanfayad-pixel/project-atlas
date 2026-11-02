@@ -1,5 +1,32 @@
 # Project Atlas — Testing and CI
 
+## Current Verification — Atlas Intelligence Phase 6.1
+
+Latest reported local verification:
+
+| Check | Result |
+|---|---|
+| Frontend Vitest | 206/206 passed |
+| Frontend suites | 22/22 passed |
+| Application TypeScript | Passed |
+| API TypeScript | Passed |
+| ESLint | Passed |
+| Production frontend build | Passed |
+| Documentation link validation | Passed |
+| Git whitespace validation | Passed |
+
+The new tests cover historical market analytics,
+the Market Intelligence component, and automatic
+analysis after CSV or manual-data ingestion.
+
+These are local results. Public deployment and
+updated GitHub Actions verification remain pending.
+
+See [Phase 6 documentation](phase6-market-intelligence.md).
+
+---
+
+
 ## Phase 5.6 — Current Verification Baseline
 
 Latest reported local results:

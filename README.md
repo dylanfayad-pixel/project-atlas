@@ -1,5 +1,62 @@
 # Project Atlas
 
+**Atlas Intelligence — Automated Quantitative Market Research**
+
+Project Atlas is evolving into Atlas Intelligence, a
+financial research platform built with React, TypeScript,
+and a C++20 quantitative engineering foundation.
+
+The active product direction focuses on market-data
+analysis, technical indicators, market regimes,
+financial risk analytics, and automated research insights.
+
+Phase 6.1 introduces automatic browser-side historical
+market analysis for validated daily OHLCV data.
+
+## Current Product Status — Phase 6.1
+
+**Implemented and verified locally:**
+
+- Daily OHLCV CSV uploads.
+- Manual historical market-data entry.
+- Automatic historical price-return calculations.
+- Annualized historical volatility.
+- Maximum closing-price drawdown.
+- SMA 20 and SMA 50.
+- Wilder RSI 14.
+- Insufficient-data handling.
+- Browser-side analytics without a backtesting service.
+
+**Latest reported verification:**
+
+- 206 frontend tests passed across 22 suites.
+- Application and API TypeScript passed.
+- ESLint passed.
+- Production frontend build passed.
+- Documentation links passed.
+- Git whitespace checks passed.
+
+**Deployment:** The Phase 6.1 changes are not yet
+published to the public website.
+
+**Migration:** Legacy backtesting components and
+historical C++ implementations remain in the repository
+while the new product architecture is developed.
+They are not part of the future Atlas Intelligence
+product roadmap.
+
+See [Phase 6 engineering documentation](
+docs/phase6-market-intelligence.md).
+
+> Research disclaimer: Atlas Intelligence provides
+> historical market analysis, not guaranteed investment
+> predictions or financial advice.
+
+---
+
+## Historical Engineering Documentation
+
+
 **C++20 quantitative research and backtesting engine with a React and TypeScript dashboard.**
 
 Project Atlas is an educational systems-engineering project for validating market data, evaluating historical strategies, simulating simplified portfolio execution, and analyzing performance. The repository contains a C++ computation engine and a browser-based Atlas Terminal interface.
@@ -16,9 +73,9 @@ Project Atlas is an educational systems-engineering project for validating marke
 | Phase 3 — Execution realism | Complete | Commission and slippage modeling |
 | Phase 4 — Portfolio and risk | Complete | Risk metrics, controls, JSON v3 |
 | Phase 5 — Research terminal | In progress | Local backtesting, data import, dashboard |
-| Phase 6 — Public release | Planned | Secure hosted execution and deployment |
+| Historical Phase 6 proposal | Superseded | Replaced by Atlas Intelligence roadmap |
 
-## Current Atlas Terminal Status — Phase 5.6
+## Historical Atlas Terminal Status — Phase 5.6
 
 Phase 5.5 local historical backtesting is complete.
 

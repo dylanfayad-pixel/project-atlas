@@ -1,5 +1,36 @@
 # Project Atlas — System Architecture
 
+## Current Architecture — Atlas Intelligence Phase 6.1
+
+The active Market Intelligence workflow runs in the browser:
+
+```text
+CSV Upload / Manual OHLCV Entry
+             |
+             v
+Validated Research Dataset
+             |
+             v
+marketAnalytics.ts
+             |
+             v
+MarketIntelligence.tsx
+             |
+             v
+Historical Market Metrics
+```
+
+This workflow does not require the Python backtesting
+service, Docker backend, or Render deployment.
+
+Legacy C++ simulation and HTTP execution infrastructure
+remain in the repository during migration.
+
+See [Phase 6 documentation](phase6-market-intelligence.md).
+
+---
+
+
 ## Phase 5.6 — Current Backtesting Architecture
 
 The current implementation supports authenticated,

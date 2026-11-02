@@ -2,7 +2,7 @@ import type {
   BacktestDraft,
   BacktestExecution,
 } from '../lib/backtestWorkspace'
-import { BacktestConfigForm } from './BacktestConfigForm'
+import { MarketIntelligence } from './MarketIntelligence'
 const BacktestResults = lazy(
   () => import('./BacktestResults').then((module) => ({
     default: module.BacktestResults,
@@ -69,8 +69,6 @@ export function WorkspaceContent({
   session,
   backtestDraft,
   backtestExecution,
-  onBacktestDraftChange,
-  onRunBacktest,
   demoMode,
   onDatasetImported,
   onManualDataLoaded,
@@ -90,12 +88,7 @@ export function WorkspaceContent({
           onInstrumentSaved={onInstrumentSaved}
         />
         {session.dataset && (
-          <BacktestConfigForm
-            draft={backtestDraft}
-            running={backtestExecution.status === 'running'}
-            onChange={onBacktestDraftChange}
-            onRun={onRunBacktest}
-          />
+          <MarketIntelligence dataset={session.dataset} />
         )}
       </>
     )

@@ -1,6 +1,34 @@
 # Project Atlas — JSON Contract and API Boundary
 
-## Phase 5.6 — Current Backtesting API
+## Current Product Direction — Phase 6.1
+
+Atlas Intelligence performs its initial historical
+market analytics directly in the browser.
+
+The current Phase 6.1 workflow uses validated daily
+OHLCV data and does not require an HTTP backtesting API.
+
+The existing `/api/market-data` route remains part of
+the market-data provider integration.
+
+The historical `/api/backtest` route and Python/C++
+execution service remain in the repository during
+migration but are not part of the new product roadmap.
+
+Render previously hosted the Python backend and
+successfully served its health endpoint. However,
+authenticated public execution through Vercel was
+not successfully verified.
+
+The new Phase 6.1 frontend has not yet been deployed.
+
+See [Phase 6 documentation](
+phase6-market-intelligence.md).
+
+---
+
+
+## Historical Phase 5.6 — Backtesting API
 
 The frontend submits historical research requests to:
 
