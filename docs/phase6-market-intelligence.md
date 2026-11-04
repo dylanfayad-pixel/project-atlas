@@ -1,5 +1,20 @@
 # Phase 6 — Atlas Intelligence
 
+## Historical Milestone Record
+
+This document records the earlier Phase 6.1 and 6.2
+implementation milestones.
+
+Some roadmap items and verification counts below reflect
+the state of the project at those earlier milestones.
+
+For the latest capabilities, tests, and limitations,
+see [Phase 6.3 — Advanced Market Intelligence](
+phase6-advanced-intelligence.md).
+
+---
+
+
 ## Product Direction
 
 Project Atlas is transitioning from a historical backtesting

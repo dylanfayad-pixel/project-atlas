@@ -13,6 +13,9 @@ export type MarketAnalytics = {
   maximumDrawdownPct: number
   sma20: number | null
   sma50: number | null
+  ema12: number | null
+  ema26: number | null
+  macd: MacdResult
   rsi14: number | null
 }
 
@@ -48,6 +51,142 @@ export function simpleMovingAverage(
   }
 
   return mean(values.slice(-period))
+}
+
+// Calculate the latest EMA using an initial SMA seed.
+// Returns null until enough observations are available.
+export function exponentialMovingAverage(
+  values: number[],
+  period: number,
+): number | null {
+  if (
+    !Number.isSafeInteger(period) ||
+    period < 1 ||
+    values.length < period
+  ) {
+    return null
+  }
+
+  if (values.some((value) => !Number.isFinite(value))) {
+    throw new Error('EMA requires finite observations')
+  }
+
+  const multiplier = 2 / (period + 1)
+  let ema = mean(values.slice(0, period))
+
+  for (let i = period; i < values.length; i++) {
+    ema = values[i] * multiplier + ema * (1 - multiplier)
+  }
+
+  return ema
+}
+
+export type MacdResult = {
+  macd: number | null
+  signal: number | null
+  histogram: number | null
+}
+
+// Calculate MACD using independently seeded fast and slow
+// EMAs, then seed the signal EMA from valid MACD values.
+export function movingAverageConvergenceDivergence(
+  closes: number[],
+  fastPeriod = 12,
+  slowPeriod = 26,
+  signalPeriod = 9,
+): MacdResult {
+  if (
+    !Number.isSafeInteger(fastPeriod) ||
+    !Number.isSafeInteger(slowPeriod) ||
+    !Number.isSafeInteger(signalPeriod) ||
+    fastPeriod < 1 ||
+    slowPeriod <= fastPeriod ||
+    signalPeriod < 1
+  ) {
+    throw new Error('Invalid MACD periods')
+  }
+
+  if (closes.some((value) => !Number.isFinite(value))) {
+    throw new Error('MACD requires finite observations')
+  }
+
+  if (closes.length < slowPeriod) {
+    return { macd: null, signal: null, histogram: null }
+  }
+
+  const fastMultiplier = 2 / (fastPeriod + 1)
+  const slowMultiplier = 2 / (slowPeriod + 1)
+  const signalMultiplier = 2 / (signalPeriod + 1)
+
+  // Seed each EMA from its initial SMA.
+  let fastSum = 0
+  let slowSum = 0
+  let fastEma = 0
+  let slowEma = 0
+
+  let macd = 0
+  let signal = 0
+  let signalSeedSum = 0
+  let macdObservations = 0
+
+  for (let i = 0; i < closes.length; i++) {
+    const close = closes[i]
+
+    if (i < fastPeriod) {
+      fastSum += close
+      if (i === fastPeriod - 1) {
+        fastEma = fastSum / fastPeriod
+      }
+    } else {
+      fastEma =
+        close * fastMultiplier +
+        fastEma * (1 - fastMultiplier)
+    }
+
+    if (i < slowPeriod) {
+      slowSum += close
+      if (i === slowPeriod - 1) {
+        slowEma = slowSum / slowPeriod
+      }
+    } else {
+      slowEma =
+        close * slowMultiplier +
+        slowEma * (1 - slowMultiplier)
+    }
+
+    if (i < slowPeriod - 1) continue
+
+    macd = fastEma - slowEma
+    macdObservations++
+
+    // The signal EMA is seeded from the first
+    // signalPeriod valid MACD observations.
+    if (macdObservations <= signalPeriod) {
+      signalSeedSum += macd
+
+      if (macdObservations === signalPeriod) {
+        signal = signalSeedSum / signalPeriod
+      }
+    } else {
+      signal =
+        macd * signalMultiplier +
+        signal * (1 - signalMultiplier)
+    }
+  }
+
+  if (macdObservations < signalPeriod) {
+    return {
+      macd,
+      signal: null,
+      histogram: null,
+    }
+  }
+
+  return {
+    macd,
+    signal,
+    histogram: macd - signal,
+  }
 }
 
 // Wilder RSI with an initial 14-period average followed
@@ -148,6 +287,9 @@ export function analyzeMarket(
     maximumDrawdownPct: maximumDrawdown * 100,
     sma20: simpleMovingAverage(closes, 20),
     sma50: simpleMovingAverage(closes, 50),
+    ema12: exponentialMovingAverage(closes, 12),
+    ema26: exponentialMovingAverage(closes, 26),
+    macd: movingAverageConvergenceDivergence(closes),
     rsi14: relativeStrengthIndex(closes),
   }
 }

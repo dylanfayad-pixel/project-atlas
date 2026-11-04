@@ -1,6 +1,39 @@
 # Atlas Terminal
 
-## Atlas Intelligence — Phase 6.2
+## Current Frontend — Atlas Intelligence Phase 6.3
+
+The active frontend provides:
+
+- Market Overview
+- Data Workspace
+- Technical Indicators
+- Market Explorer
+- Risk Intelligence
+
+Historical analysis includes SMA, EMA, RSI, MACD,
+returns, volatility, and closing-price drawdown.
+
+Market regime classification and research explanations
+are deterministic and rules-based.
+
+CSV uploads and manual daily OHLCV entry work without
+the historical backtesting service.
+
+**Latest local baseline:** 228 tests passed across
+28 suites. Public Phase 6.3 deployment is unverified.
+
+Older trading signals, portfolio fixtures, and
+backtesting components remain in the repository as
+historical implementation artifacts, not active
+research terminal functionality.
+
+See [Phase 6.3 documentation](
+../docs/phase6-advanced-intelligence.md).
+
+---
+
+
+## Historical Milestone — Phase 6.2
 
 The active React application provides five
 quantitative research workspaces:
@@ -32,7 +65,7 @@ npm run build
 Latest reported local baseline: 200 passing
 frontend tests across 22 suites.
 
-The Phase 6.2 public deployment remains unverified.
+Historical milestone note: public Phase 6.2 deployment was not verified at that time.
 
 See [Phase 6 engineering documentation](
 ../docs/phase6-market-intelligence.md).
@@ -54,7 +87,7 @@ historical backtesting project.
 - Vitest
 - ESLint
 
-## Current Features
+## Historical Atlas Terminal Features
 
 - Interactive market-data visualization.
 - Historical BUY, SELL, and HOLD signal display.
@@ -86,7 +119,7 @@ npm run lint
 npm run build
 ```
 
-## Current Data Sources
+## Historical Demonstration Data Sources
 
 The frontend currently reads:
 

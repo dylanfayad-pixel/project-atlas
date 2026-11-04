@@ -1,5 +1,47 @@
 # Project Atlas — System Architecture
 
+## Phase 6.3 — Active Intelligence Architecture
+
+The active research flow is:
+
+```text
+Validated daily OHLCV observations
+               |
+               v
+ResearchSession / App.tsx
+               |
+               v
+marketAnalytics.ts
+               |
+       +-------+--------+
+       |                |
+       v                v
+marketRegime.ts    Technical Indicators
+       |
+       v
+researchInsights.ts
+       |
+       v
+Market Overview / Risk Intelligence
+```
+
+The analytics and explanations are deterministic,
+browser-side computations. No backtesting API or
+language-model service is required.
+
+The active UI uses MarketIntelligence,
+MarketRegimePanel, and ResearchInsightsPanel.
+
+Historical C++ and HTTP execution infrastructure
+remain in the repository but are not used by these
+research panels.
+
+See [Phase 6.3 documentation](
+phase6-advanced-intelligence.md).
+
+---
+
+
 ## Phase 6.2 — Active Research Terminal
 
 The active frontend contains five workspaces:

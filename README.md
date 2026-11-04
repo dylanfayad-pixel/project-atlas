@@ -1,5 +1,37 @@
 # Project Atlas
 
+## Current Release Candidate — Phase 6.3
+
+**Status:** Implemented and verified locally; publication pending.
+
+Atlas Intelligence now provides:
+
+- Five research workspaces.
+- Validated CSV uploads and manual daily OHLCV entry.
+- Historical returns, volatility, and closing-price drawdown.
+- SMA 20/50, RSI 14, and EMA 12/26.
+- MACD 12/26/9, including signal and histogram.
+- Rules-based trend and volatility classifications.
+- Deterministic, explainable historical research insights.
+- Explicit insufficient-data handling.
+
+**Latest local verification:** 228 frontend tests passed
+across 28 suites. TypeScript, ESLint, and the production
+frontend build passed.
+
+The active research interface does not require the
+historical backtesting service. The C++ engine remains
+in the repository as historical engineering work.
+
+Phase 6.3 has not yet been committed or verified in
+GitHub Actions. Public deployment remains unverified.
+
+See [Phase 6.3 engineering documentation](
+docs/phase6-advanced-intelligence.md).
+
+---
+
+
 **Atlas Intelligence — Automated Quantitative Market Research**
 
 Project Atlas is evolving into Atlas Intelligence, a
@@ -13,7 +45,7 @@ financial risk analytics, and automated research insights.
 Phase 6.1 introduces automatic browser-side historical
 market analysis for validated daily OHLCV data.
 
-## Current Product Status — Phase 6.2
+## Historical Milestone — Phase 6.1
 
 **Implemented and verified locally:**
 
@@ -36,8 +68,7 @@ market analysis for validated daily OHLCV data.
 - Documentation links passed.
 - Git whitespace checks passed.
 
-**Deployment:** The Phase 6.1 changes are not yet
-published to the public website.
+**Historical deployment note:** Public deployment was unverified at the time of the Phase 6.1 milestone.
 
 **Migration:** Legacy backtesting components and
 historical C++ implementations remain in the repository
@@ -54,7 +85,7 @@ docs/phase6-market-intelligence.md).
 
 ---
 
-### Phase 6.2 — Research Terminal
+### Historical Milestone — Phase 6.2 Research Terminal
 
 The active frontend now contains five research workspaces:
 
@@ -77,8 +108,7 @@ Latest reported local verification:
 - Application TypeScript and ESLint passed.
 - Production frontend build passed.
 
-The Phase 6.2 changes are not yet verified on the public
-deployment.
+Historical milestone note: Phase 6.2 public deployment was unverified at the time of documentation.
 
 See [Phase 6 engineering documentation](
 docs/phase6-market-intelligence.md).

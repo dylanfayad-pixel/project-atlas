@@ -1,5 +1,32 @@
 # Project Atlas — Testing and CI
 
+## Phase 6.3 — Latest Local Verification
+
+| Check | Result |
+|---|---|
+| Frontend tests | 228 passed |
+| Frontend suites | 28 passed |
+| Application TypeScript | Passed |
+| ESLint | Passed |
+| Production frontend build | Passed |
+| Markdown link validation | Passed |
+
+Coverage includes EMA, MACD numerical equivalence,
+market regime classification, deterministic insights,
+component rendering, and application integration.
+
+The MACD reference uses the same EMA seeding convention;
+external numerical validation remains future work.
+
+These are local results, not evidence of public
+deployment or a completed Phase 6.3 CI run.
+
+See [Phase 6.3 documentation](
+phase6-advanced-intelligence.md).
+
+---
+
+
 ## Phase 6.2 — Research Terminal Verification
 
 Latest reported local verification:

@@ -1,5 +1,7 @@
 import { ResearchSetup } from './ResearchSetup'
 import { MarketIntelligence } from './MarketIntelligence'
+import { MarketRegimePanel } from './MarketRegimePanel'
+import { ResearchInsightsPanel } from './ResearchInsightsPanel'
 import { CandlestickChart } from './CandlestickChart'
 import { analyzeMarket } from '../lib/marketAnalytics'
 import type { WorkspaceView } from './Sidebar'
@@ -72,6 +74,8 @@ export function WorkspaceContent({
     return (
       <>
         <MarketIntelligence dataset={dataset} />
+        <MarketRegimePanel dataset={dataset} />
+        <ResearchInsightsPanel dataset={dataset} />
         <CandlestickChart bars={dataset.bars} />
       </>
     )
@@ -115,6 +119,40 @@ export function WorkspaceContent({
               {analysis.rsi14?.toFixed(2) ?? 'Insufficient data'}
             </strong>
           </div>
+          <div className="detail-card">
+            <span>EMA 12</span>
+            <strong>
+              {analysis.ema12?.toFixed(2) ?? 'Insufficient data'}
+            </strong>
+          </div>
+
+          <div className="detail-card">
+            <span>EMA 26</span>
+            <strong>
+              {analysis.ema26?.toFixed(2) ?? 'Insufficient data'}
+            </strong>
+          </div>
+
+          <div className="detail-card">
+            <span>MACD</span>
+            <strong>
+              {analysis.macd.macd?.toFixed(4) ?? 'Insufficient data'}
+            </strong>
+          </div>
+
+          <div className="detail-card">
+            <span>MACD Signal</span>
+            <strong>
+              {analysis.macd.signal?.toFixed(4) ?? 'Insufficient data'}
+            </strong>
+          </div>
+
+          <div className="detail-card">
+            <span>MACD Histogram</span>
+            <strong>
+              {analysis.macd.histogram?.toFixed(4) ?? 'Insufficient data'}
+            </strong>
+          </div>
         </div>
 
         <p className="workspace-description">
@@ -127,7 +165,9 @@ export function WorkspaceContent({
 
   if (view === 'risk-intelligence') {
     return (
-      <section className="panel">
+      <>
+        <MarketRegimePanel dataset={dataset} />
+        <section className="panel">
         <div className="panel-heading">
           <div>
             <h2>Risk Intelligence</h2>
@@ -169,7 +209,8 @@ export function WorkspaceContent({
           Drawdown uses closing prices rather than
           intraday lows. These metrics are not forecasts.
         </p>
-      </section>
+        </section>
+      </>
     )
   }
 

@@ -161,6 +161,17 @@ describe('Atlas Intelligence CSV research', () => {
 
     expect(within(dashboard).getByText('106.00')).toBeInTheDocument()
     expect(within(dashboard).getByText('2.91%')).toBeInTheDocument()
+
+    await navigate(user, 'Market Overview')
+
+    const insights = screen.getByRole('region', {
+      name: 'Research Insights',
+    })
+
+    expect(
+      within(insights).getByText('Trend Classification Unavailable'),
+    ).toBeInTheDocument()
+
   })
 
   it('preserves imported data across navigation', async () => {
@@ -196,6 +207,11 @@ describe('Atlas Intelligence CSV research', () => {
 
     expect(screen.getByText('SMA 20')).toBeInTheDocument()
     expect(screen.getByText('RSI 14')).toBeInTheDocument()
+    expect(screen.getByText('EMA 12')).toBeInTheDocument()
+    expect(screen.getByText('EMA 26')).toBeInTheDocument()
+    expect(screen.getByText('MACD')).toBeInTheDocument()
+    expect(screen.getByText('MACD Signal')).toBeInTheDocument()
+    expect(screen.getByText('MACD Histogram')).toBeInTheDocument()
 
     expect(
       screen.getAllByText('Insufficient data').length,

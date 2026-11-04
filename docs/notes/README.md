@@ -41,6 +41,8 @@ demonstrate the project confidently.
 
 | [23 — Market Intelligence Analytics](23-market-intelligence-analytics.md) | Returns, volatility, drawdown, SMA and RSI |
 
+| [24 — Advanced Market Intelligence](24-advanced-market-intelligence.md) | EMA, MACD, market regimes, explainable insights |
+
 ## How to Use These Notes
 
 1. Read the simple explanation first.
@@ -53,8 +55,8 @@ demonstrate the project confidently.
 
 - Phases 0–4: Historical C++ engineering foundation complete.
 - Phase 5: Historical terminal and backtesting implementation.
-- Phase 6.2: Five-workspace Atlas Intelligence terminal implemented locally.
-- Frontend: 200 tests passed across 22 suites.
+- Phase 6.3: Advanced Market Intelligence implemented locally.
+- Frontend: 228 tests passed across 28 suites.
 - Application and API TypeScript: Passed.
 - ESLint and frontend production build: Passed.
 - Public Phase 6 deployment: Pending.
@@ -91,11 +93,11 @@ The active product roadmap focuses on:
 
 - Automatic ticker-symbol market-data retrieval.
 - Additional validated financial data sources.
-- EMA, MACD, and additional technical indicators.
-- Market regime classification.
+- Additional technical indicators and chart overlays.
+- Configurable and independently validated market regimes.
 - Quantitative stock screening and rankings.
 - Portfolio risk and concentration analytics.
-- Automated, explainable research summaries.
+- Expanded research explanations and data-quality reporting.
 - Professional terminal redesign.
 - Reliable public deployment and CI verification.
 
