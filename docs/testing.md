@@ -1,6 +1,34 @@
 # Project Atlas — Testing and CI
 
-## Phase 6.3 — Latest Local Verification
+## Atlas Intelligence v1.0 — Latest Local Verification
+
+| Verification | Result |
+|---|---|
+| Frontend Vitest | 294/294 passed |
+| Frontend suites | 35/35 passed |
+| Application TypeScript | Passed |
+| API TypeScript | Passed |
+| ESLint | Passed |
+| Production build | Passed |
+| Documentation links | Passed |
+| Git whitespace checks | Passed |
+
+Coverage includes dataset isolation, capacity handling,
+CSV and manual ingestion, technical indicators,
+market regimes, comparative analytics, screening,
+ranking, numeric validation, and application integration.
+
+These are local verification results. The current
+release candidate still requires final GitHub Actions,
+accessibility, and public deployment verification.
+
+See [v1.0 release documentation](
+phase6-release-candidate.md).
+
+---
+
+
+## Historical Verification — Phase 6.3
 
 | Check | Result |
 |---|---|
@@ -63,7 +91,7 @@ See [Phase 6 documentation](phase6-market-intelligence.md).
 ---
 
 
-## Current Verification — Atlas Intelligence Phase 6.1
+## Historical Verification — Phase 6.1
 
 Latest reported local verification:
 
@@ -90,7 +118,7 @@ See [Phase 6 documentation](phase6-market-intelligence.md).
 ---
 
 
-## Phase 5.6 — Current Verification Baseline
+## Historical Verification — Phase 5.6
 
 Latest reported local results:
 

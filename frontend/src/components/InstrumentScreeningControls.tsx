@@ -1,3 +1,5 @@
+import { useState } from 'react'
+
 import type {
   ScreeningDirection,
   ScreeningFilters,
@@ -14,17 +16,21 @@ type Props = {
   onReset: () => void
 }
 
-// Empty numeric inputs mean no threshold, not zero.
-function parseOptionalNumber(
+type NumericFilter =
+  | 'minimumReturnPct'
+  | 'maximumDrawdownPct'
+  | 'maximumVolatilityPct'
+
+function parseThreshold(
   value: string,
-  nonnegative = false,
-): number | null {
+  nonnegative: boolean,
+): number | null | 'invalid' {
   if (value.trim() === '') return null
 
   const parsed = Number(value)
 
-  if (!Number.isFinite(parsed)) return null
-  if (nonnegative && parsed < 0) return null
+  if (!Number.isFinite(parsed)) return 'invalid'
+  if (nonnegative && parsed < 0) return 'invalid'
 
   return parsed
 }
@@ -40,6 +46,50 @@ export function InstrumentScreeningControls({
   onDirectionChange,
   onReset,
 }: Props) {
+  const [errors, setErrors] =
+    useState<Partial<Record<NumericFilter, string>>>({})
+
+  const [rawValues, setRawValues] = useState<
+    Record<NumericFilter, string>
+  >({
+    minimumReturnPct: String(filters.minimumReturnPct ?? ''),
+    maximumDrawdownPct: String(filters.maximumDrawdownPct ?? ''),
+    maximumVolatilityPct: String(filters.maximumVolatilityPct ?? ''),
+  })
+
+  function updateNumericFilter(
+    field: NumericFilter,
+    value: string,
+    nonnegative: boolean,
+  ) {
+    setRawValues((previous) => ({
+      ...previous,
+      [field]: value,
+    }))
+
+    const parsed = parseThreshold(value, nonnegative)
+
+    if (parsed === 'invalid') {
+      setErrors((previous) => ({
+        ...previous,
+        [field]: nonnegative
+          ? 'Enter a nonnegative number.'
+          : 'Enter a valid number.',
+      }))
+      return
+    }
+
+    setErrors((previous) => ({
+      ...previous,
+      [field]: '',
+    }))
+
+    onFiltersChange({
+      ...filters,
+      [field]: parsed,
+    })
+  }
+
   return (
     <section
       className="panel"
@@ -54,6 +104,12 @@ export function InstrumentScreeningControls({
         </div>
         <span className="panel-tag">HISTORICAL</span>
       </div>
+
+      <p className="workspace-description">
+        Leave a numeric field empty to disable that filter.
+        Return thresholds may be negative. Drawdown and
+        volatility limits must be nonnegative.
+      </p>
 
       <div className="detail-grid">
         <label className="detail-card">
@@ -75,13 +131,23 @@ export function InstrumentScreeningControls({
           <input
             type="number"
             aria-label="Minimum Return (%)"
-            value={filters.minimumReturnPct ?? ''}
-            onChange={(event) => onFiltersChange({
-              ...filters,
-              minimumReturnPct:
-                parseOptionalNumber(event.target.value),
-            })}
+            aria-describedby={errors.minimumReturnPct ? 'minimum-return-error' : undefined}
+            aria-invalid={Boolean(errors.minimumReturnPct)}
+            step="any"
+            value={rawValues.minimumReturnPct}
+            onChange={(event) =>
+              updateNumericFilter(
+                'minimumReturnPct',
+                event.target.value,
+                false,
+              )
+            }
           />
+          {errors.minimumReturnPct && (
+            <span id="minimum-return-error" className="field-error">
+              {errors.minimumReturnPct}
+            </span>
+          )}
         </label>
 
         <label className="detail-card">
@@ -90,13 +156,23 @@ export function InstrumentScreeningControls({
             type="number"
             min="0"
             aria-label="Maximum Drawdown (%)"
-            value={filters.maximumDrawdownPct ?? ''}
-            onChange={(event) => onFiltersChange({
-              ...filters,
-              maximumDrawdownPct:
-                parseOptionalNumber(event.target.value, true),
-            })}
+            aria-describedby={errors.maximumDrawdownPct ? 'maximum-drawdown-error' : undefined}
+            aria-invalid={Boolean(errors.maximumDrawdownPct)}
+            step="any"
+            value={rawValues.maximumDrawdownPct}
+            onChange={(event) =>
+              updateNumericFilter(
+                'maximumDrawdownPct',
+                event.target.value,
+                true,
+              )
+            }
           />
+          {errors.maximumDrawdownPct && (
+            <span id="maximum-drawdown-error" className="field-error">
+              {errors.maximumDrawdownPct}
+            </span>
+          )}
         </label>
 
         <label className="detail-card">
@@ -105,13 +181,23 @@ export function InstrumentScreeningControls({
             type="number"
             min="0"
             aria-label="Maximum Volatility (%)"
-            value={filters.maximumVolatilityPct ?? ''}
-            onChange={(event) => onFiltersChange({
-              ...filters,
-              maximumVolatilityPct:
-                parseOptionalNumber(event.target.value, true),
-            })}
+            aria-describedby={errors.maximumVolatilityPct ? 'maximum-volatility-error' : undefined}
+            aria-invalid={Boolean(errors.maximumVolatilityPct)}
+            step="any"
+            value={rawValues.maximumVolatilityPct}
+            onChange={(event) =>
+              updateNumericFilter(
+                'maximumVolatilityPct',
+                event.target.value,
+                true,
+              )
+            }
           />
+          {errors.maximumVolatilityPct && (
+            <span id="maximum-volatility-error" className="field-error">
+              {errors.maximumVolatilityPct}
+            </span>
+          )}
         </label>
 
         <label className="detail-card">
@@ -147,10 +233,24 @@ export function InstrumentScreeningControls({
         </label>
       </div>
 
+      {Object.values(errors).some(Boolean) && (
+        <p className="error-banner" role="alert">
+          Correct the highlighted screening fields.
+        </p>
+      )}
+
       <button
         type="button"
         className="research-upload-button"
-        onClick={onReset}
+        onClick={() => {
+          setErrors({})
+          setRawValues({
+            minimumReturnPct: '',
+            maximumDrawdownPct: '',
+            maximumVolatilityPct: '',
+          })
+          onReset()
+        }}
       >
         Reset Screening
       </button>

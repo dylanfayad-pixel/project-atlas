@@ -77,6 +77,11 @@ export function ResearchSetup({
 
   return (
     <div className="research-setup">
+      <p className="workspace-description" role="note">
+        Research datasets are currently stored in browser memory.
+        Refreshing or closing this page clears imported data.
+        Keep your original CSV files for future sessions.
+      </p>
       <div className="manual-data-actions">
         <button
           type="button"

@@ -1,37 +1,29 @@
 # Atlas Terminal
 
-## Current Frontend — Atlas Intelligence Phase 6.3
+## Current Frontend — Atlas Intelligence v1.0 Candidate
 
-The active frontend provides:
+The active frontend supports five research workspaces,
+validated CSV and manual OHLCV ingestion, technical
+indicators, market regimes, historical risk analytics,
+multi-instrument collections, shared-date comparisons,
+and quantitative screening.
 
-- Market Overview
-- Data Workspace
-- Technical Indicators
-- Market Explorer
-- Risk Intelligence
+Historical-return rankings are displayed only when
+comparison quality meets eligibility requirements.
 
-Historical analysis includes SMA, EMA, RSI, MACD,
-returns, volatility, and closing-price drawdown.
+Imported datasets remain in browser memory and
+are cleared when the application refreshes.
 
-Market regime classification and research explanations
-are deterministic and rules-based.
+**Latest local verification:** 294 frontend tests
+passed across 35 suites. TypeScript, ESLint,
+and production build passed.
 
-CSV uploads and manual daily OHLCV entry work without
-the historical backtesting service.
+Public release verification remains pending.
 
-**Latest local baseline:** 228 tests passed across
-28 suites. Public Phase 6.3 deployment is unverified.
-
-Older trading signals, portfolio fixtures, and
-backtesting components remain in the repository as
-historical implementation artifacts, not active
-research terminal functionality.
-
-See [Phase 6.3 documentation](
-../docs/phase6-advanced-intelligence.md).
+See [v1.0 release documentation](
+../docs/phase6-release-candidate.md).
 
 ---
-
 
 ## Historical Milestone — Phase 6.2
 

@@ -1,6 +1,60 @@
 # Project Atlas — System Architecture
 
-## Phase 6.3 — Active Intelligence Architecture
+## Atlas Intelligence v1.0 — Active Architecture
+
+The active application uses browser-side quantitative
+research calculations.
+
+```text
+CSV / Manual Daily OHLCV
+          |
+          v
+Validated Research Datasets
+          |
+          v
+ResearchCollection (App.tsx)
+          |
+          +---- Active Dataset
+          |         |
+          |         +--> Market Analytics
+          |         +--> Technical Indicators
+          |         +--> Market Regimes
+          |         +--> Research Insights
+          |
+          +---- Complete Dataset Collection
+                    |
+                    v
+              Shared-Date Alignment
+                    |
+                    v
+              Comparative Risk Analytics
+                    |
+                    v
+              Comparison Quality
+                    |
+                    v
+              Screening and Ranking
+                    |
+                    v
+              Market Explorer
+```
+
+The collection is held in React memory. Each dataset
+retains independent observations and metadata.
+
+Screening operates on aligned analytical results and
+does not mutate the original datasets.
+
+The active frontend does not require the historical
+C++ backtesting service.
+
+See [v1.0 release documentation](
+phase6-release-candidate.md).
+
+---
+
+
+## Historical Milestone — Phase 6.3 Intelligence Architecture
 
 The active research flow is:
 
@@ -42,7 +96,7 @@ phase6-advanced-intelligence.md).
 ---
 
 
-## Phase 6.2 — Active Research Terminal
+## Historical Milestone — Phase 6.2 Research Terminal
 
 The active frontend contains five workspaces:
 
@@ -71,7 +125,7 @@ See [Phase 6 documentation](phase6-market-intelligence.md).
 ---
 
 
-## Current Architecture — Atlas Intelligence Phase 6.1
+## Historical Milestone — Phase 6.1 Architecture
 
 The active Market Intelligence workflow runs in the browser:
 
@@ -102,7 +156,7 @@ See [Phase 6 documentation](phase6-market-intelligence.md).
 ---
 
 
-## Phase 5.6 — Current Backtesting Architecture
+## Historical Milestone — Phase 5.6 Backtesting Architecture
 
 The current implementation supports authenticated,
 containerized historical backtesting locally.

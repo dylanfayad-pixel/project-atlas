@@ -216,6 +216,99 @@ describe('Multi-instrument comparison dashboard', () => {
       .toBeInTheDocument()
   })
 
+  it('rejects negative maximum drawdown without changing results', async () => {
+    const user = userEvent.setup()
+
+    render(
+      <InstrumentComparison datasets={[
+        dataset('a', [100, 110, 120]),
+        dataset('b', [200, 210, 220]),
+      ]} />,
+    )
+
+    const input = screen.getByRole('spinbutton', {
+      name: 'Maximum Drawdown (%)',
+    })
+
+    await user.type(input, '-5')
+
+    expect(input).toHaveAttribute('aria-invalid', 'true')
+    expect(screen.getByRole('alert'))
+      .toHaveTextContent('Correct the highlighted screening fields.')
+
+    const errorId = input.getAttribute('aria-describedby')
+
+    expect(errorId).toBeTruthy()
+
+    const error = document.getElementById(errorId!)
+
+    expect(error).toHaveTextContent('Enter a nonnegative number.')
+
+    expect(within(screen.getByRole('table')).getByText('A'))
+      .toBeInTheDocument()
+
+    expect(within(screen.getByRole('table')).getByText('B'))
+      .toBeInTheDocument()
+  })
+
+  it('clears numeric validation errors after reset', async () => {
+    const user = userEvent.setup()
+
+    render(
+      <InstrumentComparison datasets={[
+        dataset('a', [100, 110, 120]),
+        dataset('b', [200, 210, 220]),
+      ]} />,
+    )
+
+    const input = screen.getByRole('spinbutton', {
+      name: 'Maximum Volatility (%)',
+    })
+
+    await user.type(input, '-10')
+
+    expect(input).toHaveAttribute('aria-invalid', 'true')
+
+    await user.click(screen.getByRole('button', {
+      name: 'Reset Screening',
+    }))
+
+    expect(input).toHaveValue(null)
+    expect(input).toHaveAttribute('aria-invalid', 'false')
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+
+  it('applies a corrected numeric threshold', async () => {
+    const user = userEvent.setup()
+
+    render(
+      <InstrumentComparison datasets={[
+        dataset('a', [100, 110, 120]),
+        dataset('b', [200, 210, 220]),
+      ]} />,
+    )
+
+    const input = screen.getByRole('spinbutton', {
+      name: 'Maximum Drawdown (%)',
+    })
+
+    await user.type(input, '-5')
+
+    expect(input).toHaveAttribute('aria-invalid', 'true')
+
+    await user.clear(input)
+    await user.type(input, '0')
+
+    expect(input).toHaveAttribute('aria-invalid', 'false')
+    expect(input).toHaveValue(0)
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+
+    const table = screen.getByRole('table')
+
+    expect(within(table).getByText('A')).toBeInTheDocument()
+    expect(within(table).getByText('B')).toBeInTheDocument()
+  })
+
   it('does not generate investment recommendations', () => {
     render(
       <InstrumentComparison datasets={[

@@ -829,3 +829,49 @@ button.nav-item:focus-visible {
   outline: 2px solid #60a5fa;
   outline-offset: 2px;
 }
+
+/* Atlas Intelligence v1.0: accessible screening controls. */
+.detail-card input,
+.detail-card select {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid #405775;
+  border-radius: 7px;
+  background: #101b2c;
+  color: #f0f6ff;
+  font: inherit;
+}
+
+.detail-card input:focus-visible,
+.detail-card select:focus-visible {
+  outline: 3px solid #8ecaff;
+  outline-offset: 2px;
+}
+
+.detail-card input[aria-invalid="true"] {
+  border-color: #ff8094;
+}
+
+.field-error {
+  color: #ff9bac;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 900px) {
+  .detail-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 650px) {
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .table-scroll {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+}

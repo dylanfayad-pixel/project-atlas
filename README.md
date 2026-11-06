@@ -1,36 +1,32 @@
 # Project Atlas
 
-## Current Release Candidate — Phase 6.3
+## Current Release Candidate — Atlas Intelligence v1.0
 
-**Status:** Implemented and verified locally; publication pending.
+**Status:** Core implementation verified locally;
+final release verification pending.
 
-Atlas Intelligence now provides:
+Atlas Intelligence provides five research workspaces,
+validated OHLCV ingestion, technical indicators,
+historical risk analytics, market regimes, explainable
+research insights, multi-instrument comparisons,
+quantitative screening, and eligibility-aware rankings.
 
-- Five research workspaces.
-- Validated CSV uploads and manual daily OHLCV entry.
-- Historical returns, volatility, and closing-price drawdown.
-- SMA 20/50, RSI 14, and EMA 12/26.
-- MACD 12/26/9, including signal and histogram.
-- Rules-based trend and volatility classifications.
-- Deterministic, explainable historical research insights.
-- Explicit insufficient-data handling.
+**Latest local verification:** 294 frontend tests
+passed across 35 suites. Application and API TypeScript,
+ESLint, production build, documentation links, and
+whitespace checks passed.
 
-**Latest local verification:** 228 frontend tests passed
-across 28 suites. TypeScript, ESLint, and the production
-frontend build passed.
+The active application runs its historical analytics
+in the browser without requiring the legacy
+backtesting service.
 
-The active research interface does not require the
-historical backtesting service. The C++ engine remains
-in the repository as historical engineering work.
+**Release status:** Public deployment and final
+accessibility verification remain pending.
 
-Phase 6.3 has not yet been committed or verified in
-GitHub Actions. Public deployment remains unverified.
-
-See [Phase 6.3 engineering documentation](
-docs/phase6-advanced-intelligence.md).
+See [v1.0 release candidate documentation](
+docs/phase6-release-candidate.md).
 
 ---
-
 
 **Atlas Intelligence — Automated Quantitative Market Research**
 

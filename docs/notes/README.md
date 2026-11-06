@@ -43,6 +43,8 @@ demonstrate the project confidently.
 
 | [24 — Advanced Market Intelligence](24-advanced-market-intelligence.md) | EMA, MACD, market regimes, explainable insights |
 
+| [25 — Multi-Instrument Research](25-multi-instrument-research.md) | Dataset collections, aligned comparisons, screening, and ranking |
+
 ## How to Use These Notes
 
 1. Read the simple explanation first.
@@ -53,18 +55,27 @@ demonstrate the project confidently.
 
 ## Current Project Status
 
-- Phases 0–4: Historical C++ engineering foundation complete.
-- Phase 5: Historical terminal and backtesting implementation.
-- Phase 6.3: Advanced Market Intelligence implemented locally.
-- Frontend: 228 tests passed across 28 suites.
-- Application and API TypeScript: Passed.
-- ESLint and frontend production build: Passed.
-- Public Phase 6 deployment: Pending.
-- Research terminal migration: Implemented locally.
+**Atlas Intelligence v1.0 release candidate**
 
-The legacy backtesting code remains available as
-historical engineering work during the migration.
+- Historical C++20 quantitative engineering foundation retained.
+- Five active browser-based research workspaces.
+- Validated CSV uploads and manual OHLCV entry.
+- Independent multi-instrument research collection.
+- Technical indicators, market regimes, and research insights.
+- Shared-date comparisons and historical risk analytics.
+- Quantitative screening and eligibility-aware rankings.
+- 294 frontend tests passed across 35 suites.
+- Application and API TypeScript passed.
+- ESLint and production frontend build passed.
+- Public release verification remains pending.
 
+The active research interface does not require
+the historical C++ backtesting service.
+
+See [v1.0 release candidate documentation](
+../phase6-release-candidate.md).
+
+---
 
 ## Important Limitations
 
@@ -87,19 +98,20 @@ been demonstrated.
 
 Historical backtesting does not guarantee future returns.
 
-## Atlas Intelligence Roadmap
+## Atlas Intelligence Release Priorities
 
-The active product roadmap focuses on:
+The current v1.0 release candidate focuses on:
 
-- Automatic ticker-symbol market-data retrieval.
-- Additional validated financial data sources.
-- Additional technical indicators and chart overlays.
-- Configurable and independently validated market regimes.
-- Quantitative stock screening and rankings.
-- Portfolio risk and concentration analytics.
-- Expanded research explanations and data-quality reporting.
-- Professional terminal redesign.
-- Reliable public deployment and CI verification.
+- Final accessibility and keyboard verification.
+- Responsive desktop, tablet, and mobile testing.
+- Complete documentation consistency.
+- GitHub Actions verification.
+- Public deployment and end-to-end acceptance testing.
+
+Future enhancements may include automatic market-data
+retrieval, additional financial data sources, and
+portfolio concentration analytics. These are not
+represented as implemented v1.0 functionality.
 
 Legacy backtesting guides remain available as
 historical engineering documentation.
