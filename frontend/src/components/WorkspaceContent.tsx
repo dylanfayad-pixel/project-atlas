@@ -2,16 +2,19 @@ import { ResearchSetup } from './ResearchSetup'
 import { MarketIntelligence } from './MarketIntelligence'
 import { MarketRegimePanel } from './MarketRegimePanel'
 import { ResearchInsightsPanel } from './ResearchInsightsPanel'
+import { InstrumentComparison } from './InstrumentComparison'
 import { CandlestickChart } from './CandlestickChart'
 import { analyzeMarket } from '../lib/marketAnalytics'
 import type { WorkspaceView } from './Sidebar'
 import type { ResearchSession } from '../lib/researchSession'
+import type { ResearchDataset } from '../lib/researchSession'
 import type { OhlcvBar } from '../lib/ohlcvData'
 import type { InstrumentMetadata } from '../lib/instrumentMetadata'
 
 type Props = {
   view: WorkspaceView
   session: ResearchSession
+  datasets: ResearchDataset[]
   onDatasetImported: (filename: string, bars: OhlcvBar[]) => void
   onManualDataLoaded: (bars: OhlcvBar[]) => void
   onInstrumentSaved: (
@@ -46,6 +49,7 @@ function EmptyWorkspace({ view }: { view: WorkspaceView }) {
 export function WorkspaceContent({
   view,
   session,
+  datasets,
   onDatasetImported,
   onManualDataLoaded,
   onInstrumentSaved,
@@ -82,7 +86,12 @@ export function WorkspaceContent({
   }
 
   if (view === 'market-explorer') {
-    return <CandlestickChart bars={dataset.bars} />
+    return (
+      <>
+        <InstrumentComparison datasets={datasets} />
+        <CandlestickChart bars={dataset.bars} />
+      </>
+    )
   }
 
   const analysis = analyzeMarket(dataset.bars)

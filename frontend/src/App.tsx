@@ -1,10 +1,20 @@
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Code2 } from 'lucide-react'
 import { Sidebar } from './components/Sidebar'
 import type { WorkspaceView } from './components/Sidebar'
 import { WorkspaceContent } from './components/WorkspaceContent'
 import { SessionIdentity } from './components/SessionIdentity'
+import { DatasetSelector } from './components/DatasetSelector'
+import {
+  MAX_RESEARCH_DATASETS,
+  addResearchDataset,
+  createResearchCollection,
+  getActiveDataset,
+  removeResearchDataset,
+  replaceResearchDataset,
+  selectResearchDataset,
+} from './lib/researchCollection'
 import {
   createResearchSession,
   createUploadedDataset,
@@ -28,51 +38,106 @@ function App() {
   const [activeView, setActiveView] =
     useState<WorkspaceView>('data-workspace')
 
-  const [session, setSession] = useState(createResearchSession)
+  const [collection, setCollection] =
+    useState(createResearchCollection)
+
+  // Track the latest collection synchronously so closely timed
+  // imports cannot bypass capacity validation.
+  const collectionRef = useRef(collection)
+
+  function commitCollection(
+    next: typeof collection,
+  ) {
+    collectionRef.current = next
+    setCollection(next)
+  }
+
+  const [collectionError, setCollectionError] =
+    useState<string | null>(null)
+
+  // Preserve the existing single-dataset component contract.
+  const activeDataset = getActiveDataset(collection)
+
+  const session = {
+    ...createResearchSession(),
+    dataset: activeDataset,
+    status: activeDataset ? 'data-ready' as const : 'no-data' as const,
+  }
 
   function handleDatasetImported(
     filename: string,
     bars: OhlcvBar[],
   ) {
-    const dataset = createUploadedDataset(filename, bars)
+    if (
+      collectionRef.current.datasets.length >= MAX_RESEARCH_DATASETS
+    ) {
+      setCollectionError(
+        `Research collection limit reached (${MAX_RESEARCH_DATASETS} datasets).`,
+      )
+      return
+    }
 
-    setSession((previous) => ({
-      ...previous,
-      dataset,
-      status: 'data-ready',
-    }))
+    setCollectionError(null)
+
+    const dataset = createUploadedDataset(filename, bars)
+    commitCollection(
+      addResearchDataset(collectionRef.current, dataset),
+    )
   }
 
   function handleManualDataLoaded(bars: OhlcvBar[]) {
-    const dataset = createManualDataset(bars)
+    if (
+      collectionRef.current.datasets.length >= MAX_RESEARCH_DATASETS
+    ) {
+      setCollectionError(
+        `Research collection limit reached (${MAX_RESEARCH_DATASETS} datasets).`,
+      )
+      return
+    }
 
-    setSession((previous) => ({
-      ...previous,
-      dataset,
-      status: 'data-ready',
-    }))
+    setCollectionError(null)
+
+    const dataset = createManualDataset(bars)
+    commitCollection(
+      addResearchDataset(collectionRef.current, dataset),
+    )
   }
 
   function handleInstrumentSaved(
     datasetId: string,
     metadata: InstrumentMetadata,
   ) {
-    setSession((previous) => {
-      // Ignore metadata updates for a replaced dataset.
-      if (previous.dataset?.id !== datasetId) {
-        return previous
-      }
+    const current = collectionRef.current.datasets.find(
+      (dataset) => dataset.id === datasetId,
+    )
 
-      return {
-        ...previous,
-        dataset: {
-          ...previous.dataset,
+    if (!current) return
+
+    commitCollection(
+      replaceResearchDataset(
+        collectionRef.current,
+        datasetId,
+        {
+          ...current,
           symbol: metadata.symbol,
           exchange: metadata.exchange,
           instrumentVerified: false,
         },
-      }
-    })
+      ),
+    )
+  }
+
+  function handleDatasetSelected(datasetId: string) {
+    commitCollection(
+      selectResearchDataset(collectionRef.current, datasetId),
+    )
+  }
+
+  function handleDatasetRemoved(datasetId: string) {
+    commitCollection(
+      removeResearchDataset(collectionRef.current, datasetId),
+    )
+    setCollectionError(null)
   }
 
   return (
@@ -105,6 +170,18 @@ function App() {
           </div>
         </header>
 
+        {collectionError && (
+          <div className="error-banner" role="alert">
+            {collectionError}
+          </div>
+        )}
+
+        <DatasetSelector
+          collection={collection}
+          onSelect={handleDatasetSelected}
+          onRemove={handleDatasetRemoved}
+        />
+
         {session.dataset && (
           <SessionIdentity dataset={session.dataset} />
         )}
@@ -112,6 +189,7 @@ function App() {
         <WorkspaceContent
           view={activeView}
           session={session}
+          datasets={collection.datasets}
           onDatasetImported={handleDatasetImported}
           onManualDataLoaded={handleManualDataLoaded}
           onInstrumentSaved={handleInstrumentSaved}

@@ -6,7 +6,6 @@ import {
   cleanup,
   render,
   screen,
-  waitFor,
   within,
 } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -22,6 +21,12 @@ const sampleCsv = [
   'timestamp,open,high,low,close,volume',
   '2026-01-05,100,105,98,103,1500000',
   '2026-01-06,103,108,101,106,1700000',
+].join('\n')
+
+const alignedCsv = [
+  'timestamp,open,high,low,close,volume',
+  '2026-01-05,200,205,195,200,1000000',
+  '2026-01-06,210,215,205,210,1000000',
 ].join('\n')
 
 const replacementCsv = [
@@ -230,10 +235,11 @@ describe('Atlas Intelligence CSV research', () => {
     expect(screen.getByText('Historical Price Return')).toBeInTheDocument()
   })
 
-  it('resets metadata after dataset replacement', async () => {
+  it('preserves instrument metadata across multiple datasets', async () => {
     const user = userEvent.setup()
     render(<App />)
 
+    // Import and identify the first instrument.
     await uploadCsv(user, sampleCsv)
 
     await user.type(
@@ -245,19 +251,216 @@ describe('Atlas Intelligence CSV research', () => {
       name: 'Save Instrument Information',
     }))
 
-    await waitFor(() => {
-      expect(screen.getByText('AAPL')).toBeInTheDocument()
+    const identity = screen.getByRole('region', {
+      name: 'Active research dataset',
     })
+
+    expect(identity).toHaveTextContent('AAPL')
+
+    // A second import must not delete the original dataset.
+    await uploadCsv(user, replacementCsv, 'replacement.csv')
+
+    const collection = screen.getByRole('region', {
+      name: 'Research Collection',
+    })
+
+    expect(within(collection).getByText('2 DATASETS'))
+      .toBeInTheDocument()
+
+    expect(within(collection).getByText('AAPL'))
+      .toBeInTheDocument()
+
+    // The newly imported dataset becomes active and starts
+    // with independent, unverified instrument metadata.
+    expect(identity).toHaveTextContent('UNSPECIFIED INSTRUMENT')
+
+    // Select the original dataset and restore its identity.
+    await user.click(
+      within(collection).getByRole('button', {
+        name: 'Select Dataset',
+      }),
+    )
+
+    expect(identity).toHaveTextContent('AAPL')
+    expect(screen.getByText('Dataset Preview'))
+      .toBeInTheDocument()
+  })
+
+  it('isolates historical prices when switching datasets', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    await uploadCsv(user, sampleCsv)
+
+    let dashboard = screen.getByRole('region', {
+      name: 'Market Intelligence',
+    })
+
+    expect(within(dashboard).getByText('106.00'))
+      .toBeInTheDocument()
 
     await uploadCsv(user, replacementCsv, 'replacement.csv')
 
-    await waitFor(() => {
-      expect(
-        screen.getByText('UNSPECIFIED INSTRUMENT'),
-      ).toBeInTheDocument()
+    dashboard = screen.getByRole('region', {
+      name: 'Market Intelligence',
     })
 
-    expect(screen.queryByText('AAPL')).not.toBeInTheDocument()
+    expect(within(dashboard).getByText('205.00'))
+      .toBeInTheDocument()
+
+    const collection = screen.getByRole('region', {
+      name: 'Research Collection',
+    })
+
+    await user.click(
+      within(collection).getByRole('button', {
+        name: 'Select Dataset',
+      }),
+    )
+
+    dashboard = screen.getByRole('region', {
+      name: 'Market Intelligence',
+    })
+
+    expect(within(dashboard).getByText('106.00'))
+      .toBeInTheDocument()
+
+    expect(within(dashboard).queryByText('205.00'))
+      .not.toBeInTheDocument()
+  })
+
+  it('removes datasets without retaining stale research data', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    await uploadCsv(user, sampleCsv)
+    await uploadCsv(user, replacementCsv, 'replacement.csv')
+
+    let collection = screen.getByRole('region', {
+      name: 'Research Collection',
+    })
+
+    expect(within(collection).getByText('2 DATASETS'))
+      .toBeInTheDocument()
+
+    await user.click(
+      within(collection).getByRole('button', {
+        name: 'Remove replacement.csv',
+      }),
+    )
+
+    collection = screen.getByRole('region', {
+      name: 'Research Collection',
+    })
+
+    expect(within(collection).getByText('1 DATASETS'))
+      .toBeInTheDocument()
+
+    expect(
+      screen.getByRole('region', {
+        name: 'Market Intelligence',
+      }),
+    ).toHaveTextContent('106.00')
+
+    await user.click(
+      within(collection).getByRole('button', {
+        name: 'Remove sample.csv',
+      }),
+    )
+
+    expect(
+      screen.queryByRole('region', {
+        name: 'Research Collection',
+      }),
+    ).not.toBeInTheDocument()
+
+    expect(screen.getByText('NO ACTIVE DATA'))
+      .toBeInTheDocument()
+  })
+
+  it('rejects a 21st dataset without changing the collection', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    // Fill the research collection to its documented capacity.
+    for (let index = 0; index < 20; index++) {
+      await uploadCsv(
+        user,
+        sampleCsv,
+        `instrument-${index}.csv`,
+      )
+    }
+
+    const collection = screen.getByRole('region', {
+      name: 'Research Collection',
+    })
+
+    expect(within(collection).getByText('20 DATASETS'))
+      .toBeInTheDocument()
+
+    // Importing beyond capacity must not create another dataset.
+    await uploadCsv(user, replacementCsv, 'overflow.csv')
+
+    expect(
+      await screen.findByRole('alert'),
+    ).toHaveTextContent('Research collection limit reached')
+
+    expect(within(collection).getByText('20 DATASETS'))
+      .toBeInTheDocument()
+
+    expect(within(collection).queryByText('overflow.csv'))
+      .not.toBeInTheDocument()
+  })
+
+  it('compares multiple instruments using shared dates', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    await uploadCsv(user, sampleCsv)
+
+    const collection = await screen.findByRole('region', {
+      name: 'Research Collection',
+    })
+
+    expect(within(collection).getByText('1 DATASETS'))
+      .toBeInTheDocument()
+
+    await uploadCsv(user, alignedCsv, 'aligned.csv')
+
+    // Wait for the second import to update React collection state.
+    expect(
+      await within(collection).findByText('2 DATASETS'),
+    ).toBeInTheDocument()
+
+    await navigate(user, 'Market Explorer')
+
+    const comparison = screen.getByRole('region', {
+      name: 'Instrument Comparison',
+    })
+
+    expect(
+      within(comparison).getAllByText('2'),
+    ).toHaveLength(3)
+
+    expect(within(comparison).getByText('sample.csv'))
+      .toBeInTheDocument()
+
+    expect(within(comparison).getByText('aligned.csv'))
+      .toBeInTheDocument()
+
+    expect(within(comparison).getByText('2026-01-05'))
+      .toBeInTheDocument()
+
+    expect(within(comparison).getByText('2026-01-06'))
+      .toBeInTheDocument()
+
+    // The sample dataset rises from 103 to 106.
+    // The aligned dataset rises from 200 to 210.
+    expect(within(comparison).getByText('2.91%'))
+      .toBeInTheDocument()
+
+    expect(within(comparison).getByText('5.00%'))
+      .toBeInTheDocument()
   })
 
   it('preserves valid data after invalid upload', async () => {
@@ -309,6 +512,52 @@ describe('Atlas Intelligence manual research', () => {
         name: 'Market Intelligence',
       }),
     ).toBeInTheDocument()
+  })
+
+  it('preserves CSV and manual datasets independently', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    // Import historical CSV observations.
+    await uploadCsv(user, sampleCsv)
+
+    // Manual observations create a second dataset.
+    await loadManualData(user)
+
+    const collection = screen.getByRole('region', {
+      name: 'Research Collection',
+    })
+
+    expect(within(collection).getByText('2 DATASETS'))
+      .toBeInTheDocument()
+
+    expect(within(collection).getByText('sample.csv'))
+      .toBeInTheDocument()
+
+    // Manual data is the newly selected dataset.
+    let dashboard = screen.getByRole('region', {
+      name: 'Market Intelligence',
+    })
+
+    expect(within(dashboard).getByText('103.00'))
+      .toBeInTheDocument()
+
+    // Return to the original CSV dataset.
+    await user.click(
+      within(collection).getByRole('button', {
+        name: 'Select Dataset',
+      }),
+    )
+
+    dashboard = screen.getByRole('region', {
+      name: 'Market Intelligence',
+    })
+
+    expect(within(dashboard).getByText('106.00'))
+      .toBeInTheDocument()
+
+    expect(within(dashboard).queryByText('103.00'))
+      .not.toBeInTheDocument()
   })
 
   it('switches input methods without clearing the dataset', async () => {
