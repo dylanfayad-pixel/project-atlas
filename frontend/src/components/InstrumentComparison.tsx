@@ -1,6 +1,16 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { analyzeAlignedRisk } from '../lib/alignedRiskAnalytics'
 import { assessComparisonQuality } from '../lib/comparisonQuality'
+import { InstrumentScreeningControls } from './InstrumentScreeningControls'
+import {
+  DEFAULT_SCREENING_FILTERS,
+  screenInstruments,
+} from '../lib/instrumentScreening'
+import type {
+  ScreeningDirection,
+  ScreeningFilters,
+  ScreeningSort,
+} from '../lib/instrumentScreening'
 import type { ResearchDataset } from '../lib/researchSession'
 
 type Props = {
@@ -13,6 +23,13 @@ function formatPercent(value: number | null): string {
 
 // Display only descriptive, date-aligned historical comparisons.
 export function InstrumentComparison({ datasets }: Props) {
+  const [filters, setFilters] = useState<ScreeningFilters>(
+    DEFAULT_SCREENING_FILTERS,
+  )
+  const [sort, setSort] = useState<ScreeningSort>('return')
+  const [direction, setDirection] =
+    useState<ScreeningDirection>('desc')
+
   const analysis = useMemo(
     () => analyzeAlignedRisk(datasets),
     [datasets],
@@ -23,7 +40,35 @@ export function InstrumentComparison({ datasets }: Props) {
     [datasets],
   )
 
+  const screened = useMemo(
+    () => screenInstruments(
+      analysis.results,
+      quality.eligibility,
+      filters,
+      sort,
+      direction,
+    ),
+    [analysis.results, quality.eligibility, filters, sort, direction],
+  )
+
+  function resetScreening() {
+    setFilters(DEFAULT_SCREENING_FILTERS)
+    setSort('return')
+    setDirection('desc')
+  }
+
   return (
+    <>
+      <InstrumentScreeningControls
+        filters={filters}
+        sort={sort}
+        direction={direction}
+        onFiltersChange={setFilters}
+        onSortChange={setSort}
+        onDirectionChange={setDirection}
+        onReset={resetScreening}
+      />
+
     <section className="panel" aria-label="Instrument Comparison">
       <div className="panel-heading">
         <div>
@@ -67,10 +112,18 @@ export function InstrumentComparison({ datasets }: Props) {
             </div>
           </div>
 
+          {screened.length === 0 && (
+            <p className="workspace-description" role="status">
+              No instruments match the current screening filters.
+              Adjust or reset the filters to see results.
+            </p>
+          )}
+
           <div className="table-scroll">
             <table>
               <thead>
                 <tr>
+                  <th>Rank</th>
                   <th>Instrument</th>
                   <th>Return</th>
                   <th>Volatility</th>
@@ -79,8 +132,9 @@ export function InstrumentComparison({ datasets }: Props) {
                 </tr>
               </thead>
               <tbody>
-                {analysis.results.map((result) => (
+                {screened.map((result) => (
                   <tr key={result.datasetId}>
+                    <td>{result.rank ?? '—'}</td>
                     <td>{result.label}</td>
                     <td>{formatPercent(result.returnPct)}</td>
                     <td>
@@ -113,5 +167,6 @@ export function InstrumentComparison({ datasets }: Props) {
         and unverified. No trading recommendations are generated.
       </p>
     </section>
+    </>
   )
 }

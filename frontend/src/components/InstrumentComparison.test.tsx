@@ -3,6 +3,7 @@
 import '@testing-library/jest-dom/vitest'
 import { afterEach, describe, expect, it } from 'vitest'
 import { cleanup, render, screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { InstrumentComparison } from './InstrumentComparison'
 import type { ResearchDataset } from '../lib/researchSession'
 
@@ -73,6 +74,146 @@ describe('Multi-instrument comparison dashboard', () => {
     )
 
     expect(screen.getByText('LIMITED')).toBeInTheDocument()
+  })
+
+  it('filters displayed instruments by search', async () => {
+    const user = userEvent.setup()
+
+    render(
+      <InstrumentComparison datasets={[
+        dataset('a', [100, 110, 120]),
+        dataset('b', [200, 210, 220]),
+      ]} />,
+    )
+
+    await user.type(
+      screen.getByRole('searchbox', {
+        name: 'Search Instruments',
+      }),
+      'A',
+    )
+
+    const table = screen.getByRole('table')
+
+    expect(within(table).getByText('A')).toBeInTheDocument()
+    expect(within(table).queryByText('B'))
+      .not.toBeInTheDocument()
+  })
+
+  it('filters by minimum historical return', async () => {
+    const user = userEvent.setup()
+
+    render(
+      <InstrumentComparison datasets={[
+        dataset('a', [100, 110, 120]),
+        dataset('b', [200, 210, 220]),
+      ]} />,
+    )
+
+    await user.type(
+      screen.getByRole('spinbutton', {
+        name: 'Minimum Return (%)',
+      }),
+      '15',
+    )
+
+    const table = screen.getByRole('table')
+
+    expect(within(table).getByText('A')).toBeInTheDocument()
+    expect(within(table).queryByText('B'))
+      .not.toBeInTheDocument()
+  })
+
+  it('explains when screening filters exclude all instruments', async () => {
+    const user = userEvent.setup()
+
+    render(
+      <InstrumentComparison datasets={[
+        dataset('a', [100, 110, 120]),
+        dataset('b', [200, 210, 220]),
+      ]} />,
+    )
+
+    await user.type(
+      screen.getByRole('searchbox', {
+        name: 'Search Instruments',
+      }),
+      'NOT-A-REAL-INSTRUMENT',
+    )
+
+    expect(
+      screen.getByRole('status'),
+    ).toHaveTextContent('No instruments match')
+
+    expect(
+      within(screen.getByRole('table')).queryByText('A'),
+    ).not.toBeInTheDocument()
+
+    expect(
+      within(screen.getByRole('table')).queryByText('B'),
+    ).not.toBeInTheDocument()
+  })
+
+  it('resets screening filters', async () => {
+    const user = userEvent.setup()
+
+    render(
+      <InstrumentComparison datasets={[
+        dataset('a', [100, 110, 120]),
+        dataset('b', [200, 210, 220]),
+      ]} />,
+    )
+
+    await user.type(
+      screen.getByRole('searchbox', {
+        name: 'Search Instruments',
+      }),
+      'A',
+    )
+
+    await user.click(screen.getByRole('button', {
+      name: 'Reset Screening',
+    }))
+
+    const table = screen.getByRole('table')
+
+    expect(within(table).getByText('A')).toBeInTheDocument()
+    expect(within(table).getByText('B')).toBeInTheDocument()
+  })
+
+  it('sorts displayed instruments by name', async () => {
+    const user = userEvent.setup()
+
+    render(
+      <InstrumentComparison datasets={[
+        dataset('b', [200, 210, 220]),
+        dataset('a', [100, 110, 120]),
+      ]} />,
+    )
+
+    await user.selectOptions(
+      screen.getByRole('combobox', {
+        name: 'Sort Instruments By',
+      }),
+      'name',
+    )
+
+    await user.selectOptions(
+      screen.getByRole('combobox', {
+        name: 'Sort Direction',
+      }),
+      'asc',
+    )
+
+    const rows = within(screen.getByRole('table'))
+      .getAllByRole('row')
+      .slice(1)
+
+    expect(within(rows[0]).getByText('A'))
+      .toBeInTheDocument()
+
+    expect(within(rows[1]).getByText('B'))
+      .toBeInTheDocument()
   })
 
   it('does not generate investment recommendations', () => {
