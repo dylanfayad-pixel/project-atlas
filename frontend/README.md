@@ -2,25 +2,29 @@
 
 ## Current Frontend — Atlas Intelligence v1.0 Candidate
 
-The active frontend supports five research workspaces,
-validated CSV and manual OHLCV ingestion, technical
-indicators, market regimes, historical risk analytics,
-multi-instrument collections, shared-date comparisons,
-and quantitative screening.
+**Status:** Release candidate. Public acceptance verification pending.
 
-Historical-return rankings are displayed only when
-comparison quality meets eligibility requirements.
+Atlas Intelligence provides five quantitative research workspaces,
+validated CSV and manual OHLCV ingestion, technical indicators,
+market regimes, historical risk analytics, multi-instrument
+comparisons, screening, and eligibility-aware rankings.
 
-Imported datasets remain in browser memory and
-are cleared when the application refreshes.
+The Market Overview includes a compact instrument selector and
+six-metric historical summary.
 
-**Latest local verification:** 294 frontend tests
-passed across 35 suites. TypeScript, ESLint,
-and production build passed.
+Ticker-based historical retrieval is implemented with a
+validated API client, provider provenance, and server-side
+authorization. Anonymous public ticker retrieval remains
+disabled pending approved authentication, provider licensing,
+and enforceable request quotas.
 
-Public release verification remains pending.
+Research collections are stored in browser memory and are
+cleared when the page refreshes.
 
-See [v1.0 release documentation](
+**Latest local verification:** 328 frontend tests expected
+across 43 suites; final full-suite verification pending.
+
+See [v1.0 release candidate documentation](
 ../docs/phase6-release-candidate.md).
 
 ---

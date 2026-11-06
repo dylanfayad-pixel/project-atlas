@@ -4,8 +4,8 @@
 
 | Verification | Result |
 |---|---|
-| Frontend Vitest | 294/294 passed |
-| Frontend suites | 35/35 passed |
+| Frontend Vitest | 328/328 passed |
+| Frontend suites | 43/43 passed |
 | Application TypeScript | Passed |
 | API TypeScript | Passed |
 | ESLint | Passed |

@@ -6,6 +6,7 @@ import type { WorkspaceView } from './components/Sidebar'
 import { WorkspaceContent } from './components/WorkspaceContent'
 import { SessionIdentity } from './components/SessionIdentity'
 import { DatasetSelector } from './components/DatasetSelector'
+import { CompactInstrumentSelector } from './components/CompactInstrumentSelector'
 import {
   MAX_RESEARCH_DATASETS,
   addResearchDataset,
@@ -21,6 +22,8 @@ import {
   createManualDataset,
 } from './lib/researchSession'
 import type { OhlcvBar } from './lib/ohlcvData'
+import type { HistoricalDataResponse } from './lib/historicalDataResponse'
+import { createProviderDataset } from './lib/providerDataset'
 import type { InstrumentMetadata } from './lib/instrumentMetadata'
 import './App.css'
 
@@ -103,6 +106,31 @@ function App() {
     )
   }
 
+  // Provider observations enter the same bounded research collection
+  // as CSV and manual datasets, preserving independent identities.
+  function handleProviderDataLoaded(
+    data: HistoricalDataResponse,
+  ) {
+    if (
+      collectionRef.current.datasets.length >= MAX_RESEARCH_DATASETS
+    ) {
+      setCollectionError(
+        `Research collection limit reached (${MAX_RESEARCH_DATASETS} datasets).`,
+      )
+      return false
+    }
+
+    setCollectionError(null)
+
+    const dataset = createProviderDataset(data)
+
+    commitCollection(
+      addResearchDataset(collectionRef.current, dataset),
+    )
+
+    return true
+  }
+
   function handleInstrumentSaved(
     datasetId: string,
     metadata: InstrumentMetadata,
@@ -176,13 +204,20 @@ function App() {
           </div>
         )}
 
-        <DatasetSelector
-          collection={collection}
-          onSelect={handleDatasetSelected}
-          onRemove={handleDatasetRemoved}
-        />
+        {activeView === 'market-overview' ? (
+          <CompactInstrumentSelector
+            collection={collection}
+            onSelect={handleDatasetSelected}
+          />
+        ) : (
+          <DatasetSelector
+            collection={collection}
+            onSelect={handleDatasetSelected}
+            onRemove={handleDatasetRemoved}
+          />
+        )}
 
-        {session.dataset && (
+        {session.dataset && activeView !== 'market-overview' && (
           <SessionIdentity dataset={session.dataset} />
         )}
 
@@ -192,6 +227,7 @@ function App() {
           datasets={collection.datasets}
           onDatasetImported={handleDatasetImported}
           onManualDataLoaded={handleManualDataLoaded}
+          onProviderDataLoaded={handleProviderDataLoaded}
           onInstrumentSaved={handleInstrumentSaved}
         />
 

@@ -1,6 +1,8 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { createHistoricalDataRequest } from '../src/lib/historicalDataRequest.js'
 import { executeProviderRequest } from '../server/providers/execute.js'
+import { createConfiguredMarketDataProvider } from '../server/providers/config.js'
+import { authorizeMarketDataRequest } from '../server/security/marketDataAccess.js'
 import {
   MarketDataProviderError,
 } from '../server/providers/types.js'
@@ -40,12 +42,24 @@ function mapProviderError(error: MarketDataProviderError): number {
 // Dependency injection keeps provider behavior independently
 // testable without network access or real credentials.
 export function createMarketDataHandler(
-  provider: HistoricalMarketDataProvider | null
+  provider: HistoricalMarketDataProvider | null,
+  authorize: (request: IncomingMessage) => boolean =
+    authorizeMarketDataRequest,
 ) {
   return async function handler(
     request: IncomingMessage,
     response: ServerResponse
   ): Promise<void> {
+    // Reject unauthorized clients before parsing requests or
+    // invoking the paid upstream market-data provider.
+    if (!authorize(request)) {
+      sendJson(response, 401, {
+        error: 'Market-data access is not authorized.',
+        code: 'UNAUTHORIZED',
+      } satisfies ApiError)
+      return
+    }
+
     if (request.method !== 'GET') {
       response.setHeader('Allow', 'GET')
       sendJson(response, 405, {
@@ -134,6 +148,8 @@ export function createMarketDataHandler(
   }
 }
 
-// Production remains explicitly unconfigured until
-// a licensed provider adapter is selected.
-export default createMarketDataHandler(null)
+// Activate only an explicitly configured server-side provider.
+// Missing credentials keep the endpoint safely unavailable.
+export default createMarketDataHandler(
+  createConfiguredMarketDataProvider(),
+)

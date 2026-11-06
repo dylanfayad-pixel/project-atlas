@@ -61,7 +61,7 @@ async function invoke(
     },
   }) as unknown as ServerResponse
 
-  await createMarketDataHandler(provider)(request, response)
+  await createMarketDataHandler(provider, () => true)(request, response)
 
   return {
     status: response.statusCode,
@@ -80,6 +80,39 @@ function mockProvider(
 }
 
 describe('Market-data HTTP provider integration', () => {
+  it('never invokes the provider for unauthorized requests', async () => {
+    let calls = 0
+
+    const provider = mockProvider(async () => {
+      calls += 1
+      return validResponse()
+    })
+
+    const request = {
+      method: 'GET',
+      url: validUrl,
+      headers: {},
+    } as IncomingMessage
+
+    const response = Object.assign(new EventEmitter(), {
+      statusCode: 200,
+      setHeader() {
+        return this
+      },
+      end() {
+        return this
+      },
+    }) as unknown as ServerResponse
+
+    await createMarketDataHandler(
+      provider,
+      () => false,
+    )(request, response)
+
+    expect(response.statusCode).toBe(401)
+    expect(calls).toBe(0)
+  })
+
   it('returns validated historical observations', async () => {
     const result = await invoke(
       mockProvider(async () => validResponse())

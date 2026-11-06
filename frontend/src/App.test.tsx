@@ -190,7 +190,7 @@ describe('Atlas Intelligence CSV research', () => {
 
     expect(
       screen.getByRole('region', {
-        name: 'Market Intelligence',
+        name: 'Market Overview Summary',
       }),
     ).toBeInTheDocument()
 
@@ -509,7 +509,7 @@ describe('Atlas Intelligence manual research', () => {
 
     expect(
       screen.getByRole('region', {
-        name: 'Market Intelligence',
+        name: 'Market Overview Summary',
       }),
     ).toBeInTheDocument()
   })

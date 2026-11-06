@@ -875,3 +875,127 @@ button.nav-item:focus-visible {
     overflow-x: auto;
   }
 }
+
+/* Atlas Intelligence: compact research instrument navigation. */
+.compact-instrument-selector {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 14px 20px;
+  margin-bottom: 20px;
+  background: #101c2d;
+  border: 1px solid #29405d;
+  border-radius: 10px;
+}
+
+.compact-instrument-selector label {
+  color: #9db0c8;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.compact-instrument-selector select {
+  flex: 1;
+  min-width: 180px;
+  max-width: 420px;
+  padding: 10px 14px;
+  background: #0c1728;
+  color: #edf4ff;
+  border: 1px solid #405775;
+  border-radius: 7px;
+  font: inherit;
+}
+
+.compact-instrument-selector select:focus-visible {
+  outline: 3px solid #8ecaff;
+  outline-offset: 2px;
+}
+
+.compact-instrument-selector > span {
+  color: #9db0c8;
+  font-size: 0.8rem;
+}
+
+.overview-secondary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.overview-secondary-grid > .panel {
+  min-width: 0;
+  margin: 0;
+}
+
+@media (max-width: 1050px) {
+  .overview-secondary-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 650px) {
+  .compact-instrument-selector {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .compact-instrument-selector select {
+    min-width: 0;
+    max-width: none;
+    width: 100%;
+  }
+}
+
+/* Compact, responsive Market Overview statistics. */
+.market-overview-summary {
+  margin-bottom: 20px;
+}
+
+.overview-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.overview-metric {
+  min-width: 0;
+  padding: 20px;
+  background: #101c2d;
+  border: 1px solid #29405d;
+  border-radius: 10px;
+}
+
+.overview-metric span {
+  display: block;
+  margin-bottom: 10px;
+  color: #9db0c8;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.overview-metric strong {
+  display: block;
+  color: #f0f6ff;
+  font-size: clamp(1.2rem, 2vw, 1.8rem);
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.market-overview-summary .workspace-description {
+  margin-top: 14px;
+}
+
+@media (max-width: 900px) {
+  .overview-metrics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 650px) {
+  .overview-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+}

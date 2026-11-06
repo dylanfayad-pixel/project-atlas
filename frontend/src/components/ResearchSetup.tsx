@@ -4,11 +4,14 @@ import { FileUp, Database, ShieldCheck } from 'lucide-react'
 import { CandlestickChart } from './CandlestickChart'
 import { InstrumentEditor } from './InstrumentEditor'
 import { ManualDataEditor } from './ManualDataEditor'
+import { TickerSearch } from './TickerSearch'
+import { DataProvenancePanel } from './DataProvenancePanel'
 import type {
   InstrumentMetadata,
 } from '../lib/instrumentMetadata'
 import { parseOhlcvCsv } from '../lib/ohlcvData'
 import type { OhlcvBar } from '../lib/ohlcvData'
+import type { HistoricalDataResponse } from '../lib/historicalDataResponse'
 import type { ResearchDataset } from '../lib/researchSession'
 
 // Limit browser-side imports to avoid excessive memory use.
@@ -18,6 +21,7 @@ type Props = {
   dataset: ResearchDataset | null
   onDatasetImported: (filename: string, bars: OhlcvBar[]) => void
   onManualDataLoaded: (bars: OhlcvBar[]) => void
+  onProviderDataLoaded: (data: HistoricalDataResponse) => boolean
   onInstrumentSaved: (
     datasetId: string,
     metadata: InstrumentMetadata
@@ -28,6 +32,7 @@ export function ResearchSetup({
   dataset,
   onDatasetImported,
   onManualDataLoaded,
+  onProviderDataLoaded,
   onInstrumentSaved,
 }: Props) {
   const fileInput = useRef<HTMLInputElement>(null)
@@ -36,7 +41,7 @@ export function ResearchSetup({
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [sourceMode, setSourceMode] =
-    useState<'csv' | 'manual'>('csv')
+    useState<'csv' | 'manual' | 'ticker'>('csv')
 
   // Validate the complete file before exposing imported data.
   async function handleFile(event: ChangeEvent<HTMLInputElement>) {
@@ -99,9 +104,22 @@ export function ResearchSetup({
         >
           Manual Entry
         </button>
-      </div>
 
-      {sourceMode === 'csv' && (
+          <button
+            type="button"
+            className="research-upload-button"
+            onClick={() => setSourceMode('ticker')}
+            aria-pressed={sourceMode === 'ticker'}
+          >
+            Search Ticker
+          </button>
+        </div>
+
+      {sourceMode === 'ticker' && (
+          <TickerSearch onDataLoaded={onProviderDataLoaded} />
+        )}
+
+        {sourceMode === 'csv' && (
       <section className="panel">
         <div className="panel-heading">
           <div>
@@ -177,6 +195,10 @@ export function ResearchSetup({
             onInstrumentSaved(dataset.id, metadata)
           }
         />
+      )}
+
+      {dataset?.source === 'provider' && (
+        <DataProvenancePanel dataset={dataset} />
       )}
 
       {bars.length > 0 && (

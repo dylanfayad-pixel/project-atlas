@@ -3,7 +3,9 @@
 import { describe, expect, it } from 'vitest'
 import { EventEmitter } from 'node:events'
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import handler from '../../api/market-data'
+import handler, {
+  createMarketDataHandler,
+} from '../../api/market-data'
 
 type Result = {
   status: number
@@ -18,7 +20,8 @@ type Result = {
 // starting a server or contacting an external provider.
 async function invoke(
   method: string,
-  url: string
+  url: string,
+  authorized = true,
 ): Promise<Result> {
   const request = {
     method,
@@ -40,7 +43,11 @@ async function invoke(
     },
   }) as unknown as ServerResponse
 
-  await handler(request, response)
+  const selectedHandler = authorized
+    ? createMarketDataHandler(null, () => true)
+    : handler
+
+  await selectedHandler(request, response)
 
   return {
     status: response.statusCode,
@@ -52,6 +59,13 @@ async function invoke(
 describe('Historical market-data API', () => {
   const validUrl =
     '/api/market-data?symbol=AAPL&start=2025-01-01&end=2025-12-31'
+
+  it('rejects unauthorized public requests', async () => {
+    const result = await invoke('GET', validUrl, false)
+
+    expect(result.status).toBe(401)
+    expect(result.body.code).toBe('UNAUTHORIZED')
+  })
 
   it('rejects unsupported methods', async () => {
     const result = await invoke('POST', validUrl)

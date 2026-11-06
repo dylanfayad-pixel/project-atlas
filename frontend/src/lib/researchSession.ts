@@ -8,6 +8,14 @@ export type ResearchDataSource =
   | 'demo'
   | 'provider'
 
+export type ProviderProvenance = {
+  provider: string
+  retrievedAt: string
+  adjusted: boolean
+  requestedStartDate: string
+  requestedEndDate: string
+}
+
 export type ResearchTimeframe = '1d'
 
 export type ResearchDataset = {
@@ -17,6 +25,7 @@ export type ResearchDataset = {
   symbol: string | null
   exchange: string | null
   instrumentVerified: false
+  provenance?: ProviderProvenance
   timeframe: ResearchTimeframe
   bars: OhlcvBar[]
   firstTimestamp: string

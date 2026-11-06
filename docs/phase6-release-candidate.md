@@ -73,7 +73,7 @@ require the historical backtesting service.
 
 ## Latest Local Verification
 
-- 294 frontend tests passed across 35 suites.
+- 328 frontend tests passed across 43 suites.
 - Application TypeScript passed.
 - API TypeScript passed.
 - ESLint passed.
@@ -92,3 +92,41 @@ fully released:
 - Production deployment verification.
 - End-to-end testing of the public website.
 - Documentation consistency audit.
+
+## v1.0 Release Candidate — Ticker Integration
+
+The release candidate adds:
+
+- A compact Market Overview instrument selector.
+- Six-metric historical overview cards.
+- Ticker-based historical data request interface.
+- Validated same-origin historical-data API client.
+- Provider dataset creation and independent collection storage.
+- Provider provenance including source, retrieval time,
+  adjustment status, and requested date range.
+- Server-side market-data authorization.
+- Explicit public ticker availability controls.
+- Regression coverage for cancellation, provider failures,
+  collection rejection, and authorization.
+
+### Public Access Policy
+
+Anonymous users can upload CSV files and enter manual
+daily OHLCV observations.
+
+Ticker retrieval is disabled in the public interface
+until a secure browser authentication mechanism and
+enforceable shared request quotas are implemented.
+
+The server-side API requires trusted-client authorization.
+Provider credentials must never be embedded in browser
+JavaScript or committed to the repository.
+
+### Verification
+
+The latest expected automated baseline is 328 tests
+across 43 suites, pending final full-suite confirmation.
+
+Production deployment, browser accessibility, responsive
+layout verification, and live provider licensing remain
+separate release acceptance requirements.

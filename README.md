@@ -2,44 +2,32 @@
 
 ## Current Release Candidate — Atlas Intelligence v1.0
 
-**Status:** Core implementation verified locally;
-final release verification pending.
+**Status:** Release candidate. Public acceptance verification pending.
 
-Atlas Intelligence provides five research workspaces,
-validated OHLCV ingestion, technical indicators,
-historical risk analytics, market regimes, explainable
-research insights, multi-instrument comparisons,
-quantitative screening, and eligibility-aware rankings.
+Atlas Intelligence provides five quantitative research workspaces,
+validated CSV and manual OHLCV ingestion, technical indicators,
+market regimes, historical risk analytics, multi-instrument
+comparisons, screening, and eligibility-aware rankings.
 
-**Latest local verification:** 294 frontend tests
-passed across 35 suites. Application and API TypeScript,
-ESLint, production build, documentation links, and
-whitespace checks passed.
+The Market Overview includes a compact instrument selector and
+six-metric historical summary.
 
-The active application runs its historical analytics
-in the browser without requiring the legacy
-backtesting service.
+Ticker-based historical retrieval is implemented with a
+validated API client, provider provenance, and server-side
+authorization. Anonymous public ticker retrieval remains
+disabled pending approved authentication, provider licensing,
+and enforceable request quotas.
 
-**Release status:** Public deployment and final
-accessibility verification remain pending.
+Research collections are stored in browser memory and are
+cleared when the page refreshes.
+
+**Latest local verification:** 328 frontend tests expected
+across 43 suites; final full-suite verification pending.
 
 See [v1.0 release candidate documentation](
 docs/phase6-release-candidate.md).
 
 ---
-
-**Atlas Intelligence — Automated Quantitative Market Research**
-
-Project Atlas is evolving into Atlas Intelligence, a
-financial research platform built with React, TypeScript,
-and a C++20 quantitative engineering foundation.
-
-The active product direction focuses on market-data
-analysis, technical indicators, market regimes,
-financial risk analytics, and automated research insights.
-
-Phase 6.1 introduces automatic browser-side historical
-market analysis for validated daily OHLCV data.
 
 ## Historical Milestone — Phase 6.1
 

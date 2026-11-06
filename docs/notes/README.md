@@ -64,7 +64,7 @@ demonstrate the project confidently.
 - Technical indicators, market regimes, and research insights.
 - Shared-date comparisons and historical risk analytics.
 - Quantitative screening and eligibility-aware rankings.
-- 294 frontend tests passed across 35 suites.
+- 328 frontend tests passed across 43 suites.
 - Application and API TypeScript passed.
 - ESLint and production frontend build passed.
 - Public release verification remains pending.

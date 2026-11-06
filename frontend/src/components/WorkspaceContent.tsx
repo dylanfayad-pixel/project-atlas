@@ -1,5 +1,6 @@
 import { ResearchSetup } from './ResearchSetup'
 import { MarketIntelligence } from './MarketIntelligence'
+import { MarketOverviewSummary } from './MarketOverviewSummary'
 import { MarketRegimePanel } from './MarketRegimePanel'
 import { ResearchInsightsPanel } from './ResearchInsightsPanel'
 import { InstrumentComparison } from './InstrumentComparison'
@@ -9,6 +10,7 @@ import type { WorkspaceView } from './Sidebar'
 import type { ResearchSession } from '../lib/researchSession'
 import type { ResearchDataset } from '../lib/researchSession'
 import type { OhlcvBar } from '../lib/ohlcvData'
+import type { HistoricalDataResponse } from '../lib/historicalDataResponse'
 import type { InstrumentMetadata } from '../lib/instrumentMetadata'
 
 type Props = {
@@ -17,6 +19,7 @@ type Props = {
   datasets: ResearchDataset[]
   onDatasetImported: (filename: string, bars: OhlcvBar[]) => void
   onManualDataLoaded: (bars: OhlcvBar[]) => void
+  onProviderDataLoaded: (data: HistoricalDataResponse) => boolean
   onInstrumentSaved: (
     datasetId: string,
     metadata: InstrumentMetadata,
@@ -52,6 +55,7 @@ export function WorkspaceContent({
   datasets,
   onDatasetImported,
   onManualDataLoaded,
+  onProviderDataLoaded,
   onInstrumentSaved,
 }: Props) {
   const dataset = session.dataset
@@ -63,6 +67,7 @@ export function WorkspaceContent({
           dataset={dataset}
           onDatasetImported={onDatasetImported}
           onManualDataLoaded={onManualDataLoaded}
+          onProviderDataLoaded={onProviderDataLoaded}
           onInstrumentSaved={onInstrumentSaved}
         />
         {dataset && <MarketIntelligence dataset={dataset} />}
@@ -77,10 +82,12 @@ export function WorkspaceContent({
   if (view === 'market-overview') {
     return (
       <>
-        <MarketIntelligence dataset={dataset} />
-        <MarketRegimePanel dataset={dataset} />
-        <ResearchInsightsPanel dataset={dataset} />
+        <MarketOverviewSummary dataset={dataset} />
         <CandlestickChart bars={dataset.bars} />
+        <div className="overview-secondary-grid">
+          <MarketRegimePanel dataset={dataset} />
+          <ResearchInsightsPanel dataset={dataset} />
+        </div>
       </>
     )
   }
